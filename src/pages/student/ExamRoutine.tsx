@@ -21,10 +21,6 @@ interface ExamSession {
   color: string;
 }
 
-interface UpcomingExam extends ExamSession {
-  date: Date;
-}
-
 export default function ExamRoutine() {
   const [currentMonth, setCurrentMonth] = useState(11);
   const [currentYear, setCurrentYear] = useState(2024);

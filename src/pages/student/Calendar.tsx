@@ -194,9 +194,8 @@ export default function AcademicCalendar() {
 
   const renderMonthView = () => {
     const year = currentYear;
-    const month = selectedMonth;
-    const daysInMonth = getDaysInMonth(year, month);
-    const firstDay = getFirstDayOfMonth(year, month);
+    const daysInMonth = getDaysInMonth(year, selectedMonth);
+    const firstDay = getFirstDayOfMonth(year, selectedMonth);
     const days = [];
 
     for (let i = 0; i < firstDay; i++) {
@@ -204,9 +203,9 @@ export default function AcademicCalendar() {
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const dateKey = `${year}-${String(selectedMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
       const event = academicEvents[dateKey];
-      const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
+      const isToday = new Date().getDate() === day && new Date().getMonth() === selectedMonth && new Date().getFullYear() === year;
 
       days.push(
         <div key={day} className={`min-h-32 border border-gray-200 p-2 ${isToday ? "bg-blue-50 border-blue-200" : ""}`}>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { IoMdHome, IoMdPerson } from "react-icons/io";
 import { FaRegFileLines } from "react-icons/fa6";
@@ -28,7 +28,7 @@ const NavBar = () => {
   const [loginSheetOpen, setLoginSheetOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en"); 
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  // const dropdownRef = useRef<HTMLDivElement>(null);
   
 
   //   const { user, isAuthenticated } = useSelector(
