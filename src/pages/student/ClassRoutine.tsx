@@ -204,8 +204,6 @@ export default function ClassRoutine() {
               {/* Day columns */}
               {weeklySchedule.map((day) => {
                 const classSession = getClassForTimeSlot(day, timeSlot);
-                
-                const timeIndex = timeSlots.indexOf(timeSlot);
                 const isStartingSlot = classSession && classSession.time === timeSlot;
                 
                 return (

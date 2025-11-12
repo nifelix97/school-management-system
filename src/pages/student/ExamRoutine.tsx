@@ -484,25 +484,6 @@ export default function ExamRoutine() {
     return days;
   };
 
-  const getUpcomingExams = (): UpcomingExam[] => {
-    const today = new Date();
-    const upcoming: UpcomingExam[] = [];
-
-    for (const [dateStr, exams] of Object.entries(examSchedule)) {
-      const examDate = new Date(dateStr);
-      if (examDate >= today) {
-        exams.forEach((exam) => {
-          upcoming.push({ ...exam, date: examDate });
-        });
-      }
-    }
-
-    return upcoming
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .slice(0, 5);
-  };
-
-  const upcomingExams = getUpcomingExams();
   const selectedExams = selectedDate ? getExamForDate(selectedDate) : [];
 
   return (
