@@ -1,0 +1,60 @@
+@import "tailwindcss";
+@import "@fontsource/comfortaa/600.css";
+@import "@fontsource/comfortaa/700.css";
+@import "@fontsource/comfortaa/700.css";
+
+/* ✅ Keep only custom props + keyframes in @theme */
+@theme {
+  --breakpoint-xxs: 320px;
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+
+  --color-primary-50: oklch(0.4136 0.1184 256.98);
+  --color-primary-100: oklch(0.8179 0.1705 77.95);
+  --color-primary-200: oklch(0.501 0.1905 22.94);
+  --color-primary-300: oklch(0.4608 0.12 145.76);
+
+  --font-family-primary: 'Comfortaa', system-ui, -apple-system, sans-serif;
+
+  /* ✅ You can keep keyframes here */
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+}
+
+/* ✅ Move global styles OUTSIDE the @theme block */
+* {
+  font-family: var(--font-family-primary);
+}
+
+/* ✅ Utility classes */
+.font-comfortaa {
+  font-family: var(--font-family-primary);
+}
+
+.text-14 {
+  font-size: var(--font-size-base);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
