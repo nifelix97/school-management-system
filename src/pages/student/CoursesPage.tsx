@@ -30,13 +30,6 @@ interface ClassItem {
   courses: Course[];
 }
 
-interface CalendarEvent {
-  classId: number;
-  title: string;
-  time: string;
-  color: string;
-}
-
 interface EnrollableCourse extends Course {
   className: string;
   classId: number;
@@ -48,7 +41,6 @@ export default function CoursesPage() {
   const [activeTab, setActiveTab] = useState("courses");
   const [filter, setFilter] = useState("all");
   const [classFilter, setClassFilter] = useState("all");
-  const [currentDate] = useState(new Date(2025, 10, 10));
   const [selectedCourse, setSelectedCourse] = useState<EnrollableCourse | null>(null);
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
@@ -289,113 +281,7 @@ export default function CoursesPage() {
 
 
 
-  const calendarEvents: Record<number, CalendarEvent[]> = {
-    8: [
-      {
-        classId: 1,
-        title: "Web Dev Bootcamp",
-        time: "10:00 AM",
-        color: "bg-blue-100 text-blue-700",
-      },
-    ],
-    11: [
-      {
-        classId: 2,
-        title: "UX/UI Masterclass",
-        time: "2:00 PM",
-        color: "bg-purple-100 text-purple-700",
-      },
-    ],
-    13: [
-      {
-        classId: 1,
-        title: "Web Dev Bootcamp",
-        time: "10:00 AM",
-        color: "bg-blue-100 text-blue-700",
-      },
-    ],
-    15: [
-      {
-        classId: 2,
-        title: "UX/UI Masterclass",
-        time: "2:00 PM",
-        color: "bg-purple-100 text-purple-700",
-      },
-    ],
-    18: [
-      {
-        classId: 1,
-        title: "Web Dev Bootcamp",
-        time: "10:00 AM",
-        color: "bg-blue-100 text-blue-700",
-      },
-    ],
-    20: [
-      {
-        classId: 1,
-        title: "Web Dev Bootcamp",
-        time: "10:00 AM",
-        color: "bg-blue-100 text-blue-700",
-      },
-    ],
-  };
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
-
-  const renderCalendar = () => {
-    const daysInMonth = getDaysInMonth(currentDate);
-    const firstDay = getFirstDayOfMonth(currentDate);
-    const days = [];
-
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="aspect-square"></div>);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const isToday = day === 10;
-      const hasEvent = calendarEvents[day];
-
-      days.push(
-        <div
-          key={day}
-          className={`aspect-square border border-gray-200 p-2 transition-all hover:bg-gray-50 cursor-pointer ${
-            isToday ? "bg-primary-50 bg-opacity-10 border-primary-50" : ""
-          }`}
-          onClick={() => {
-            if (hasEvent) {
-              const foundClass = classes.find((c) => c.id === hasEvent[0].classId);
-              setSelectedClass(foundClass || null);
-            }
-          }}
-        >
-          <div
-            className={`text-sm font-semibold mb-1 ${
-              isToday ? "text-primary-50" : "text-gray-700"
-            }`}
-          >
-            {day}
-          </div>
-          {hasEvent &&
-            hasEvent.map((event: CalendarEvent) => (
-              <div
-                key={event.classId}
-                className={`text-xs p-1 rounded mb-1 ${event.color} truncate`}
-              >
-                <div className="font-medium">{event.time}</div>
-              </div>
-            ))}
-        </div>
-      );
-    }
-
-    return days;
-  };
 
   if (selectedCourse) {
     return (
