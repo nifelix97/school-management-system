@@ -1,4 +1,3 @@
-import React from "react";
 import TeacherProfile from "../../components/TeacherProfile";
 
 const TeacherProfilePage = () => {

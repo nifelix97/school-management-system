@@ -12,7 +12,6 @@ import {
   File,
   Edit3,
   Trash2,
-  X,
   Mail,
   MailOpen,
   Star,

@@ -23,7 +23,7 @@ import LoginDropdown from "./LoginPopUp";
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [showUserMenu, setShowUserMenu] = useState(false);
+
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginSheetOpen, setLoginSheetOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en"); 
@@ -50,12 +50,7 @@ const NavBar = () => {
     // You can also update the Google Translate widget with the selected language here
   };
 
-  const toggleUserMenu = () => {
-    setShowUserMenu((prevShowUserMenu) => !prevShowUserMenu);
-    if (dropdownRef.current) {
-      dropdownRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+
 
   // const handleLogout = () => {
   //    dispatch(logout());

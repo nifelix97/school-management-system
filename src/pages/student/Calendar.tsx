@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
   Search,
-  Plus,
   RefreshCw,
   Clock,
-  Users,
 } from "lucide-react";
 
 type AcademicEventKey = string;
@@ -116,22 +114,7 @@ export default function AcademicCalendar() {
     "2025-12-31": { title: "New Year's Eve", color: "bg-orange-100 text-orange-700", type: "holiday" },
   };
 
-  const upcomingEvents = [
-    {
-      title: "Spring Semester Begins",
-      date: "Jan 8, 2025",
-      time: "2:30PM - 3:30PM",
-      instructor: "Mrs.M.Wilson",
-      color: "bg-blue-50 border-l-4 border-blue-500",
-    },
-    {
-      title: "Registration Deadline",
-      date: "Jan 15, 2025",
-      time: "6:30PM - 6:30PM",
-      instructor: "Mrs.M.Wilson",
-      color: "bg-red-50 border-l-4 border-red-500",
-    },
-  ];
+
 
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();

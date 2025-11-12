@@ -2,18 +2,14 @@ import React, { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  Calendar,
   CheckCircle,
   XCircle,
   AlertCircle,
   FileText,
   TrendingUp,
-  TrendingDown,
-  Clock,
   Plus,
   Send,
   X,
-  User,
 } from "lucide-react";
 
 // Import for navigation (you can replace with your routing solution)

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   Calendar,
@@ -28,8 +28,7 @@ interface LeaveRequest {
 export default function LeaveRequestsPage() {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
-  const [showModal, setShowModal] = useState(false);
+
 
   // My leave requests data
   const leaveRequests: LeaveRequest[] = [

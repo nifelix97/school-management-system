@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   BookOpen,
   Calendar,
@@ -44,30 +44,11 @@ interface EnrollableCourse extends Course {
   image: string;
 }
 
-interface EnrollableClass {
-  id: number;
-  name: string;
-  instructor: string;
-  students: number;
-  startDate: string;
-  schedule: string;
-  duration: string;
-  image: string;
-  badge?: string;
-  courses: EnrollableCourse[];
-}
-
-interface DateObject {
-  getFullYear(): number;
-  getMonth(): number;
-  getDate(): number;
-}
-
 export default function CoursesPage() {
   const [activeTab, setActiveTab] = useState("courses");
   const [filter, setFilter] = useState("all");
   const [classFilter, setClassFilter] = useState("all");
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 10, 10));
+  const [currentDate] = useState(new Date(2025, 10, 10));
   const [selectedCourse, setSelectedCourse] = useState<EnrollableCourse | null>(null);
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
@@ -306,20 +287,7 @@ export default function CoursesPage() {
    }
  };
 
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+
 
   const calendarEvents: Record<number, CalendarEvent[]> = {
     8: [
@@ -414,9 +382,9 @@ export default function CoursesPage() {
             {day}
           </div>
           {hasEvent &&
-            hasEvent.map((event: CalendarEvent, idx: number) => (
+            hasEvent.map((event: CalendarEvent) => (
               <div
-                key={idx}
+                key={event.classId}
                 className={`text-xs p-1 rounded mb-1 ${event.color} truncate`}
               >
                 <div className="font-medium">{event.time}</div>

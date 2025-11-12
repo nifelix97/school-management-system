@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Users, BookOpen, Calendar, CheckCircle, Clock, TrendingUp, Award } from "lucide-react";
+import { Users, BookOpen, Calendar, TrendingUp } from "lucide-react";
 
 interface StatCardProps {
   icon: React.ReactElement<LucideProps>;

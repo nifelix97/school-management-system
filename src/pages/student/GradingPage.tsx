@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   Search,
-  Filter,
   TrendingUp,
-  TrendingDown,
   Award,
   BookOpen,
   Calendar,
@@ -37,7 +35,6 @@ interface Course {
 
 export default function GradingPage() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
   const courses: Course[] = [

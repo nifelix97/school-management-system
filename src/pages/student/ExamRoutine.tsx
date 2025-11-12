@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -7,7 +7,6 @@ import {
   User,
   Calendar,
   BookOpen,
-  AlertCircle,
   X,
 } from "lucide-react";
 

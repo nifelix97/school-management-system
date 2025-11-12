@@ -1,16 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   Search,
-  Filter,
   Star,
   BookOpen,
-  Download,
   Heart,
-  Clock,
-  User,
-  Calendar,
-  Eye,
 } from "lucide-react";
 
 interface Book {
