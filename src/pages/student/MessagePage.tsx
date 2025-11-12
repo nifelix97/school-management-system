@@ -250,7 +250,7 @@ export default function MessagePage({ userRole = "student" }: { userRole?: "teac
     return otherParticipant.role === "student";
   }).length;
 
-  const getConversationMessages = (conversationId: number) => {
+  const getConversationMessages = () => {
     if (!selectedConversation) return [];
     const participantIds = selectedConversation.participants.map(p => p.id);
     return messages.filter(m => 
@@ -460,7 +460,7 @@ export default function MessagePage({ userRole = "student" }: { userRole?: "teac
 
   if (selectedConversation) {
     const otherParticipant = getOtherParticipant(selectedConversation);
-    const conversationMessages = getConversationMessages(selectedConversation.id);
+    const conversationMessages = getConversationMessages();
 
     return (
       <div className="min-h-screen bg-gray-50">
