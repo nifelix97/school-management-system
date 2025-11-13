@@ -51,7 +51,7 @@ type Tab = (typeof tabs)[number];
 
 const Field = ({ label, value }: { label: string; value?: React.ReactNode }) => (
   <div className="py-3 sm:py-4">
-    <div className="text-xs sm:text-sm uppercase tracking-wide text-gray-500 mb-2">
+    <div className="text-xs sm:text-sm uppercase tracking-wide text-primary-50/60 mb-2">
       {label}
     </div>
     <div className="text-base sm:text-lg md:text-xl text-primary-50 font-medium">
@@ -180,7 +180,7 @@ const TeacherProfile: React.FC<Props> = ({
           <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-primary-50 truncate">
             {fullName}
           </div>
-          <div className="text-xs sm:text-sm md:text-base text-gray-500">
+          <div className="text-xs sm:text-sm md:text-base text-primary-50/40">
             {profile.position} - {profile.department}
           </div>
 
@@ -196,7 +196,7 @@ const TeacherProfile: React.FC<Props> = ({
                   className={`relative pb-2 whitespace-nowrap bg-transparent border-none cursor-pointer ${
                     isActive
                       ? "text-primary-100 font-semibold"
-                      : "text-gray-500 hover:text-primary-50"
+                      : "text-primary-50/60 hover:text-primary-50"
                   }`}
                 >
                   {t}

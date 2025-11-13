@@ -43,7 +43,7 @@ const links = [
     icon: <IoCheckmarkDoneOutline className="w-5 h-5" />,
   },
   {
-    to: "/teacher/class-info",
+    to: "/teacher/student-info",
     label: "Student Info",
     icon: <IoPeopleOutline className="w-5 h-5" />,
   },
@@ -54,7 +54,7 @@ const links = [
   },
   {
     to: "/teacher/parents",
-    label: "View Parents",
+    label: "Set Course",
     icon: <IoPeopleOutline className="w-5 h-5" />,
   },
   {

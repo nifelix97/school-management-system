@@ -69,7 +69,7 @@ const TeacherProfilePage = () => {
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-primary-50 mb-2 sm:mb-3">
             Teacher Profile
           </h1>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600">
+          <p className="text-sm sm:text-base md:text-lg text-primary-50">
             Manage your personal information and emergency contacts
           </p>
         </div>

@@ -19,6 +19,13 @@ import LeaveRequestsPage from "../pages/student/LeaveRequestsPage";
 import TeacherLayout from "../components/TeacherLayout";
 import TeacherDashboard from "../pages/Teacher/TeacherDashboard";
 import TeacherProfilePage from "../pages/Teacher/TeacherProfilePage";
+import AcademicCalendar from "../pages/Teacher/AcademicCalendar";
+import ManageAttendance from "../pages/Teacher/ManageAttendance";
+import StudentInfo from "../pages/Teacher/StudentInfo";
+import TeacherRoutine from "../pages/Teacher/TeacherRoutine";
+import SetCourse from "../pages/Teacher/SetCourse";
+
+
 
 export default function AppRoutes() {
   return (
@@ -50,18 +57,11 @@ export default function AppRoutes() {
       <Route element={<TeacherLayout />}>
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
         <Route path="/teacher/profile" element={<TeacherProfilePage />} />
-        <Route path="/teacher/calendar" element={<div className="p-6"><h1 className="text-2xl font-bold">Personal Calendar</h1></div>} />
-        <Route path="/teacher/attendance" element={<div className="p-6"><h1 className="text-2xl font-bold">Manage Attendance</h1></div>} />
-        <Route path="/teacher/class-info" element={<div className="p-6"><h1 className="text-2xl font-bold">Class & Student Info</h1></div>} />
-        <Route path="/teacher/class-routine" element={<div className="p-6"><h1 className="text-2xl font-bold">View Class Routine</h1></div>} />
-        <Route path="/teacher/parents" element={<div className="p-6"><h1 className="text-2xl font-bold">View Parents</h1></div>} />
-        <Route path="/teacher/subjects" element={<div className="p-6"><h1 className="text-2xl font-bold">Subjects & Notifications</h1></div>} />
-        <Route path="/teacher/grading" element={<div className="p-6"><h1 className="text-2xl font-bold">View Grading System</h1></div>} />
-        <Route path="/teacher/mark-sheets" element={<div className="p-6"><h1 className="text-2xl font-bold">Submit Mark Sheets</h1></div>} />
-        <Route path="/teacher/library" element={<div className="p-6"><h1 className="text-2xl font-bold">Manage Library</h1></div>} />
-        <Route path="/teacher/exam-attendance" element={<div className="p-6"><h1 className="text-2xl font-bold">Manage Exam Attendance</h1></div>} />
-        <Route path="/teacher/notifications" element={<div className="p-6"><h1 className="text-2xl font-bold">View Notifications</h1></div>} />
-        <Route path="/teacher/messages" element={<div className="p-6"><h1 className="text-2xl font-bold">Manage Messages</h1></div>} />
+        <Route path="/teacher/calendar" element={<AcademicCalendar />} />
+        <Route path="/teacher/attendance" element={<ManageAttendance />} />
+        <Route path="/teacher/student-info" element={<StudentInfo />} />
+        <Route path="/teacher/class-routine" element={<TeacherRoutine />} />
+        <Route path="/teacher/parents" element={<SetCourse />} />
       </Route>  
     </Routes>
   );

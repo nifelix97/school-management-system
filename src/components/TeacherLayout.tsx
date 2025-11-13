@@ -23,7 +23,7 @@ const TeacherLayout: React.FC = () => {
           <TeacherSidebar />
 
           {/* Page content */}
-          <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
+          <main className="flex-1">
             <Outlet />
           </main>
         </div>
