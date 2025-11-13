@@ -139,9 +139,9 @@ export default function LeaveRequestsPage() {
               onClick={() => window.history.back()}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <ChevronLeft size={20} className="text-gray-600" />
+              <ChevronLeft size={20} className="text-primary-50/40" />
             </button>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Leave Requests</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-primary-50">My Leave Requests</h1>
           </div>
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm sm:text-base">
             <Plus size={16} />
@@ -155,22 +155,22 @@ export default function LeaveRequestsPage() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-50/40" />
                 <input
                   type="text"
                   placeholder="Search requests..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                  className="w-full pl-10 pr-4 py-2.5 sm:py-2 border text-primary-50 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 />
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Filter size={16} className="text-gray-400" />
+              <Filter size={16} className="text-primary-50" />
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-3 py-2.5 sm:py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base min-w-[120px]"
+                className="px-3 py-2.5 sm:py-2 border border-primary-50/40 text-primary-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base min-w-[120px]"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -187,8 +187,8 @@ export default function LeaveRequestsPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <AlertCircle className="text-yellow-600" size={18} />
               <div>
-                <p className="text-xs sm:text-sm text-gray-600">Pending</p>
-                <p className="text-lg sm:text-xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-primary-50/40">Pending</p>
+                <p className="text-lg sm:text-xl font-bold text-primary-50">
                   {leaveRequests.filter(r => r.status === "pending").length}
                 </p>
               </div>
@@ -198,8 +198,8 @@ export default function LeaveRequestsPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <CheckCircle className="text-green-600" size={18} />
               <div>
-                <p className="text-xs sm:text-sm text-gray-600">Approved</p>
-                <p className="text-lg sm:text-xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-primary-50/40">Approved</p>
+                <p className="text-lg sm:text-xl font-bold text-primary-50">
                   {leaveRequests.filter(r => r.status === "approved").length}
                 </p>
               </div>
@@ -209,8 +209,8 @@ export default function LeaveRequestsPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <XCircle className="text-red-600" size={18} />
               <div>
-                <p className="text-xs sm:text-sm text-gray-600">Rejected</p>
-                <p className="text-lg sm:text-xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-primary-50/40">Rejected</p>
+                <p className="text-lg sm:text-xl font-bold text-primary-50">
                   {leaveRequests.filter(r => r.status === "rejected").length}
                 </p>
               </div>
@@ -220,8 +220,8 @@ export default function LeaveRequestsPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <FileText style={{color: 'var(--color-primary-50)'}} size={18} />
               <div>
-                <p className="text-xs sm:text-sm text-gray-600">Total</p>
-                <p className="text-lg sm:text-xl font-bold text-gray-900">{leaveRequests.length}</p>
+                <p className="text-xs sm:text-sm text-primary-50/40">Total</p>
+                <p className="text-lg sm:text-xl font-bold text-primary-50">{leaveRequests.length}</p>
               </div>
             </div>
           </div>
@@ -251,14 +251,14 @@ export default function LeaveRequestsPage() {
                           </span>
                         </div>
                       </div>
-                      <p className="text-sm sm:text-base text-gray-700 mb-3 leading-relaxed">{request.reason}</p>
+                      <p className="text-sm sm:text-base text-primary-50 mb-3 leading-relaxed">{request.reason}</p>
                     </div>
                     <div className="text-left sm:text-right flex-shrink-0">
-                      <p className="text-xs sm:text-sm text-gray-500 mb-1">Submitted</p>
-                      <p className="text-xs sm:text-sm font-medium text-gray-900">{request.submittedAt.toLocaleDateString()}</p>
+                      <p className="text-xs sm:text-sm text-primary-50/60 mb-1">Submitted</p>
+                      <p className="text-xs sm:text-sm font-medium text-primary-50">{request.submittedAt.toLocaleDateString()}</p>
                       {request.reviewedAt && (
                         <>
-                          <p className="text-xs text-gray-400 mt-1">Reviewed by {request.reviewedBy}</p>
+                          <p className="text-xs text-primary-50/40 mt-1">Reviewed by {request.reviewedBy}</p>
                           {request.comments && (
                             <p className="text-xs text-blue-600 mt-1 sm:max-w-xs">{request.comments}</p>
                           )}
@@ -266,7 +266,7 @@ export default function LeaveRequestsPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 pt-2 border-t border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-primary-50/60 pt-2 border-t border-gray-100">
                     <div className="flex items-center gap-1">
                       <Calendar size={14} />
                       <span>{request.fromDate.toLocaleDateString()} - {request.toDate.toLocaleDateString()}</span>

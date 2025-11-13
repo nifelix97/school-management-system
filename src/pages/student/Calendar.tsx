@@ -164,20 +164,20 @@ export default function AcademicCalendar() {
 
     return (
       <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-        <h3 className="font-bold text-gray-900 mb-3 text-center">
+        <h3 className="font-bold text-primary-50 mb-3 text-center">
           {monthNames[monthIndex]}
         </h3>
         <div className="grid grid-cols-7 gap-1 mb-2">
           {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
             <div
               key={i}
-              className="text-center text-xs font-semibold text-gray-500"
+              className="text-center text-xs font-semibold text-primary-50"
             >
               {day}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1">{days}</div>
+        <div className="grid grid-cols-7 gap-1 text-primary-50">{days}</div>
       </div>
     );
   };
@@ -234,7 +234,7 @@ export default function AcademicCalendar() {
         </div>
         <div className="grid grid-cols-7 gap-0">
           {["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((day) => (
-            <div key={day} className="text-center font-semibold text-gray-700 py-4 border border-gray-200 bg-gray-50">
+            <div key={day} className="text-center font-semibold text-primary-50 py-4 border border-gray-200 bg-gray-50">
               {day}
             </div>
           ))}
@@ -249,25 +249,27 @@ export default function AcademicCalendar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Academic Calendar</h1>
+          <h1 className="text-2xl font-bold text-primary-50">
+            Academic Calendar
+          </h1>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="relative flex-1 sm:flex-initial">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-50"
                 size={18}
               />
               <input
                 type="text"
                 placeholder="Search"
-                className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-50 focus:border-transparent"
+                className="w-full sm:w-64 pl-10 pr-4 py-2 border border-primary-50 text-primary-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-50 focus:border-transparent"
               />
             </div>
             {/* <button className="whitespace-nowrap px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-2">
               <Plus size={18} />
               <span className="hidden sm:inline">Add New Event</span>
             </button> */}
-            <button className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-              <RefreshCw size={18} />
+            <button className="p-2 bg-white border border-primary-50 rounded-lg hover:bg-gray-50">
+              <RefreshCw size={18} className="text-primary-50" />
             </button>
           </div>
         </div>
@@ -277,32 +279,42 @@ export default function AcademicCalendar() {
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => view === "year" ? setCurrentYear(currentYear - 1) : setSelectedMonth(selectedMonth - 1)}
+                <button
+                  onClick={() =>
+                    view === "year"
+                      ? setCurrentYear(currentYear - 1)
+                      : setSelectedMonth(selectedMonth - 1)
+                  }
                   className="p-2 hover:bg-gray-100 rounded-lg"
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={20} className="text-primary-50" />
                 </button>
-                <h2 className="text-xl font-bold text-gray-900">
-                  {view === "year" ? currentYear : `${monthNames[selectedMonth]} ${currentYear}`}
+                <h2 className="text-xl font-bold text-primary-50">
+                  {view === "year"
+                    ? currentYear
+                    : `${monthNames[selectedMonth]} ${currentYear}`}
                 </h2>
-                <button 
-                  onClick={() => view === "year" ? setCurrentYear(currentYear + 1) : setSelectedMonth(selectedMonth + 1)}
+                <button
+                  onClick={() =>
+                    view === "year"
+                      ? setCurrentYear(currentYear + 1)
+                      : setSelectedMonth(selectedMonth + 1)
+                  }
                   className="p-2 hover:bg-gray-100 rounded-lg"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={20} className="text-primary-50" />
                 </button>
               </div>
               <div className="flex items-center gap-2">
-                <button 
+                <button
                   onClick={() => setView(view === "year" ? "month" : "year")}
-                  className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm"
+                  className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-primary-50 hover:bg-gray-50 flex items-center gap-2 text-sm"
                 >
                   <span>{view === "year" ? "Month View" : "Year View"}</span>
-                  <ChevronDown size={16} />
+                  <ChevronDown size={16} className="text-primary-50" />
                 </button>
                 <button className="p-2 hover:bg-gray-100 rounded-lg">
-                  <RefreshCw size={18} />
+                  <RefreshCw size={18} className="text-primary-50"/>
                 </button>
               </div>
             </div>
@@ -314,26 +326,28 @@ export default function AcademicCalendar() {
           <div className="lg:col-span-1 space-y-6">
             {/* Academic Year Overview */}
             <div className="bg-white rounded-xl shadow-sm p-4">
-              <h3 className="font-semibold text-gray-900 mb-4">Academic Year 2024-25</h3>
-              
-              <div className="space-y-3 text-sm">
+              <h3 className="font-semibold text-primary-50 mb-4">
+                Academic Year 2024-25
+              </h3>
+
+              <div className="space-y-3 text-sm text-primary-50">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Fall Semester</span>
+                  <span className="text-primary-50">Fall Semester</span>
                   <span className="font-medium">Aug - Dec</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Spring Semester</span>
+                  <span className="text-primary-50">Spring Semester</span>
                   <span className="font-medium">Jan - May</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Summer Session</span>
+                  <span className="text-primary-50">Summer Session</span>
                   <span className="font-medium">Jun - Jul</span>
                 </div>
               </div>
-              
+
               <div className="mt-4 pt-4 border-t border-gray-200">
-                <h4 className="font-medium text-gray-700 mb-2">Key Dates</h4>
-                <div className="space-y-2 text-xs">
+                <h4 className="font-medium text-primary-50 mb-2">Key Dates</h4>
+                <div className="space-y-2 text-xs text-primary-50">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded bg-blue-100"></div>
                     <span>Semester Start/End</span>
@@ -357,7 +371,7 @@ export default function AcademicCalendar() {
             {/* Notifications Panel */}
             <div className="bg-white rounded-xl shadow-sm p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">Notification</h3>
+                <h3 className="font-semibold text-primary-50">Notification</h3>
                 <button className="text-gray-400 hover:text-gray-600">
                   <RefreshCw size={16} />
                 </button>
@@ -365,38 +379,56 @@ export default function AcademicCalendar() {
 
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium text-gray-700 text-sm mb-3">
+                  <h4 className="font-medium text-primary-50 text-sm mb-3">
                     Upcoming Events
                   </h4>
                   <div className="space-y-3">
                     <div className="border-l-4 border-blue-400 pl-3">
-                      <div className="text-sm font-medium text-gray-900">Advanced Mathematics</div>
-                      <div className="text-xs text-gray-500">3-Hour Course</div>
-                      <div className="flex items-center gap-1 text-xs text-gray-600 mt-1">
+                      <div className="text-sm font-medium text-primary-50">
+                        Advanced Mathematics
+                      </div>
+                      <div className="text-xs text-primary-50">
+                        3-Hour Course
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-primary-50 mt-1">
                         <Clock size={12} />
                         <span>9:00AM - 12:00PM</span>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">📍 Room 201</div>
+                      <div className="text-xs text-primary-50 mt-1">
+                        📍 Room 201
+                      </div>
                     </div>
-                    
+
                     <div className="border-l-4 border-green-400 pl-3">
-                      <div className="text-sm font-medium text-gray-900">Chemistry Lab</div>
-                      <div className="text-xs text-gray-500">4-Hour Practical</div>
-                      <div className="flex items-center gap-1 text-xs text-gray-600 mt-1">
-                        <Clock size={12} />
-                        <span>1:00PM - 5:00PM</span>
+                      <div className="text-sm font-medium text-primary-50">
+                        Chemistry Lab
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">📍 Lab Complex</div>
+                      <div className="text-xs text-primary-50">
+                        4-Hour Practical
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-primary-50 mt-1">
+                        <Clock size={12} />
+                        <span className="text-primary-50">1:00PM - 5:00PM</span>
+                      </div>
+                      <div className="text-xs text-primary-50 mt-1">
+                        📍 Lab Complex
+                      </div>
                     </div>
-                    
+
                     <div className="border-l-4 border-purple-400 pl-3">
-                      <div className="text-sm font-medium text-gray-900">Research Seminar</div>
-                      <div className="text-xs text-gray-500">2-Hour Session</div>
-                      <div className="flex items-center gap-1 text-xs text-gray-600 mt-1">
-                        <Clock size={12} />
-                        <span>2:00PM - 4:00PM</span>
+                      <div className="text-sm font-medium text-primary-50">
+                        Research Seminar
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">📍 Conference Hall</div>
+                      <div className="text-xs text-primary-50">
+                        2-Hour Session
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-primary-50 mt-1">
+                        <Clock size={12} />
+                        <span className="text-primary-50">2:00PM - 4:00PM</span>
+                      </div>
+                      <div className="text-xs text-primary-50 mt-1">
+                        📍 Conference Hall
+                      </div>
                     </div>
                   </div>
                 </div>

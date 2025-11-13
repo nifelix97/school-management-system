@@ -24,7 +24,7 @@ type Tab = (typeof tabs)[number];
 
 const Field = ({ label, value }: { label: string; value?: React.ReactNode }) => (
   <div className="py-3">
-    <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+    <div className="text-xs uppercase tracking-wide text-primary-50/60 mb-1">
       {label}
     </div>
     <div className="text-sm text-primary-50">
@@ -208,7 +208,7 @@ const StudentProfile: React.FC<Props> = ({
                 />
               ))
             ) : (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-primary-50/40">
                 No emergency contacts yet.
               </div>
             )}
@@ -218,7 +218,7 @@ const StudentProfile: React.FC<Props> = ({
 
       {/* Personal details (view / edit) */}
       {active === "Personal details" && (
-        <div className="mt-4 sm:mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+        <div className="mt-4 sm:mt-6 bg-white rounded-2xl shadow-sm border border-primary-50/40 p-4 sm:p-6">
           {!editing ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
@@ -253,7 +253,7 @@ const StudentProfile: React.FC<Props> = ({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-primary-50">
                 <Input
                   label="First name"
                   name="firstName"
@@ -276,7 +276,7 @@ const StudentProfile: React.FC<Props> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-primary-50">
                 <Input
                   label="Email"
                   name="email"
@@ -301,6 +301,7 @@ const StudentProfile: React.FC<Props> = ({
               </div>
 
               <Input
+              className="text-primary-50"
                 label="New password"
                 name="newPassword"
                 type="password"
@@ -319,7 +320,7 @@ const StudentProfile: React.FC<Props> = ({
                   type="button"
                   disabled={!isValid || saving}
                   onClick={handleSave}
-                  className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-primary-50 ${
+                  className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-white ${
                     !isValid || saving
                       ? "bg-primary-50/60 cursor-not-allowed"
                       : "bg-primary-50 hover:opacity-95"

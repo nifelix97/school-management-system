@@ -136,7 +136,7 @@ export default function ClassRoutine() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Back Button */}
-        <button 
+        <button
           onClick={() => window.history.back()}
           className="flex items-center gap-2 text-primary-50 hover:text-opacity-80 mb-4"
         >
@@ -146,9 +146,9 @@ export default function ClassRoutine() {
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Class Routine</h1>
+          <h1 className="text-2xl font-bold text-primary-50">Class Routine</h1>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm">
+            <button className="px-4 py-2 bg-white border border-primary-50 text-primary-50 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm">
               <Calendar size={16} />
               <span>This Week</span>
             </button>
@@ -158,20 +158,20 @@ export default function ClassRoutine() {
         {/* Week Navigation */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setCurrentWeek(currentWeek - 1)}
               className="p-2 hover:bg-gray-100 rounded-lg"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={20} className="text-primary-50" />
             </button>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-primary-50">
               {formatWeekRange(weekDates)}
             </h2>
-            <button 
+            <button
               onClick={() => setCurrentWeek(currentWeek + 1)}
               className="p-2 hover:bg-gray-100 rounded-lg"
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={20} className="text-primary-50" />
             </button>
           </div>
         </div>
@@ -180,58 +180,76 @@ export default function ClassRoutine() {
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="grid grid-cols-8 gap-0">
             {/* Time column header */}
-            <div className="border-r border-gray-200 p-4 bg-gray-50">
-              <div className="font-semibold text-gray-700">Time</div>
+            <div className="border-r border-primary-50 p-4 bg-gray-50">
+              <div className="font-semibold text-primary-50">Time</div>
             </div>
-            
+
             {/* Day headers */}
             {weeklySchedule.map((day) => (
-              <div key={day.day} className="border-r border-gray-200 p-4 text-center bg-gray-50">
-                <div className="font-semibold text-gray-900">{day.day}</div>
-                <div className="text-sm text-gray-500">{day.date}</div>
+              <div
+                key={day.day}
+                className="border-r  border-primary-50/60 p-4 text-center border-primary-50"
+              >
+                <div className="font-semibold text-primary-50">{day.day}</div>
+                <div className="text-sm text-primary-50">{day.date}</div>
               </div>
             ))}
           </div>
-          
+
           {/* Time slots and classes */}
           {timeSlots.map((timeSlot) => (
-            <div key={timeSlot} className="grid grid-cols-8 gap-0 border-t border-gray-200">
+            <div
+              key={timeSlot}
+              className="grid grid-cols-8 gap-0 border-t border-primary-50"
+            >
               {/* Time label */}
-              <div className="border-r border-gray-200 p-4 text-sm text-gray-600 font-medium bg-gray-50">
+              <div className="border-r border-primary-50 p-4 text-sm text-primary-50 font-medium bg-gray-50">
                 {timeSlot}
               </div>
-              
+
               {/* Day columns */}
               {weeklySchedule.map((day) => {
                 const classSession = getClassForTimeSlot(day, timeSlot);
-                const isStartingSlot = classSession && classSession.time === timeSlot;
-                
+                const isStartingSlot =
+                  classSession && classSession.time === timeSlot;
+
                 return (
-                  <div key={`${timeSlot}-${day.day}`} className="border-r border-gray-200 p-2 min-h-[80px]">
+                  <div
+                    key={`${timeSlot}-${day.day}`}
+                    className="border-r border-primary-50/60 p-2 min-h-[80px]"
+                  >
                     {classSession && (
-                      <div className={`${classSession.color} rounded-lg p-3 h-full ${!isStartingSlot ? 'opacity-75' : ''}`}>
+                      <div
+                        className={`${
+                          classSession.color
+                        } rounded-lg p-3 h-full ${
+                          !isStartingSlot ? "opacity-75" : ""
+                        }`}
+                      >
                         {isStartingSlot ? (
                           <>
-                            <div className="text-sm font-semibold text-gray-900 mb-1">
+                            <div className="text-sm font-semibold text-primary-50 mb-1">
                               {classSession.subject}
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
+                            <div className="flex items-center gap-1 text-xs text-primary-50 mb-1">
                               <User size={12} />
                               <span>{classSession.teacher}</span>
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
+                            <div className="flex items-center gap-1 text-xs text-primary-50 mb-1">
                               <MapPin size={12} />
                               <span>{classSession.room}</span>
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-gray-600">
+                            <div className="flex items-center gap-1 text-xs text-primary-50">
                               <Clock size={12} />
                               <span>{classSession.duration}</span>
                             </div>
                           </>
                         ) : (
-                          <div className="text-sm font-medium text-gray-700 text-center">
+                          <div className="text-sm font-medium text-primary-50 text-center">
                             {classSession.subject}
-                            <div className="text-xs text-gray-500 mt-1">continues...</div>
+                            <div className="text-xs text-primary-50 mt-1">
+                              continues...
+                            </div>
                           </div>
                         )}
                       </div>
@@ -245,15 +263,24 @@ export default function ClassRoutine() {
 
         {/* Today's Classes Summary */}
         <div className="mt-6 bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Today's Classes</h3>
+          <h3 className="text-lg font-semibold text-primary-50 mb-4">
+            Today's Classes
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {weeklySchedule[0].classes.map((classSession) => (
-              <div key={classSession.id} className={`${classSession.color} rounded-lg p-4`}>
+              <div
+                key={classSession.id}
+                className={`${classSession.color} rounded-lg p-4`}
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-gray-900">{classSession.subject}</h4>
-                  <span className="text-sm text-gray-600">{classSession.time}</span>
+                  <h4 className="font-semibold text-primary-50">
+                    {classSession.subject}
+                  </h4>
+                  <span className="text-sm text-primary-50">
+                    {classSession.time}
+                  </span>
                 </div>
-                <div className="space-y-1 text-sm text-gray-600">
+                <div className="space-y-1 text-sm text-primary-50">
                   <div className="flex items-center gap-2">
                     <User size={14} />
                     <span>{classSession.teacher}</span>

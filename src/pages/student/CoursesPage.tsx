@@ -305,10 +305,10 @@ export default function CoursesPage() {
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-2xl font-bold text-primary-50 mb-2">
                     {selectedCourse.title}
                   </h1>
-                  <p className="text-gray-600">
+                  <p className="text-primary-50">
                     Part of: {selectedCourse.className}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
@@ -330,7 +330,7 @@ export default function CoursesPage() {
               {selectedCourse.progress > 0 && selectedCourse.progress < 100 && (
                 <div className="mb-6">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-600">Progress</span>
+                    <span className="text-primary-50">Progress</span>
                     <span className="font-semibold text-primary-50">
                       {selectedCourse.progress}%
                     </span>
@@ -347,18 +347,18 @@ export default function CoursesPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="text-2xl mb-2">📚</div>
-                  <div className="text-sm text-gray-600">Lessons</div>
-                  <div className="font-semibold text-gray-900">24 Modules</div>
+                  <div className="text-sm text-primary-50">Lessons</div>
+                  <div className="font-semibold text-primary-50">24 Modules</div>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="text-2xl mb-2">⏱️</div>
-                  <div className="text-sm text-gray-600">Duration</div>
-                  <div className="font-semibold text-gray-900">8 Hours</div>
+                  <div className="text-sm text-primary-50">Duration</div>
+                  <div className="font-semibold text-primary-50">8 Hours</div>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="text-2xl mb-2">🎯</div>
-                  <div className="text-sm text-gray-600">Level</div>
-                  <div className="font-semibold text-gray-900">
+                  <div className="text-sm text-primary-50">Level</div>
+                  <div className="font-semibold text-primary-50">
                     Intermediate
                   </div>
                 </div>
@@ -399,7 +399,7 @@ export default function CoursesPage() {
 
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-primary-50">
                   {selectedClass.name}
                 </h1>
                 {selectedClass.status === "retaking" && (
@@ -447,7 +447,7 @@ export default function CoursesPage() {
               </div>
 
               <div className="border-t border-gray-200 pt-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">
+                <h2 className="text-lg font-bold text-primary-50 mb-4">
                   Courses in this Class
                 </h2>
                 <div className="space-y-3">
@@ -467,7 +467,7 @@ export default function CoursesPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-1">
+                          <h3 className="font-semibold text-primary-50 mb-1">
                             {course.title}
                           </h3>
                           {course.status === "retaking" && (
@@ -510,7 +510,7 @@ export default function CoursesPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+          <h1 className="text-xl sm:text-2xl font-bold text-primary-50">
             My Courses
           </h1>
         </div>
@@ -521,7 +521,7 @@ export default function CoursesPage() {
             className={`pb-3 px-1 text-sm font-semibold transition-colors relative whitespace-nowrap ${
               activeTab === "courses"
                 ? "text-primary-50"
-                : "text-gray-500 hover:text-gray-700"
+                : "text-primary-50/40 hover:text-primary-100"
             }`}
           >
             Courses
@@ -534,7 +534,7 @@ export default function CoursesPage() {
             className={`pb-3 px-1 text-sm font-semibold transition-colors relative whitespace-nowrap ${
               activeTab === "classes"
                 ? "text-primary-50"
-                : "text-gray-500 hover:text-gray-700"
+                : "text-primary-50/40 hover:text-primary-100"
             }`}
           >
             Classes
@@ -553,7 +553,7 @@ export default function CoursesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                     filter === "all"
                       ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   All
@@ -563,7 +563,7 @@ export default function CoursesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
                     filter === "ongoing"
                       ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   Ongoing
@@ -576,7 +576,7 @@ export default function CoursesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                     filter === "completed"
                       ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                      : "bg-white text-primary-50 border border-gray-200 hover:border-primary-100"
                   }`}
                 >
                   Completed
@@ -586,13 +586,13 @@ export default function CoursesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                     filter === "waiting"
                       ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   Waiting Enrollment
                 </button>
               </div>
-              <div className="sm:ml-auto flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+              <div className="sm:ml-auto flex items-center gap-2 text-sm text-primary-50 whitespace-nowrap">
                 <span>Sort: Last Active</span>
                 <ChevronDown size={16} />
               </div>
@@ -626,17 +626,17 @@ export default function CoursesPage() {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2 min-h-[2.5rem]">
+                    <h3 className="font-semibold text-primary-50 text-sm mb-2 line-clamp-2 min-h-[2.5rem]">
                       {course.title}
                     </h3>
-                    <p className="text-xs text-gray-500 mb-3">
+                    <p className="text-xs text-primary-50/40 mb-3">
                       Class: {course.className}
                     </p>
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">
                         👤
                       </div>
-                      <span className="text-xs text-gray-600">
+                      <span className="text-xs text-primary-50">
                         {course.instructor}
                       </span>
                     </div>
@@ -654,7 +654,7 @@ export default function CoursesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                     classFilter === "all"
                       ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   All Classes
@@ -664,7 +664,7 @@ export default function CoursesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                     classFilter === "current"
                       ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   Current Classes
@@ -674,7 +674,7 @@ export default function CoursesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                     classFilter === "retaking"
                       ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   Retaking
@@ -694,7 +694,7 @@ export default function CoursesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                     classFilter === "ongoing"
                       ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   Ongoing
@@ -704,7 +704,7 @@ export default function CoursesPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                     classFilter === "completed"
                       ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                      : "bg-white text-prrimary-50 border border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   Completed
@@ -752,7 +752,7 @@ export default function CoursesPage() {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 text-sm mb-3 line-clamp-2 min-h-[2.5rem]">
+                    <h3 className="font-semibold text-primary-50 text-sm mb-3 line-clamp-2 min-h-[2.5rem]">
                       {classItem.name}
                     </h3>
                     <div className="flex items-center gap-2 mb-3">
@@ -782,31 +782,31 @@ export default function CoursesPage() {
       </div>
 
       {showEnrollModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-primary-50">
                 Enroll in Course
               </h2>
               <button
                 onClick={() => setShowEnrollModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-primary-50/40 hover:text-gray-600"
               >
                 <X size={24} />
               </button>
             </div>
-            <p className="text-gray-600 mb-4">
+            <p className="text-primary-50 mb-4">
               Would you like to enroll in{" "}
               <strong>{courseToEnroll?.title}</strong>?
             </p>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-primary-50 mb-6">
               This course is part of the{" "}
               <strong>{courseToEnroll?.className}</strong> class.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowEnrollModal(false)}
-                className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all"
+                className="flex-1 py-2 border border-gray-300 text-primary-50 rounded-lg font-semibold hover:bg-gray-50 transition-all"
               >
                 Cancel
               </button>

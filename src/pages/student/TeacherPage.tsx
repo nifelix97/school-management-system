@@ -152,11 +152,11 @@ export default function TeacherPage() {
                     className="w-32 h-32 rounded-full object-cover"
                   />
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                      <h1 className="text-2xl font-bold text-primary-50 mb-2">
                         {selectedTeacher.name}
                       </h1>
                       <p className="text-lg text-primary-50 font-medium mb-2">
@@ -164,57 +164,78 @@ export default function TeacherPage() {
                       </p>
                       <div className="flex items-center gap-1 mb-2">
                         <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                        <span className="font-semibold">{selectedTeacher.rating}</span>
-                        <span className="text-gray-500">/ 5.0</span>
+                        <span className="font-semibold text-primary-50">
+                          {selectedTeacher.rating}
+                        </span>
+                        <span className="text-primary-50">/ 5.0</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2 text-sm text-primary-50">
                       <Award size={16} />
                       <span>{selectedTeacher.experience} experience</span>
                     </div>
                   </div>
 
-                  <p className="text-gray-600 mb-6">{selectedTeacher.bio}</p>
+                  <p className="text-primary-50 mb-6">{selectedTeacher.bio}</p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-3">Contact Information</h3>
+                      <h3 className="font-semibold text-primary-50 mb-3">
+                        Contact Information
+                      </h3>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
-                          <Mail size={16} className="text-gray-400" />
-                          <span>{selectedTeacher.email}</span>
+                          <Mail size={16} className="text-primary-50/60" />
+                          <span className="text-primary-50">
+                            {selectedTeacher.email}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <Phone size={16} className="text-gray-400" />
-                          <span>{selectedTeacher.phone}</span>
+                          <Phone size={16} className="text-primary-50/60" />
+                          <span className="text-primary-50">
+                            {selectedTeacher.phone}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <MapPin size={16} className="text-gray-400" />
-                          <span>{selectedTeacher.office}</span>
+                          <MapPin size={16} className="text-primary-50/60" />
+                          <span className="text-primary-50">
+                            {selectedTeacher.office}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-3">Schedule</h3>
+                      <h3 className="font-semibold text-primary-50 mb-3">
+                        Schedule
+                      </h3>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
-                          <Clock size={16} className="text-gray-400" />
-                          <span>{selectedTeacher.officeHours}</span>
+                          <Clock size={16} className="text-primary-50/60" />
+                          <span className="text-primary-50">
+                            {selectedTeacher.officeHours}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <Calendar size={16} className="text-gray-400" />
-                          <span>Next class: {selectedTeacher.nextClass}</span>
+                          <Calendar size={16} className="text-primary-50/60" />
+                          <span className="text-primary-50">
+                            Next class: {selectedTeacher.nextClass}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-6">
-                    <h3 className="font-semibold text-gray-900 mb-3">Education</h3>
+                    <h3 className="font-semibold text-primary-50 mb-3">
+                      Education
+                    </h3>
                     <ul className="space-y-1">
                       {selectedTeacher.education.map((edu, index) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
+                        <li
+                          key={index}
+                          className="text-sm text-primary-50 flex items-center gap-2"
+                        >
                           <BookOpen size={14} className="text-gray-400" />
                           {edu}
                         </li>
@@ -242,7 +263,7 @@ export default function TeacherPage() {
         </button>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">My Teachers</h1>
+          <h1 className="text-2xl font-bold text-primary-50">My Teachers</h1>
           <div className="relative flex-1 sm:flex-initial">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -253,7 +274,7 @@ export default function TeacherPage() {
               placeholder="Search teachers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-50 focus:border-transparent"
+              className="w-full sm:w-64 pl-10 pr-4 py-2 border border-primary-50 text-primary-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-50 focus:border-transparent"
             />
           </div>
         </div>
@@ -273,7 +294,7 @@ export default function TeacherPage() {
                     className="w-16 h-16 rounded-full object-cover"
                   />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">
+                    <h3 className="font-semibold text-primary-50 mb-1">
                       {teacher.name}
                     </h3>
                     <p className="text-primary-50 font-medium text-sm mb-1">
@@ -281,12 +302,12 @@ export default function TeacherPage() {
                     </p>
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="text-sm font-medium">{teacher.rating}</span>
+                      <span className="text-sm font-medium text-primary-50">{teacher.rating}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-sm text-gray-600">
+                <div className="space-y-2 text-sm text-primary-50/60">
                   <div className="flex items-center gap-2">
                     <MapPin size={14} />
                     <span>{teacher.office}</span>

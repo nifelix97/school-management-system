@@ -177,10 +177,10 @@ export default function NotificationsPage() {
               <div className="flex flex-col xs:flex-row items-start gap-3 xs:gap-4 mb-4">
                 <div className="flex-shrink-0">{getIcon(selectedNotification.type)}</div>
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-primary-50 mb-2">
                     {selectedNotification.title}
                   </h1>
-                  <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 text-xs xs:text-sm text-gray-600 mb-4">
+                  <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 text-xs xs:text-sm text-primary-50 mb-4">
                     <div className="flex items-center gap-1">
                       <User size={14} className="xs:w-4 xs:h-4" />
                       <span>{selectedNotification.sender}</span>
@@ -200,13 +200,13 @@ export default function NotificationsPage() {
                 <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 w-full xs:w-auto">
                   <span className={`px-2 xs:px-3 py-1 rounded-full text-xs font-medium ${
                     selectedNotification.priority === 'high' ? 'bg-red-100 text-red-700' :
-                    selectedNotification.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                    selectedNotification.priority === 'medium' ? 'bg-primary-50 text-white' :
                     'bg-green-100 text-green-700'
                   }`}>
                     {selectedNotification.priority.toUpperCase()}
                   </span>
                   {selectedNotification.actionRequired && (
-                    <span className="px-2 xs:px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                    <span className="px-2 xs:px-3 py-1 bg-primary-50 text-white rounded-full text-xs font-medium">
                       <span className="hidden xs:inline">ACTION REQUIRED</span>
                       <span className="xs:hidden">ACTION</span>
                     </span>
@@ -215,7 +215,7 @@ export default function NotificationsPage() {
               </div>
 
               <div className="prose max-w-none">
-                <p className="text-sm xs:text-base text-gray-700 leading-relaxed">
+                <p className="text-sm xs:text-base text-primary-50 leading-relaxed">
                   {selectedNotification.details}
                 </p>
               </div>
@@ -247,13 +247,13 @@ export default function NotificationsPage() {
         </button>
 
         <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 xs:gap-4 mb-4 xs:mb-6">
-          <h1 className="text-xl xs:text-2xl font-bold text-gray-900">Notifications</h1>
+          <h1 className="text-xl xs:text-2xl font-bold text-primary-50">Notifications</h1>
           <div className="flex items-center gap-2 w-full xs:w-auto">
-            <Filter size={14} className="xs:w-4 xs:h-4 text-gray-400" />
+            <Filter size={14} className="xs:w-4 xs:h-4 text-primary-50" />
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="flex-1 xs:flex-initial px-2 xs:px-3 py-1.5 xs:py-2 border border-gray-200 rounded-lg text-xs xs:text-sm focus:outline-none focus:ring-2 focus:ring-primary-50"
+              className="flex-1 xs:flex-initial px-2 xs:px-3 py-1.5 xs:py-2 text-primary-50 border border-primary-50 rounded-lg text-xs xs:text-sm focus:outline-none focus:ring-2 focus:ring-primary-50"
             >
               <option value="all">All</option>
               <option value="unread">Unread</option>
@@ -284,14 +284,14 @@ export default function NotificationsPage() {
                   <div className="flex-shrink-0 mt-0.5">{getIcon(notification.type)}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between mb-2 gap-1 xs:gap-4">
-                      <h3 className={`font-semibold text-gray-900 text-sm xs:text-base ${!notification.isRead ? 'font-bold' : ''} pr-2 xs:pr-0`}>
+                      <h3 className={`font-semibold text-primary-50 text-sm xs:text-base ${!notification.isRead ? 'font-bold' : ''} pr-2 xs:pr-0`}>
                         {notification.title}
                         {!notification.isRead && (
                           <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full inline-block"></span>
                         )}
                       </h3>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-xs text-gray-500">{notification.timestamp}</span>
+                        <span className="text-xs text-primary-50/40">{notification.timestamp}</span>
                         {notification.actionRequired && (
                           <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
                             ACTION
@@ -299,8 +299,8 @@ export default function NotificationsPage() {
                         )}
                       </div>
                     </div>
-                    <p className="text-gray-600 text-xs xs:text-sm mb-2 leading-relaxed">{notification.message}</p>
-                    <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-4 text-xs text-gray-500">
+                    <p className="text-primary-50 text-xs xs:text-sm mb-2 leading-relaxed">{notification.message}</p>
+                    <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-4 text-xs text-primary-50/30">
                       <span>From: {notification.sender}</span>
                       <span className="capitalize hidden xs:inline">{notification.type}</span>
                       <span className="capitalize hidden xs:inline">{notification.priority} priority</span>
@@ -315,9 +315,9 @@ export default function NotificationsPage() {
 
         {filteredNotifications.length === 0 && (
           <div className="text-center py-8 xs:py-12">
-            <Bell size={40} className="xs:w-12 xs:h-12 text-gray-300 mx-auto mb-3 xs:mb-4" />
-            <h3 className="text-base xs:text-lg font-medium text-gray-900 mb-2">No notifications found</h3>
-            <p className="text-sm xs:text-base text-gray-500 px-4">Try adjusting your filter to see more notifications.</p>
+            <Bell size={40} className="xs:w-12 xs:h-12 text-primary-50 mx-auto mb-3 xs:mb-4" />
+            <h3 className="text-base xs:text-lg font-medium text-primary-50 mb-2">No notifications found</h3>
+            <p className="text-sm xs:text-base text-primary-50 px-4">Try adjusting your filter to see more notifications.</p>
           </div>
         )}
 
@@ -326,17 +326,17 @@ export default function NotificationsPage() {
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-4 xs:px-6 py-2 xs:py-3 bg-white border border-gray-200 rounded-lg text-sm xs:text-base font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 xs:px-6 py-2 xs:py-3 bg-white border border-primary-50/40 rounded-lg text-sm xs:text-base font-medium text-primary-50 hover:bg-primary-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
-            <span className="text-xs xs:text-sm text-gray-600">
+            <span className="text-xs xs:text-sm text-primary-50">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-4 xs:px-6 py-2 xs:py-3 bg-white border border-gray-200 rounded-lg text-sm xs:text-base font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 xs:px-6 py-2 xs:py-3 bg-white border border-primary-50/40 rounded-lg text-sm xs:text-base font-medium text-primary-50 hover:bg-primary-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>
