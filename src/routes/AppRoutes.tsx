@@ -24,6 +24,16 @@ import ManageAttendance from "../pages/Teacher/ManageAttendance";
 import StudentInfo from "../pages/Teacher/StudentInfo";
 import TeacherRoutine from "../pages/Teacher/TeacherRoutine";
 import SetCourse from "../pages/Teacher/SetCourse";
+import TeacherNotification from "../pages/Teacher/TeacherNotification";
+import Grading from "../pages/Teacher/Grading";
+import CreateAssignment from "../pages/Teacher/CreateAssignment";
+import MarkSheet from "../pages/Teacher/MarkSheet";
+import ExamAttendance from "../pages/Teacher/ExamAttendance";
+import TeacherMessage from "../pages/Teacher/TeacherMessage";
+import StudentMarks from "../pages/student/StudentMarks";
+
+
+
 
 
 
@@ -53,6 +63,7 @@ export default function AppRoutes() {
         <Route path="/exam-routine" element={<ExamRoutine />} />
         <Route path="/attendance" element={<AttendancePage />} />
         <Route path="/leave-requests" element={<LeaveRequestsPage />} />
+        <Route path="/results" element={<StudentMarks />} />
       </Route>
       <Route element={<TeacherLayout />}>
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
@@ -61,8 +72,20 @@ export default function AppRoutes() {
         <Route path="/teacher/attendance" element={<ManageAttendance />} />
         <Route path="/teacher/student-info" element={<StudentInfo />} />
         <Route path="/teacher/class-routine" element={<TeacherRoutine />} />
-        <Route path="/teacher/parents" element={<SetCourse />} />
-      </Route>  
+        <Route path="/teacher/course" element={<SetCourse />} />
+        <Route
+          path="/teacher/notifications"
+          element={<TeacherNotification />}
+        />
+        <Route path="/teacher/grading" element={<Grading />} />
+        <Route
+          path="/teacher/create-assignment"
+          element={<CreateAssignment />}
+        />
+        <Route path="/teacher/mark-sheets" element={<MarkSheet />} />
+        <Route path="/teacher/exam-attendance" element={<ExamAttendance />} />
+        <Route path="/teacher/messages" element={<TeacherMessage />} />
+      </Route>
     </Routes>
   );
 }

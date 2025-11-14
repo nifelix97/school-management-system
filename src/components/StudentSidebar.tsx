@@ -77,7 +77,7 @@ const links = [
     icon: <IoClipboardOutline className="w-5 h-5" />,
   },
   {
-    to: "/student/results",
+    to: "/results",
     label: "Mark sheets",
     icon: <IoTrophyOutline className="w-5 h-5" />,
   },

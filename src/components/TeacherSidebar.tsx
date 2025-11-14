@@ -10,7 +10,7 @@ import {
   IoChatbubbleEllipsesOutline,
   IoClipboardOutline,
   IoCheckmarkDoneOutline,
-  IoLibraryOutline,
+  // IoLibraryOutline,
   IoStatsChartOutline,
   IoDocumentTextOutline,
   IoMenuOutline,
@@ -53,12 +53,12 @@ const links = [
     icon: <IoTimeOutline className="w-5 h-5" />,
   },
   {
-    to: "/teacher/parents",
+    to: "/teacher/course",
     label: "Set Course",
     icon: <IoPeopleOutline className="w-5 h-5" />,
   },
   {
-    to: "/teacher/subjects",
+    to: "/teacher/notifications",
     label: "Notifications",
     icon: <IoBookOutline className="w-5 h-5" />,
   },
@@ -72,21 +72,21 @@ const links = [
     label: "Mark Sheets",
     icon: <IoDocumentTextOutline className="w-5 h-5" />,
   },
-  {
-    to: "/teacher/library",
-    label: "Manage Library",
-    icon: <IoLibraryOutline className="w-5 h-5" />,
-  },
+  // {
+  //   to: "/teacher/library",
+  //   label: "Manage Library",
+  //   icon: <IoLibraryOutline className="w-5 h-5" />,
+  // },
   {
     to: "/teacher/exam-attendance",
     label: "Exam Attendance",
     icon: <IoClipboardOutline className="w-5 h-5" />,
   },
-  {
-    to: "/teacher/notifications",
-    label: "View Notifications",
-    icon: <IoAlertCircleOutline className="w-5 h-5" />,
-  },
+  // {
+  //   to: "/teacher/notifications",
+  //   label: "View Notifications",
+  //   icon: <IoAlertCircleOutline className="w-5 h-5" />,
+  // },
   {
     to: "/teacher/messages",
     label: "Manage Messages",
