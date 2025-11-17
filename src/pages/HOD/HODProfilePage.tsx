@@ -1,4 +1,4 @@
-import HODProfile from "./HODProfile";
+import HODProfile from "./HoDProfile";
 
 const mockProfile = {
   id: "hod001",
