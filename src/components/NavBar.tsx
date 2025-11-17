@@ -156,7 +156,7 @@ const NavBar = () => {
 
             <div className="relative">
               <select
-                className="block w-full p-2 text-black bg-white rounded-md shadow-md focus:outline-none focus:ring-primary-500"
+                className="block w-full p-2 text-primary-50 bg-white rounded-md shadow-md focus:outline-none focus:ring-primary-500"
                 value={selectedLanguage}
                 onChange={(e) => handleLanguageChange(e.target.value)}
               >

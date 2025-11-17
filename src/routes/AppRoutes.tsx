@@ -31,6 +31,17 @@ import MarkSheet from "../pages/Teacher/MarkSheet";
 import ExamAttendance from "../pages/Teacher/ExamAttendance";
 import TeacherMessage from "../pages/Teacher/TeacherMessage";
 import StudentMarks from "../pages/student/StudentMarks";
+import HODLayout from "../components/HODLayout";
+import HODDashboard from "../pages/HOD/HoDDashBoard";
+import NotFound from "../pages/NotFound";
+import HODProfilePage from "../pages/HOD/HODProfilePage";
+import DepartmentCourses from "../pages/HOD/DepartmentCourses";
+import CourseManagement from "../pages/HOD/CourseManagement";
+import AssignTeacher from "../pages/HOD/AssignTeacher";
+import TeachersActivity from "../pages/HOD/TeachersActivity";
+import StudentsPerformance from "../pages/HOD/StudentsPerformance";
+import TeachersAccount from "../pages/HOD/TeachersAccount";
+
 
 
 
@@ -86,6 +97,18 @@ export default function AppRoutes() {
         <Route path="/teacher/exam-attendance" element={<ExamAttendance />} />
         <Route path="/teacher/messages" element={<TeacherMessage />} />
       </Route>
+      <Route element={<HODLayout />}>
+        <Route path="/hod/dashboard" element={<HODDashboard />} />
+        <Route path="/hod/profile" element={<HODProfilePage />} />
+        <Route path="/hod/department-courses" element={<DepartmentCourses />} />
+        <Route path="/hod/approve-courses" element={<CourseManagement />} />
+        <Route path="/hod/assign-teachers" element={<AssignTeacher />} />
+        <Route path="/hod/teachers-activity" element={<TeachersActivity />} />
+        <Route path="/hod/students-performance" element={<StudentsPerformance />} />
+        <Route path="/hod/teachers-account" element={<TeachersAccount />} />
+      </Route>
+      {/* Catch-all route for 404 errors */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

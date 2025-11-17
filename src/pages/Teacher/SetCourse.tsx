@@ -301,7 +301,7 @@ export default function SetCourse() {
         {/* Create Course Modal */}
         {showCreateModal && (
           <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 xxs:p-4 xs:p-5 sm:p-6 max-w-md w-full">
+            <div className="bg-white rounded-xl p-6 xxs:p-4 xs:p-5 sm:p-6 max-w-md w-full shadow-2xl shadow-primary-50">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-primary-50">Create New Course</h2>
                 <button

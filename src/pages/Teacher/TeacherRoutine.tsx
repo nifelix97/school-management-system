@@ -18,6 +18,7 @@ interface TeachingSession {
   duration: string;
   color: string;
   type: "class" | "break";
+  teacherId: string;
 }
 
 interface DaySchedule {
@@ -28,6 +29,13 @@ interface DaySchedule {
 
 export default function TeacherRoutine() {
   const [currentWeek, setCurrentWeek] = useState(0);
+  
+  // Current teacher info (in real app, this would come from auth context)
+  const currentTeacher = {
+    id: "teacher_001",
+    name: "Dr. Smith",
+    subjects: ["Mathematics", "Physics"]
+  };
 
 
 
@@ -71,39 +79,48 @@ export default function TeacherRoutine() {
     "5:00 PM"
   ];
 
-  const baseSchedule = {
+  // All schedule data (in real app, this would come from API)
+  const allScheduleData = {
     Monday: [
-      { id: 1, subject: "Mathematics", class: "Grade 10-A", room: "Room 101", time: "9:00 AM", duration: "1h", color: "bg-blue-100 border-l-4 border-blue-500", type: "class" as const },
-      { id: 2, subject: "Break", class: "", room: "", time: "10:00 AM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const },
-      { id: 3, subject: "Physics", class: "Grade 11-B", room: "Lab 201", time: "11:00 AM", duration: "2h", color: "bg-purple-100 border-l-4 border-purple-500", type: "class" as const },
-      { id: 4, subject: "English", class: "Grade 10-B", room: "Room 105", time: "2:00 PM", duration: "1h", color: "bg-green-100 border-l-4 border-green-500", type: "class" as const }
+      { id: 1, subject: "Mathematics", class: "Grade 10-A", room: "Room 101", time: "9:00 AM", duration: "1h", color: "bg-blue-100 border-l-4 border-blue-500", type: "class" as const, teacherId: "teacher_001" },
+      { id: 2, subject: "Break", class: "", room: "", time: "10:00 AM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
+      { id: 3, subject: "Physics", class: "Grade 11-B", room: "Lab 201", time: "11:00 AM", duration: "2h", color: "bg-purple-100 border-l-4 border-purple-500", type: "class" as const, teacherId: "teacher_001" },
+      { id: 4, subject: "English", class: "Grade 10-B", room: "Room 105", time: "2:00 PM", duration: "1h", color: "bg-green-100 border-l-4 border-green-500", type: "class" as const, teacherId: "teacher_002" }
     ],
     Tuesday: [
-      { id: 5, subject: "Chemistry", class: "Grade 12-A", room: "Lab 301", time: "8:00 AM", duration: "2h", color: "bg-red-100 border-l-4 border-red-500", type: "class" as const },
-      { id: 6, subject: "Lunch Break", class: "", room: "", time: "12:00 PM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const },
-      { id: 7, subject: "Computer Science", class: "Grade 11-A", room: "Lab 401", time: "3:00 PM", duration: "2h", color: "bg-indigo-100 border-l-4 border-indigo-500", type: "class" as const }
+      { id: 5, subject: "Chemistry", class: "Grade 12-A", room: "Lab 301", time: "8:00 AM", duration: "2h", color: "bg-red-100 border-l-4 border-red-500", type: "class" as const, teacherId: "teacher_003" },
+      { id: 6, subject: "Lunch Break", class: "", room: "", time: "12:00 PM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
+      { id: 7, subject: "Computer Science", class: "Grade 11-A", room: "Lab 401", time: "3:00 PM", duration: "2h", color: "bg-indigo-100 border-l-4 border-indigo-500", type: "class" as const, teacherId: "teacher_004" }
     ],
     Wednesday: [
-      { id: 8, subject: "Mathematics", class: "Grade 10-A", room: "Room 101", time: "9:00 AM", duration: "1h", color: "bg-blue-100 border-l-4 border-blue-500", type: "class" as const },
-      { id: 9, subject: "Break", class: "", room: "", time: "10:00 AM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const },
-      { id: 10, subject: "Biology", class: "Grade 12-B", room: "Lab 501", time: "11:00 AM", duration: "2h", color: "bg-teal-100 border-l-4 border-teal-500", type: "class" as const },
-      { id: 11, subject: "Art", class: "Grade 10-B", room: "Studio 1", time: "2:00 PM", duration: "1h", color: "bg-pink-100 border-l-4 border-pink-500", type: "class" as const }
+      { id: 8, subject: "Mathematics", class: "Grade 10-A", room: "Room 101", time: "9:00 AM", duration: "1h", color: "bg-blue-100 border-l-4 border-blue-500", type: "class" as const, teacherId: "teacher_001" },
+      { id: 9, subject: "Break", class: "", room: "", time: "10:00 AM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
+      { id: 10, subject: "Biology", class: "Grade 12-B", room: "Lab 501", time: "11:00 AM", duration: "2h", color: "bg-teal-100 border-l-4 border-teal-500", type: "class" as const, teacherId: "teacher_005" },
+      { id: 11, subject: "Art", class: "Grade 10-B", room: "Studio 1", time: "2:00 PM", duration: "1h", color: "bg-pink-100 border-l-4 border-pink-500", type: "class" as const, teacherId: "teacher_006" }
     ],
     Thursday: [
-      { id: 12, subject: "Physics", class: "Grade 11-B", room: "Lab 201", time: "10:00 AM", duration: "2h", color: "bg-purple-100 border-l-4 border-purple-500", type: "class" as const },
-      { id: 13, subject: "Lunch Break", class: "", room: "", time: "12:00 PM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const },
-      { id: 14, subject: "Geography", class: "Grade 11-A", room: "Room 301", time: "1:00 PM", duration: "1h", color: "bg-orange-100 border-l-4 border-orange-500", type: "class" as const }
+      { id: 12, subject: "Physics", class: "Grade 11-B", room: "Lab 201", time: "10:00 AM", duration: "2h", color: "bg-purple-100 border-l-4 border-purple-500", type: "class" as const, teacherId: "teacher_001" },
+      { id: 13, subject: "Lunch Break", class: "", room: "", time: "12:00 PM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
+      { id: 14, subject: "Geography", class: "Grade 11-A", room: "Room 301", time: "1:00 PM", duration: "1h", color: "bg-orange-100 border-l-4 border-orange-500", type: "class" as const, teacherId: "teacher_007" }
     ],
     Friday: [
-      { id: 15, subject: "Chemistry", class: "Grade 12-A", room: "Lab 301", time: "9:00 AM", duration: "2h", color: "bg-red-100 border-l-4 border-red-500", type: "class" as const },
-      { id: 16, subject: "Break", class: "", room: "", time: "11:00 AM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const },
-      { id: 17, subject: "English", class: "Grade 10-B", room: "Room 105", time: "12:00 PM", duration: "1h", color: "bg-green-100 border-l-4 border-green-500", type: "class" as const }
+      { id: 15, subject: "Chemistry", class: "Grade 12-A", room: "Lab 301", time: "9:00 AM", duration: "2h", color: "bg-red-100 border-l-4 border-red-500", type: "class" as const, teacherId: "teacher_003" },
+      { id: 16, subject: "Break", class: "", room: "", time: "11:00 AM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
+      { id: 17, subject: "English", class: "Grade 10-B", room: "Room 105", time: "12:00 PM", duration: "1h", color: "bg-green-100 border-l-4 border-green-500", type: "class" as const, teacherId: "teacher_002" }
     ],
     Saturday: [
-      { id: 18, subject: "Faculty Meeting", class: "", room: "Conference Room", time: "10:00 AM", duration: "2h", color: "bg-slate-100 border-l-4 border-slate-500", type: "class" as const }
+      { id: 18, subject: "Faculty Meeting", class: "", room: "Conference Room", time: "10:00 AM", duration: "2h", color: "bg-slate-100 border-l-4 border-slate-500", type: "class" as const, teacherId: "" }
     ],
     Sunday: []
   };
+
+  // Filter schedule to show only current teacher's classes and breaks
+  const baseSchedule: Record<string, TeachingSession[]> = {};
+  Object.keys(allScheduleData).forEach(day => {
+    baseSchedule[day] = allScheduleData[day as keyof typeof allScheduleData].filter(
+      session => session.type === "break" || session.teacherId === currentTeacher.id
+    );
+  });
 
   const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   

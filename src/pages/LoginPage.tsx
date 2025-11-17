@@ -96,6 +96,9 @@ const LoginPage = () => {
           case "Teacher":
             navigate("/teacher/dashboard");
             break;
+            case "HOD":
+            navigate("/hod/dashboard");
+            break;
           case "Parent":
             navigate("/parent/dashboard");
             break;
