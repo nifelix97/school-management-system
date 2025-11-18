@@ -1,6 +1,6 @@
 import React from 'react';
 import { Clock, MapPin, User } from 'lucide-react';
-import { TimetableEntry } from '../types/timetable';
+import type { TimetableEntry } from '../types/timetable';
 
 interface WeeklyCalendarViewProps {
   entries: TimetableEntry[];

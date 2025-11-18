@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Calendar, Clock, MapPin, User, Monitor } from 'lucide-react';
-import { ExamEntry, Instructor } from '../types/timetable';
+import type { ExamEntry, Instructor } from '../types/timetable';
 
 interface ExamCreateModalProps {
   isOpen: boolean;
