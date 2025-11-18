@@ -64,6 +64,8 @@ export default function AppRoutes() {
       {/* Routes WITH layout */}
       <Route element={<Layout />}>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/admissions" element={<AdmissionPage />} />
+
         {/* add more layout-wrapped routes here */}
       </Route>
 
@@ -111,12 +113,14 @@ export default function AppRoutes() {
         <Route path="/hod/approve-courses" element={<CourseManagement />} />
         <Route path="/hod/assign-teachers" element={<AssignTeacher />} />
         <Route path="/hod/teachers-activity" element={<TeachersActivity />} />
-        <Route path="/hod/students-performance" element={<StudentsPerformance />} />
+        <Route
+          path="/hod/students-performance"
+          element={<StudentsPerformance />}
+        />
         <Route path="/hod/teachers-account" element={<TeachersAccount />} />
         <Route path="/hod/time-table-exams" element={<TimeTableExams />} />
         <Route path="/hod/exams-questions" element={<ExamsQuestions />} />
         <Route path="/hod/monitor-exams" element={<MonitorExams />} />
-        <Route path="/admissions" element={<AdmissionPage />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
