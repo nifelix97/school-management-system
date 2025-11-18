@@ -41,6 +41,13 @@ import AssignTeacher from "../pages/HOD/AssignTeacher";
 import TeachersActivity from "../pages/HOD/TeachersActivity";
 import StudentsPerformance from "../pages/HOD/StudentsPerformance";
 import TeachersAccount from "../pages/HOD/TeachersAccount";
+import TimeTableExams from "../pages/HOD/TimeTableExams";
+import ExamsQuestions from "../pages/HOD/ExamsQuestions";
+import MonitorExams from "../pages/HOD/MonitorExams";
+import AdmissionPage from "../pages/AdmissionPage";
+
+
+
 
 
 
@@ -106,6 +113,10 @@ export default function AppRoutes() {
         <Route path="/hod/teachers-activity" element={<TeachersActivity />} />
         <Route path="/hod/students-performance" element={<StudentsPerformance />} />
         <Route path="/hod/teachers-account" element={<TeachersAccount />} />
+        <Route path="/hod/time-table-exams" element={<TimeTableExams />} />
+        <Route path="/hod/exams-questions" element={<ExamsQuestions />} />
+        <Route path="/hod/monitor-exams" element={<MonitorExams />} />
+        <Route path="/admissions" element={<AdmissionPage />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />

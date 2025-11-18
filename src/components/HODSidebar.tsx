@@ -66,12 +66,12 @@ const links = [
     icon: <IoPersonCircleOutline className="w-5 h-5" />,
   },
   {
-    to: "/hod/timetable-exams",
+    to: "/hod/time-table-exams",
     label: "Timetable & Exams",
     icon: <IoTimeOutline className="w-5 h-5" />,
   },
   {
-    to: "/hod/approve-exam-questions",
+    to: "/hod/exams-questions",
     label: "Exam Questions",
     icon: <IoClipboardOutline className="w-5 h-5" />,
   },

@@ -6,12 +6,26 @@ import Input from "../components/ui/Input";
 import { toast } from "react-toastify";
 
 const roles = [
-  "Student","Parent","Teacher",
-  "Librarian","Accountant","Registrar","Nurse",
-  "Alumni","Manager","Warden","Auditor",
-  "Vendors","Coaches","Receptionist","Admin",
-  "Vice Principal","HOD","Principal",
-  "Vice Chancellor","Chancellor"
+  "Student",
+  "Teacher",
+  "HOD",
+  "Registrar",
+  "Librarian",
+  "Accountant",
+  "Nurse",
+  "Alumni",
+  "Manager",
+  "Warden",
+  "Auditor",
+  "Vendors",
+  "Coaches",
+  "Receptionist",
+  "Admin",
+  "Vice Principal",
+  "Principal",
+  "Vice Chancellor",
+  "Chancellor",
+  "Parent",
 ];
 
 type FormState = {

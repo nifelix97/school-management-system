@@ -91,7 +91,7 @@ const NavBar = () => {
               Home
             </Link>
             <Link
-              to="/login"
+              to="/admissions"
               className="no-underline text-primary-50 font-medium hover:text-primary-100 flex align-items-center gap-1"
             >
               <span>
