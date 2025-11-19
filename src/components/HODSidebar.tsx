@@ -81,22 +81,22 @@ const links = [
     icon: <IoEyeOutline className="w-5 h-5" />,
   },
   {
-    to: "/hod/announcements",
+    to: "/hod/announcement",
     label: "Send Announcements",
     icon: <IoChatbubbleEllipsesOutline className="w-5 h-5" />,
   },
   {
-    to: "/hod/department-resources",
+    to: "/hod/manage-resources",
     label: "Manage Resources",
     icon: <IoFolderOutline className="w-5 h-5" />,
   },
   {
-    to: "/hod/reports",
+    to: "/hod/generate-report",
     label: "Generate Reports",
     icon: <IoDocumentTextOutline className="w-5 h-5" />,
   },
   {
-    to: "/hod/complaints",
+    to: "/hod/handle-complaints",
     label: "Handle Complaints",
     icon: <IoAlertCircleOutline className="w-5 h-5" />,
   },

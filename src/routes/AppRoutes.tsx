@@ -45,6 +45,12 @@ import TimeTableExams from "../pages/HOD/TimeTableExams";
 import ExamsQuestions from "../pages/HOD/ExamsQuestions";
 import MonitorExams from "../pages/HOD/MonitorExams";
 import AdmissionPage from "../pages/AdmissionPage";
+import Announcement from "../pages/HOD/Announcement";
+import ManageResources from "../pages/HOD/ManageResources";
+import GenerateReport from "../pages/HOD/GenerateReport";
+import HandleComplaints from "../pages/HOD/HandleComplaints";
+
+
 
 
 
@@ -121,6 +127,10 @@ export default function AppRoutes() {
         <Route path="/hod/time-table-exams" element={<TimeTableExams />} />
         <Route path="/hod/exams-questions" element={<ExamsQuestions />} />
         <Route path="/hod/monitor-exams" element={<MonitorExams />} />
+        <Route path="/hod/announcement" element={<Announcement />} />
+        <Route path="/hod/manage-resources" element={<ManageResources />} />
+        <Route path="/hod/generate-report" element={<GenerateReport />} />
+        <Route path="/hod/handle-complaints" element={<HandleComplaints />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
