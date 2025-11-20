@@ -49,6 +49,24 @@ import Announcement from "../pages/HOD/Announcement";
 import ManageResources from "../pages/HOD/ManageResources";
 import GenerateReport from "../pages/HOD/GenerateReport";
 import HandleComplaints from "../pages/HOD/HandleComplaints";
+import RegistrarLayout from "../components/RegistrarLayout";
+import RegistrarDashboard from "../pages/Registrar/RegistrarDashBoard";
+import RegistrarProfilePage from "../pages/Registrar/RegistrarProfilePage";
+import PendingRegistration from "../pages/Registrar/PendingRegistration";
+import IDManagement from "../pages/Registrar/IDManagement";
+import PromotionPage from "../pages/Registrar/PromotionPage";
+import AdmissionLetters from "../pages/Registrar/AdmissionLetters";
+import StudentRecords from "../pages/Registrar/StudentRecords";
+import AccountantLayout from "../components/AccountantLayout";
+import AccountantDashBoard from "../pages/Accountant/AccountantDashBoard";
+import FinancialClearance from "../pages/Accountant/FinancialClearance";
+import Invoices from "../pages/Accountant/Invoices";
+import StudentPayments from "../pages/Accountant/StudentPayments";
+
+
+
+
+
 
 
 
@@ -132,6 +150,36 @@ export default function AppRoutes() {
         <Route path="/hod/generate-report" element={<GenerateReport />} />
         <Route path="/hod/handle-complaints" element={<HandleComplaints />} />
       </Route>
+      <Route element={<RegistrarLayout />}>
+        <Route path="/registrar/dashboard" element={<RegistrarDashboard />} />
+        <Route path="/registrar/profile" element={<RegistrarProfilePage />} />
+        <Route
+          path="/registrar/pending-registrations"
+          element={<PendingRegistration />}
+        />
+        <Route
+          path="/registrar/manage-student-ids"
+          element={<IDManagement />}
+        />
+        <Route
+          path="/registrar/student-promotions"
+          element={<PromotionPage />}
+        />
+        <Route
+          path="/registrar/admission-letters"
+          element={<AdmissionLetters />}
+        />
+        <Route path="/registrar/student-records" element={<StudentRecords />} />
+      </Route>
+      <Route element={<AccountantLayout />}>
+        <Route path="/accountant/dashboard" element={<AccountantDashBoard />} />
+        <Route path="/accountant/student-payments" element={<StudentPayments />} />
+        <Route path="/accountant/invoices" element={<Invoices />} />
+        <Route
+          path="/accountant/financial-clearance"
+          element={<FinancialClearance />}
+        />
+        </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
     </Routes>

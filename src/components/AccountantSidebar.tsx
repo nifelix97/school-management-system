@@ -2,22 +2,17 @@ import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   IoPersonCircleOutline,
-  // IoCalendarOutline,
-//   IoTimeOutline,
-//   IoPeopleOutline,
-//   IoBookOutline,
-//   IoAlertCircleOutline,
-//   IoChatbubbleEllipsesOutline,
-  IoClipboardOutline,
-  IoCheckmarkDoneOutline,
-  IoStatsChartOutline,
+  IoWalletOutline,
   IoDocumentTextOutline,
+  IoCheckmarkCircleOutline,
+  IoCardOutline,
+  IoCashOutline,
+  IoReceiptOutline,
+  IoStatsChartOutline,
+  IoArrowUndoOutline,
+  IoCloudUploadOutline,
   IoMenuOutline,
   IoChevronBackOutline,
-  // IoSchoolOutline,
-  // IoSettingsOutline,
-//   IoEyeOutline,
-  IoFolderOutline,
 } from "react-icons/io5";
 
 type SidebarProps = {
@@ -26,43 +21,58 @@ type SidebarProps = {
 
 const links = [
   {
-    to: "/registrar/dashboard",
+    to: "/accountant/dashboard",
     label: "Dashboard",
     icon: <IoStatsChartOutline className="w-5 h-5" />,
   },
   {
-    to: "/registrar/profile",
+    to: "/accountant/profile",
     label: "Profile",
     icon: <IoPersonCircleOutline className="w-5 h-5" />,
   },
   {
-    to: "/registrar/pending-registrations",
-    label: "Pending Registrations",
-    icon: <IoClipboardOutline className="w-5 h-5" />,
+    to: "/accountant/student-payments",
+    label: "Student Payments",
+    icon: <IoWalletOutline className="w-5 h-5" />,
   },
   {
-    to: "/registrar/manage-student-ids",
-    label: "Manage Student IDs",
-    icon: <IoPersonCircleOutline className="w-5 h-5" />,
-  },
-  {
-    to: "/registrar/student-promotions",
-    label: "Student Promotions",
-    icon: <IoCheckmarkDoneOutline className="w-5 h-5" />,
-  },
-  {
-    to: "/registrar/admission-letters",
-    label: "Admission Letters",
+    to: "/accountant/invoices",
+    label: "Invoices Management",
     icon: <IoDocumentTextOutline className="w-5 h-5" />,
   },
   {
-    to: "/registrar/student-records",
-    label: "Student Records",
-    icon: <IoFolderOutline className="w-5 h-5" />,
+    to: "/accountant/financial-clearance",
+    label: "Financial Clearance",
+    icon: <IoCheckmarkCircleOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/accountant/student-balances",
+    label: "Student Balances",
+    icon: <IoCardOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/accountant/income-records",
+    label: "Income Records",
+    icon: <IoCashOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/accountant/refunds",
+    label: "Refunds",
+    icon: <IoArrowUndoOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/accountant/financial-reports",
+    label: "Financial Reports",
+    icon: <IoReceiptOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/accountant/payment-proofs",
+    label: "Payment Proofs",
+    icon: <IoCloudUploadOutline className="w-5 h-5" />,
   },
 ];
 
-const RegistrarSidebar = ({ className = "" }: SidebarProps) => {
+const AccountantSidebar = ({ className = "" }: SidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
@@ -108,7 +118,7 @@ const RegistrarSidebar = ({ className = "" }: SidebarProps) => {
             >
               <IoMenuOutline />
             </button>
-            <div className="font-heading text-white text-xl">Registrar</div>
+            <div className="font-heading text-white text-xl">Accountant</div>
             <span className="w-6" />
           </div>
         </div>
@@ -133,12 +143,12 @@ const RegistrarSidebar = ({ className = "" }: SidebarProps) => {
           !isDesktop ? "transition-transform duration-300" : "",
           className,
         ].join(" ")}
-        aria-label="Registrar sidebar"
+        aria-label="Accountant sidebar"
       >
         {/* Header + collapse/close */}
         <div className="flex items-center justify-between px-3 py-4 border-b border-gray-100">
           <span className={`font-heading text-white text-lg ${collapsed ? "opacity-0 w-0" : ""}`}>
-            Registrar Panel
+            Accountant Panel
           </span>
 
           {isDesktop ? (
@@ -204,4 +214,4 @@ const RegistrarSidebar = ({ className = "" }: SidebarProps) => {
   );
 };
 
-export default RegistrarSidebar;
+export default AccountantSidebar;

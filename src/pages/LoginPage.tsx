@@ -10,8 +10,8 @@ const roles = [
   "Teacher",
   "HOD",
   "Registrar",
-  "Librarian",
   "Accountant",
+  "Librarian",
   "Nurse",
   "Alumni",
   "Manager",
@@ -112,6 +112,12 @@ const LoginPage = () => {
             break;
             case "HOD":
             navigate("/hod/dashboard");
+            break;
+          case "Registrar":
+            navigate("/registrar/dashboard");
+            break;
+          case "Accountant":
+            navigate("/accountant/dashboard");
             break;
           case "Parent":
             navigate("/parent/dashboard");
