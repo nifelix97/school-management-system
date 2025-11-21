@@ -5,7 +5,7 @@ import {
   IoWalletOutline,
   IoDocumentTextOutline,
   IoCheckmarkCircleOutline,
-  IoCardOutline,
+  // IoCardOutline,
   IoCashOutline,
   IoReceiptOutline,
   IoStatsChartOutline,
