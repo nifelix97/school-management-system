@@ -62,6 +62,9 @@ import AccountantDashBoard from "../pages/Accountant/AccountantDashBoard";
 import FinancialClearance from "../pages/Accountant/FinancialClearance";
 import Invoices from "../pages/Accountant/Invoices";
 import StudentPayments from "../pages/Accountant/StudentPayments";
+import AccountantProfilePage from "../pages/Accountant/AccountantProfilePage";
+import IncomeRecords from "../pages/Accountant/IncomeRecords";
+
 
 
 
@@ -179,6 +182,8 @@ export default function AppRoutes() {
           path="/accountant/financial-clearance"
           element={<FinancialClearance />}
         />
+        <Route path="/accountant/profile" element={<AccountantProfilePage />} />
+        <Route path="/accountant/income-records" element={<IncomeRecords />} />
         </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />

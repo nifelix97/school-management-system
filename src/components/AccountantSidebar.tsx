@@ -45,11 +45,11 @@ const links = [
     label: "Financial Clearance",
     icon: <IoCheckmarkCircleOutline className="w-5 h-5" />,
   },
-  {
-    to: "/accountant/student-balances",
-    label: "Student Balances",
-    icon: <IoCardOutline className="w-5 h-5" />,
-  },
+  // {
+  //   to: "/accountant/student-balances",
+  //   label: "Student Balances",
+  //   icon: <IoCardOutline className="w-5 h-5" />,
+  // },
   {
     to: "/accountant/income-records",
     label: "Income Records",
