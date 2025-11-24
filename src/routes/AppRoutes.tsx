@@ -64,18 +64,15 @@ import Invoices from "../pages/Accountant/Invoices";
 import StudentPayments from "../pages/Accountant/StudentPayments";
 import AccountantProfilePage from "../pages/Accountant/AccountantProfilePage";
 import IncomeRecords from "../pages/Accountant/IncomeRecords";
-
-
-
-
-
-
-
-
-
-
-
-
+import RefundPage from "../pages/Accountant/RefundPage";
+import FinancialReport from "../pages/Accountant/FinancialReport";
+import AdminLayout from "../components/AdminLayout";
+import AdminDashboard from "../pages/Admin/AdminDashBoard";
+import AdminProfile from "../pages/Admin/AdminProfile";
+import StudentManagement from "../pages/Admin/StudentManagement";
+import TeacherManagement from "../pages/Admin/TeacherManagement";
+import CoursesManagement from "../pages/Admin/CourseManagement";
+import DepartmentsManagement from "../pages/Admin/DepartmentsManagement";
 
 
 
@@ -184,6 +181,16 @@ export default function AppRoutes() {
         />
         <Route path="/accountant/profile" element={<AccountantProfilePage />} />
         <Route path="/accountant/income-records" element={<IncomeRecords />} />
+        <Route path="/accountant/refunds" element={<RefundPage />} />
+        <Route path="/accountant/financial-reports" element={<FinancialReport />} />
+        </Route>
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route path="/admin/students" element={<StudentManagement />} />
+          <Route path="/admin/teachers" element={<TeacherManagement />} />
+          <Route path="/admin/courses" element={<CoursesManagement />} />
+          <Route path="/admin/departments" element={<DepartmentsManagement />} />
         </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />

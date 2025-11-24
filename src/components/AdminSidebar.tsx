@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
 import {
-  IoPersonCircleOutline,
-  IoWalletOutline,
-  IoDocumentTextOutline,
-  IoCheckmarkCircleOutline,
-  // IoCardOutline,
-  IoCashOutline,
-  IoReceiptOutline,
-  IoStatsChartOutline,
-  IoArrowUndoOutline,
-  // IoCloudUploadOutline,
-  IoMenuOutline,
-  IoChevronBackOutline,
+    IoCalendarOutline,
+    IoChevronBackOutline,
+    IoDocumentTextOutline,
+    IoLayersOutline,
+    IoMenuOutline,
+    IoNotificationsOutline,
+    IoPeopleOutline,
+    IoPersonCircleOutline,
+    IoSchoolOutline,
+    IoSettingsOutline,
+    IoShieldCheckmarkOutline,
+    IoStatsChartOutline,
 } from "react-icons/io5";
+import { NavLink } from "react-router-dom";
 
 type SidebarProps = {
   className?: string;
@@ -21,58 +21,58 @@ type SidebarProps = {
 
 const links = [
   {
-    to: "/accountant/dashboard",
+    to: "/admin/dashboard",
     label: "Dashboard",
     icon: <IoStatsChartOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/profile",
+    to: "/admin/profile",
     label: "Profile",
     icon: <IoPersonCircleOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/student-payments",
-    label: "Student Payments",
-    icon: <IoWalletOutline className="w-5 h-5" />,
+    to: "/admin/students",
+    label: "Student Management",
+    icon: <IoSchoolOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/invoices",
-    label: "Invoices Management",
+    to: "/admin/teachers",
+    label: "Teacher Management",
+    icon: <IoPeopleOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/admin/courses",
+    label: "Course Management",
+    icon: <IoLayersOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/admin/departments",
+    label: "D-Management",
+    icon: <IoCalendarOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/admin/reports",
+    label: "Reports & Analytics",
     icon: <IoDocumentTextOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/financial-clearance",
-    label: "Financial Clearance",
-    icon: <IoCheckmarkCircleOutline className="w-5 h-5" />,
-  },
-  // {
-  //   to: "/accountant/student-balances",
-  //   label: "Student Balances",
-  //   icon: <IoCardOutline className="w-5 h-5" />,
-  // },
-  {
-    to: "/accountant/income-records",
-    label: "Income Records",
-    icon: <IoCashOutline className="w-5 h-5" />,
+    to: "/admin/notifications",
+    label: "Notifications",
+    icon: <IoNotificationsOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/refunds",
-    label: "Refunds",
-    icon: <IoArrowUndoOutline className="w-5 h-5" />,
+    to: "/admin/user-roles",
+    label: "Roles & Permissions",
+    icon: <IoShieldCheckmarkOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/financial-reports",
-    label: "Financial Reports",
-    icon: <IoReceiptOutline className="w-5 h-5" />,
+    to: "/admin/settings",
+    label: "System Settings",
+    icon: <IoSettingsOutline className="w-5 h-5" />,
   },
-  // {
-  //   to: "/accountant/payment-proofs",
-  //   label: "Payment Proofs",
-  //   icon: <IoCloudUploadOutline className="w-5 h-5" />,
-  // },
 ];
 
-const AccountantSidebar = ({ className = "" }: SidebarProps) => {
+const AdminSidebar = ({ className = "" }: SidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
@@ -118,7 +118,7 @@ const AccountantSidebar = ({ className = "" }: SidebarProps) => {
             >
               <IoMenuOutline />
             </button>
-            <div className="font-heading text-white text-xl">Accountant</div>
+            <div className="font-heading text-white text-xl">Admin</div>
             <span className="w-6" />
           </div>
         </div>
@@ -143,12 +143,12 @@ const AccountantSidebar = ({ className = "" }: SidebarProps) => {
           !isDesktop ? "transition-transform duration-300" : "",
           className,
         ].join(" ")}
-        aria-label="Accountant sidebar"
+        aria-label="Admin sidebar"
       >
         {/* Header + collapse/close */}
         <div className="flex items-center justify-between px-3 py-4 border-b border-gray-100">
           <span className={`font-heading text-white text-lg ${collapsed ? "opacity-0 w-0" : ""}`}>
-            Accountant Panel
+            Admin Panel
           </span>
 
           {isDesktop ? (
@@ -214,4 +214,4 @@ const AccountantSidebar = ({ className = "" }: SidebarProps) => {
   );
 };
 
-export default AccountantSidebar;
+export default AdminSidebar;
