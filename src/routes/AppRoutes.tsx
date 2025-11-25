@@ -73,6 +73,11 @@ import StudentManagement from "../pages/Admin/StudentManagement";
 import TeacherManagement from "../pages/Admin/TeacherManagement";
 import CoursesManagement from "../pages/Admin/CourseManagement";
 import DepartmentsManagement from "../pages/Admin/DepartmentsManagement";
+import ReportsAnalytics from "../pages/Admin/ReportsAnalytics";
+import AdminNotifications from "../pages/Admin/AdminNotifications";
+import RolesPermission from "../pages/Admin/Roles-Permission";
+import SystemSetting from "../pages/Admin/SystemSetting";
+
 
 
 
@@ -173,7 +178,10 @@ export default function AppRoutes() {
       </Route>
       <Route element={<AccountantLayout />}>
         <Route path="/accountant/dashboard" element={<AccountantDashBoard />} />
-        <Route path="/accountant/student-payments" element={<StudentPayments />} />
+        <Route
+          path="/accountant/student-payments"
+          element={<StudentPayments />}
+        />
         <Route path="/accountant/invoices" element={<Invoices />} />
         <Route
           path="/accountant/financial-clearance"
@@ -182,16 +190,23 @@ export default function AppRoutes() {
         <Route path="/accountant/profile" element={<AccountantProfilePage />} />
         <Route path="/accountant/income-records" element={<IncomeRecords />} />
         <Route path="/accountant/refunds" element={<RefundPage />} />
-        <Route path="/accountant/financial-reports" element={<FinancialReport />} />
-        </Route>
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/profile" element={<AdminProfile />} />
-          <Route path="/admin/students" element={<StudentManagement />} />
-          <Route path="/admin/teachers" element={<TeacherManagement />} />
-          <Route path="/admin/courses" element={<CoursesManagement />} />
-          <Route path="/admin/departments" element={<DepartmentsManagement />} />
-        </Route>
+        <Route
+          path="/accountant/financial-reports"
+          element={<FinancialReport />}
+        />
+      </Route>
+      <Route element={<AdminLayout />}>
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
+        <Route path="/admin/students" element={<StudentManagement />} />
+        <Route path="/admin/teachers" element={<TeacherManagement />} />
+        <Route path="/admin/courses" element={<CoursesManagement />} />
+        <Route path="/admin/departments" element={<DepartmentsManagement />} />
+        <Route path="/admin/reports" element={<ReportsAnalytics />} />
+        <Route path="/admin/notifications" element={<AdminNotifications />} />
+        <Route path="/admin/user-roles" element={<RolesPermission />} />
+        <Route path="/admin/settings" element={<SystemSetting />} />
+      </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
     </Routes>
