@@ -8,10 +8,10 @@ import {
     IoLayersOutline,
     IoPeopleOutline,
     IoRocketOutline,
+    IoSchoolOutline,
     IoStatsChartOutline,
     IoTimeOutline,
-    IoTrendingUpOutline,
-    IoSchoolOutline
+    IoTrendingUpOutline
 } from "react-icons/io5";
 
 interface StrategicGoal {
@@ -379,7 +379,7 @@ const StrategicPlanning: React.FC = () => {
             <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200" />
             
             <div className="space-y-8">
-              {strategicGoals.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()).map((goal, index) => (
+              {strategicGoals.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()).map((goal) => (
                 <div key={goal.id} className="relative pl-20">
                   {/* Timeline dot */}
                   <div className={`absolute left-6 top-2 w-5 h-5 rounded-full border-4 border-white shadow-md ${
