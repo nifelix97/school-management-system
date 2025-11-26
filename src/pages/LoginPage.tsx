@@ -6,12 +6,13 @@ import Input from "../components/ui/Input";
 import { toast } from "react-toastify";
 
 const roles = [
+  "Admin",
+  "Principal",
   "Student",
   "Teacher",
   "HOD",
   "Registrar",
   "Accountant",
-  "Admin",
   "Librarian",
   "Nurse",
   "Alumni",
@@ -22,7 +23,6 @@ const roles = [
   "Coaches",
   "Receptionist",
   "Vice Principal",
-  "Principal",
   "Vice Chancellor",
   "Chancellor",
   "Parent",
@@ -124,6 +124,8 @@ const LoginPage = () => {
             break;
           case "Admin":
           case "Principal":
+            navigate("/principal/dashboard");
+            break;
           case "Vice Principal":
             navigate("/admin/dashboard");
             break;
@@ -251,6 +253,15 @@ const LoginPage = () => {
                 >
                   {submitting ? "Logging in..." : "Login"}
                 </button>
+                <p className="text-center text-gray-500">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/register"
+                    className="text-primary-50 hover:text-primary-100 no-underline"
+                  >
+                    Register
+                  </Link>
+                </p>
               </form>
             </div>
           </div>

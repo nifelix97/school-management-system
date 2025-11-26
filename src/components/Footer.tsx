@@ -9,15 +9,15 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           <div>
             <div className="flex items-center mb-4">
-              <h3 className="font-heading m-0 text-primary-100 font-extrabold text-2xl">SANVERSE</h3>
+              <h3 className="font-heading m-0 text-primary-100 font-extrabold text-2xl">
+                SANVERSE
+              </h3>
             </div>
             <p className="leading-relaxed opacity-90 text-white">
               Transforming education through <br />
-              innovation and excellence.
-              We prepare <br />
+              innovation and excellence. We prepare <br />
               students for a brighter future with <br />
-               quality learning
-              experiences.
+              quality learning experiences.
             </p>
             <div className="flex gap-4 mt-4">
               <a
@@ -48,7 +48,9 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-heading mb-4 text-primary-100 font-extrabold text-xl">Quick Links</h4>
+            <h4 className="font-heading mb-4 text-primary-100 font-extrabold text-xl">
+              Quick Links
+            </h4>
             <div className="flex flex-col gap-2">
               <Link
                 to="/"
@@ -78,12 +80,22 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-heading mb-4 text-primary-100 font-extrabold text-xl">Contact Info</h4>
+            <h4 className="font-heading mb-4 text-primary-100 font-extrabold text-xl">
+              Contact Info
+            </h4>
             <div className="flex flex-col gap-2 text-white">
-              <span className="opacity-90">KG 3 Street, Abuja, Nigeria</span>
-              <span className="opacity-90">+234 803 123 4567</span>
-              <span className="opacity-90">info@sanverse.com</span>
-              <span className="opacity-90">Mon-Sun: 9AM - 10PM</span>
+              <span className="opacity-90">
+                Plot 48, KN 1 Road, <br /> Sofaru Building
+                <br />
+                Kigali, Rwanda
+              </span>
+              <span className="opacity-90">
+                +250780309833
+                <br />
+                +22371005873
+              </span>
+              <span className="opacity-90">info@santechinnovate.com</span>
+              <span className="opacity-90">Mon-Sun: 8AM - 10PM</span>
             </div>
           </div>
         </div>

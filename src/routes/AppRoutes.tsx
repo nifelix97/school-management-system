@@ -1,94 +1,100 @@
-import { Routes, Route } from "react-router-dom";
-import Layout from "../components/Layout";
-import LandingPage from "../pages/LandingPage";
-import LoginPage from "../pages/LoginPage";
-import StudentLayout from "../components/StudentLayout";
-import StudentDashBoard from "../pages/StudentDashBoard";
-import Dashboard from "../pages/student/Dashboard";
-import CoursesPage from "../pages/student/CoursesPage";
-import CalendarPage from "../pages/student/Calendar";
-import ClassRoutine from "../pages/student/ClassRoutine";
-import TeacherPage from "../pages/student/TeacherPage";
-import NotificationsPage from "../pages/student/NotificationsPage";
-import GradingPage from "../pages/student/GradingPage";
-import LibraryPage from "../pages/student/LibraryPage";
-import MessagePage from "../pages/student/MessagePage";
-import ExamRoutine from "../pages/student/ExamRoutine";
-import AttendancePage from "../pages/student/AttendancePage";
-import LeaveRequestsPage from "../pages/student/LeaveRequestsPage";
-import TeacherLayout from "../components/TeacherLayout";
-import TeacherDashboard from "../pages/Teacher/TeacherDashboard";
-import TeacherProfilePage from "../pages/Teacher/TeacherProfilePage";
-import AcademicCalendar from "../pages/Teacher/AcademicCalendar";
-import ManageAttendance from "../pages/Teacher/ManageAttendance";
-import StudentInfo from "../pages/Teacher/StudentInfo";
-import TeacherRoutine from "../pages/Teacher/TeacherRoutine";
-import SetCourse from "../pages/Teacher/SetCourse";
-import TeacherNotification from "../pages/Teacher/TeacherNotification";
-import Grading from "../pages/Teacher/Grading";
-import CreateAssignment from "../pages/Teacher/CreateAssignment";
-import MarkSheet from "../pages/Teacher/MarkSheet";
-import ExamAttendance from "../pages/Teacher/ExamAttendance";
-import TeacherMessage from "../pages/Teacher/TeacherMessage";
-import StudentMarks from "../pages/student/StudentMarks";
-import HODLayout from "../components/HODLayout";
-import HODDashboard from "../pages/HOD/HoDDashBoard";
-import NotFound from "../pages/NotFound";
-import HODProfilePage from "../pages/HOD/HODProfilePage";
-import DepartmentCourses from "../pages/HOD/DepartmentCourses";
-import CourseManagement from "../pages/HOD/CourseManagement";
-import AssignTeacher from "../pages/HOD/AssignTeacher";
-import TeachersActivity from "../pages/HOD/TeachersActivity";
-import StudentsPerformance from "../pages/HOD/StudentsPerformance";
-import TeachersAccount from "../pages/HOD/TeachersAccount";
-import TimeTableExams from "../pages/HOD/TimeTableExams";
-import ExamsQuestions from "../pages/HOD/ExamsQuestions";
-import MonitorExams from "../pages/HOD/MonitorExams";
-import AdmissionPage from "../pages/AdmissionPage";
-import Announcement from "../pages/HOD/Announcement";
-import ManageResources from "../pages/HOD/ManageResources";
-import GenerateReport from "../pages/HOD/GenerateReport";
-import HandleComplaints from "../pages/HOD/HandleComplaints";
-import RegistrarLayout from "../components/RegistrarLayout";
-import RegistrarDashboard from "../pages/Registrar/RegistrarDashBoard";
-import RegistrarProfilePage from "../pages/Registrar/RegistrarProfilePage";
-import PendingRegistration from "../pages/Registrar/PendingRegistration";
-import IDManagement from "../pages/Registrar/IDManagement";
-import PromotionPage from "../pages/Registrar/PromotionPage";
-import AdmissionLetters from "../pages/Registrar/AdmissionLetters";
-import StudentRecords from "../pages/Registrar/StudentRecords";
+import { Route, Routes } from "react-router-dom";
 import AccountantLayout from "../components/AccountantLayout";
-import AccountantDashBoard from "../pages/Accountant/AccountantDashBoard";
-import FinancialClearance from "../pages/Accountant/FinancialClearance";
-import Invoices from "../pages/Accountant/Invoices";
-import StudentPayments from "../pages/Accountant/StudentPayments";
-import AccountantProfilePage from "../pages/Accountant/AccountantProfilePage";
-import IncomeRecords from "../pages/Accountant/IncomeRecords";
-import RefundPage from "../pages/Accountant/RefundPage";
-import FinancialReport from "../pages/Accountant/FinancialReport";
 import AdminLayout from "../components/AdminLayout";
+import HODLayout from "../components/HODLayout";
+import Layout from "../components/Layout";
+import PrincipalLayout from "../components/PrincipalLayout";
+import RegistrarLayout from "../components/RegistrarLayout";
+import StudentLayout from "../components/StudentLayout";
+import TeacherLayout from "../components/TeacherLayout";
+import AccountantDashBoard from "../pages/Accountant/AccountantDashBoard";
+import AccountantProfilePage from "../pages/Accountant/AccountantProfilePage";
+import FinancialClearance from "../pages/Accountant/FinancialClearance";
+import FinancialReport from "../pages/Accountant/FinancialReport";
+import IncomeRecords from "../pages/Accountant/IncomeRecords";
+import Invoices from "../pages/Accountant/Invoices";
+import RefundPage from "../pages/Accountant/RefundPage";
+import StudentPayments from "../pages/Accountant/StudentPayments";
 import AdminDashboard from "../pages/Admin/AdminDashBoard";
+import AdminNotifications from "../pages/Admin/AdminNotifications";
 import AdminProfile from "../pages/Admin/AdminProfile";
-import StudentManagement from "../pages/Admin/StudentManagement";
-import TeacherManagement from "../pages/Admin/TeacherManagement";
 import CoursesManagement from "../pages/Admin/CourseManagement";
 import DepartmentsManagement from "../pages/Admin/DepartmentsManagement";
 import ReportsAnalytics from "../pages/Admin/ReportsAnalytics";
-import AdminNotifications from "../pages/Admin/AdminNotifications";
 import RolesPermission from "../pages/Admin/Roles-Permission";
+import StudentManagement from "../pages/Admin/StudentManagement";
 import SystemSetting from "../pages/Admin/SystemSetting";
-
-
-
-
-
-
+import TeacherManagement from "../pages/Admin/TeacherManagement";
+import AdmissionPage from "../pages/AdmissionPage";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import Announcement from "../pages/HOD/Announcement";
+import AssignTeacher from "../pages/HOD/AssignTeacher";
+import CourseManagement from "../pages/HOD/CourseManagement";
+import DepartmentCourses from "../pages/HOD/DepartmentCourses";
+import ExamsQuestions from "../pages/HOD/ExamsQuestions";
+import GenerateReport from "../pages/HOD/GenerateReport";
+import HODProfilePage from "../pages/HOD/HODProfilePage";
+import HandleComplaints from "../pages/HOD/HandleComplaints";
+import HODDashboard from "../pages/HOD/HoDDashBoard";
+import ManageResources from "../pages/HOD/ManageResources";
+import MonitorExams from "../pages/HOD/MonitorExams";
+import StudentsPerformance from "../pages/HOD/StudentsPerformance";
+import TeachersAccount from "../pages/HOD/TeachersAccount";
+import TeachersActivity from "../pages/HOD/TeachersActivity";
+import TimeTableExams from "../pages/HOD/TimeTableExams";
+import LandingPage from "../pages/LandingPage";
+import LoginPage from "../pages/LoginPage";
+import NotFound from "../pages/NotFound";
+import PrincipalDashboard from "../pages/Principal/PrincipalDashBoard";
+import PrincipalProfile from "../pages/Principal/PrincipalProfile";
+import RegisterPage from "../pages/RegisterPage";
+import AdmissionLetters from "../pages/Registrar/AdmissionLetters";
+import IDManagement from "../pages/Registrar/IDManagement";
+import PendingRegistration from "../pages/Registrar/PendingRegistration";
+import PromotionPage from "../pages/Registrar/PromotionPage";
+import RegistrarDashboard from "../pages/Registrar/RegistrarDashBoard";
+import RegistrarProfilePage from "../pages/Registrar/RegistrarProfilePage";
+import StudentRecords from "../pages/Registrar/StudentRecords";
+import ResetPasswordPage from "../pages/ResetPasswordPage";
+import StudentDashBoard from "../pages/StudentDashBoard";
+import AcademicCalendar from "../pages/Teacher/AcademicCalendar";
+import CreateAssignment from "../pages/Teacher/CreateAssignment";
+import ExamAttendance from "../pages/Teacher/ExamAttendance";
+import Grading from "../pages/Teacher/Grading";
+import ManageAttendance from "../pages/Teacher/ManageAttendance";
+import MarkSheet from "../pages/Teacher/MarkSheet";
+import SetCourse from "../pages/Teacher/SetCourse";
+import StudentInfo from "../pages/Teacher/StudentInfo";
+import TeacherDashboard from "../pages/Teacher/TeacherDashboard";
+import TeacherMessage from "../pages/Teacher/TeacherMessage";
+import TeacherNotification from "../pages/Teacher/TeacherNotification";
+import TeacherProfilePage from "../pages/Teacher/TeacherProfilePage";
+import TeacherRoutine from "../pages/Teacher/TeacherRoutine";
+import VerifyOTPPage from "../pages/VerifyOTPPage";
+import AttendancePage from "../pages/student/AttendancePage";
+import CalendarPage from "../pages/student/Calendar";
+import ClassRoutine from "../pages/student/ClassRoutine";
+import CoursesPage from "../pages/student/CoursesPage";
+import Dashboard from "../pages/student/Dashboard";
+import ExamRoutine from "../pages/student/ExamRoutine";
+import GradingPage from "../pages/student/GradingPage";
+import LeaveRequestsPage from "../pages/student/LeaveRequestsPage";
+import LibraryPage from "../pages/student/LibraryPage";
+import MessagePage from "../pages/student/MessagePage";
+import NotificationsPage from "../pages/student/NotificationsPage";
+import StudentMarks from "../pages/student/StudentMarks";
+import TeacherPage from "../pages/student/TeacherPage";
+import StrategicPlanning from "../pages/Principal/StrategicPlanning";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* Routes WITHOUT layout */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/verify-otp" element={<VerifyOTPPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       {/* Routes WITH layout */}
       <Route element={<Layout />}>
@@ -206,6 +212,11 @@ export default function AppRoutes() {
         <Route path="/admin/notifications" element={<AdminNotifications />} />
         <Route path="/admin/user-roles" element={<RolesPermission />} />
         <Route path="/admin/settings" element={<SystemSetting />} />
+      </Route>
+      <Route element={<PrincipalLayout />}>
+        <Route path="/principal/dashboard" element={<PrincipalDashboard />} />
+        <Route path="/principal/profile" element={<PrincipalProfile />} />
+        <Route path="/principal/strategic-planning" element={<StrategicPlanning />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
