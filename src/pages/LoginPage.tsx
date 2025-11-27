@@ -124,7 +124,7 @@ const LoginPage = () => {
             break;
           case "Admin":
           case "Principal":
-            navigate("/principal/dashboard");
+            navigate("/admin/dashboard");
             break;
           case "Vice Principal":
             navigate("/admin/dashboard");
