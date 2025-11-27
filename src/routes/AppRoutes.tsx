@@ -85,6 +85,10 @@ import NotificationsPage from "../pages/student/NotificationsPage";
 import StudentMarks from "../pages/student/StudentMarks";
 import TeacherPage from "../pages/student/TeacherPage";
 import StrategicPlanning from "../pages/Principal/StrategicPlanning";
+import AcademicOversight from "../pages/Principal/AcademiOversight";
+import FacultyManagement from "../pages/Principal/FacultManagement";
+import DepartmentsHeads from "../pages/Principal/DepartmentsHeads";
+import BudgetsFinance from "../pages/Principal/BudgetsFinance";
 
 export default function AppRoutes() {
   return (
@@ -217,6 +221,10 @@ export default function AppRoutes() {
         <Route path="/principal/dashboard" element={<PrincipalDashboard />} />
         <Route path="/principal/profile" element={<PrincipalProfile />} />
         <Route path="/principal/strategic-planning" element={<StrategicPlanning />} />
+        <Route path="/principal/academic-oversight" element={<AcademicOversight />} />
+        <Route path="/principal/faculty-management" element={<FacultyManagement />} />
+        <Route path="/principal/department-heads" element={<DepartmentsHeads />} />
+        <Route path="/principal/budget-finance" element={<BudgetsFinance />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
