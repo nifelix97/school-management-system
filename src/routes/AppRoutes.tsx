@@ -89,6 +89,16 @@ import AcademicOversight from "../pages/Principal/AcademiOversight";
 import FacultyManagement from "../pages/Principal/FacultManagement";
 import DepartmentsHeads from "../pages/Principal/DepartmentsHeads";
 import BudgetsFinance from "../pages/Principal/BudgetsFinance";
+import PoliciesGovernance from "../pages/Principal/Policies&Governonce";
+import EventsCalendar from "../pages/Principal/Events&Calendar";
+import Announcements from "../pages/Principal/Announcements";
+import PerformanceReports from "../pages/Principal/PerformanceReports";
+import ReportAnalytics from "../pages/Principal/Reports&Analytic";
+import PrincipalNotifications from "../pages/Principal/PrincipalNotifications";
+import LibrarianLayout from "../components/LibrarianLayout";
+import LibrarianDashboard from "../pages/Librarian/LibrarianDashboard";
+
+
 
 export default function AppRoutes() {
   return (
@@ -220,11 +230,37 @@ export default function AppRoutes() {
       <Route element={<PrincipalLayout />}>
         <Route path="/principal/dashboard" element={<PrincipalDashboard />} />
         <Route path="/principal/profile" element={<PrincipalProfile />} />
-        <Route path="/principal/strategic-planning" element={<StrategicPlanning />} />
-        <Route path="/principal/academic-oversight" element={<AcademicOversight />} />
-        <Route path="/principal/faculty-management" element={<FacultyManagement />} />
-        <Route path="/principal/department-heads" element={<DepartmentsHeads />} />
+        <Route
+          path="/principal/strategic-planning"
+          element={<StrategicPlanning />}
+        />
+        <Route
+          path="/principal/academic-oversight"
+          element={<AcademicOversight />}
+        />
+        <Route
+          path="/principal/faculty-management"
+          element={<FacultyManagement />}
+        />
+        <Route
+          path="/principal/department-heads"
+          element={<DepartmentsHeads />}
+        />
         <Route path="/principal/budget-finance" element={<BudgetsFinance />} />
+        <Route path="/principal/policies" element={<PoliciesGovernance />} />
+        <Route path="/principal/events" element={<EventsCalendar />} />
+        <Route path="/principal/announcements" element={<Announcements />} />
+        <Route path="/principal/performance" element={<PerformanceReports />} />
+        <Route path="/principal/reports" element={<ReportAnalytics />} />
+        <Route path="/principal/notifications" element={<PrincipalNotifications />} />
+      </Route>
+      <Route element={<LibrarianLayout />}>
+        <Route path="/librarian/dashboard" element={<LibrarianDashboard />} />
+        {/* <Route path="/librarian/profile" element={<LibrarianProfile />} />
+        <Route path="/librarian/books" element={<BooksManagement />} />
+        <Route path="/librarian/issue-returns" element={<IssueReturns />} />
+        <Route path="/librarian/notifications" element={<LibrarianNotifications />} />
+        <Route path="/librarian/settings" element={<LibrarianSettings />} /> */}
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />

@@ -123,11 +123,16 @@ const LoginPage = () => {
             navigate("/parent/dashboard");
             break;
           case "Admin":
-          case "Principal":
             navigate("/admin/dashboard");
             break;
+          case "Principal":
+            navigate("/principal/dashboard");
+            break;
           case "Vice Principal":
-            navigate("/admin/dashboard");
+            navigate("/vice-principal/dashboard");
+            break;
+            case "Librarian":
+            navigate("/librarian/dashboard");
             break;
           default:
             // For other roles, redirect to a general dashboard or role-specific page

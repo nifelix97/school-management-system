@@ -1,21 +1,22 @@
 import { useEffect, useState } from "react";
 import {
-    IoAnalyticsOutline,
-    IoBriefcaseOutline,
+    IoBookOutline,
+    IoBookmarksOutline,
     IoCalendarOutline,
     IoChevronBackOutline,
     IoDocumentTextOutline,
-    IoLayersOutline,
-    IoMegaphoneOutline,
+    IoLibraryOutline,
     IoMenuOutline,
     IoNotificationsOutline,
     IoPeopleOutline,
     IoPersonCircleOutline,
-    IoSchoolOutline,
-    // IoSettingsOutline,
-    IoShieldCheckmarkOutline,
+    IoQrCodeOutline,
+    IoSearchOutline,
     IoStatsChartOutline,
-    IoTrophyOutline,
+    IoSwapHorizontalOutline,
+    IoTimeOutline,
+    IoTrendingUpOutline,
+    IoWarningOutline,
 } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
 
@@ -25,78 +26,83 @@ type SidebarProps = {
 
 const links = [
   {
-    to: "/principal/dashboard",
+    to: "/librarian/dashboard",
     label: "Dashboard",
     icon: <IoStatsChartOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/profile",
+    to: "/librarian/profile",
     label: "Profile",
     icon: <IoPersonCircleOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/strategic-planning",
-    label: "Strategic Planning",
-    icon: <IoAnalyticsOutline className="w-5 h-5" />,
+    to: "/librarian/catalog",
+    label: "Book Catalog",
+    icon: <IoLibraryOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/academic-oversight",
-    label: "Academic Oversight",
-    icon: <IoSchoolOutline className="w-5 h-5" />,
+    to: "/librarian/books",
+    label: "Manage Books",
+    icon: <IoBookOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/faculty-management",
-    label: "Faculty Management",
+    to: "/librarian/circulation",
+    label: "Circulation",
+    icon: <IoSwapHorizontalOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/librarian/borrowers",
+    label: "Borrowers",
     icon: <IoPeopleOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/department-heads",
-    label: "Department Heads",
-    icon: <IoBriefcaseOutline className="w-5 h-5" />,
+    to: "/librarian/reservations",
+    label: "Reservations",
+    icon: <IoBookmarksOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/budget-finance",
-    label: "Budget & Finance",
-    icon: <IoLayersOutline className="w-5 h-5" />,
+    to: "/librarian/overdue",
+    label: "Overdue Items",
+    icon: <IoWarningOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/policies",
-    label: "Policies & Governance",
-    icon: <IoShieldCheckmarkOutline className="w-5 h-5" />,
+    to: "/librarian/search",
+    label: "Advanced Search",
+    icon: <IoSearchOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/events",
-    label: "Events & Calendar",
+    to: "/librarian/acquisitions",
+    label: "Acquisitions",
+    icon: <IoTrendingUpOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/librarian/barcode",
+    label: "Barcode Scanner",
+    icon: <IoQrCodeOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/librarian/history",
+    label: "Transaction History",
+    icon: <IoTimeOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/librarian/events",
+    label: "Library Events",
     icon: <IoCalendarOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/announcements",
-    label: "Announcements",
-    icon: <IoMegaphoneOutline className="w-5 h-5" />,
-  },
-  {
-    to: "/principal/performance",
-    label: "Performance Reports",
-    icon: <IoTrophyOutline className="w-5 h-5" />,
-  },
-  {
-    to: "/principal/reports",
+    to: "/librarian/reports",
     label: "Reports & Analytics",
     icon: <IoDocumentTextOutline className="w-5 h-5" />,
   },
   {
-    to: "/principal/notifications",
+    to: "/librarian/notifications",
     label: "Notifications",
     icon: <IoNotificationsOutline className="w-5 h-5" />,
   },
-  // {
-  //   to: "/principal/settings",
-  //   label: "Settings",
-  //   icon: <IoSettingsOutline className="w-5 h-5" />,
-  // },
 ];
 
-const PrincipalSidebar = ({ className = "" }: SidebarProps) => {
+const LibrarianSidebar = ({ className = "" }: SidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
@@ -142,7 +148,7 @@ const PrincipalSidebar = ({ className = "" }: SidebarProps) => {
             >
               <IoMenuOutline />
             </button>
-            <div className="font-heading text-white text-xl">Principal</div>
+            <div className="font-heading text-white text-xl">Librarian</div>
             <span className="w-6" />
           </div>
         </div>
@@ -167,12 +173,12 @@ const PrincipalSidebar = ({ className = "" }: SidebarProps) => {
           !isDesktop ? "transition-transform duration-300" : "",
           className,
         ].join(" ")}
-        aria-label="Principal sidebar"
+        aria-label="Librarian sidebar"
       >
         {/* Header + collapse/close */}
         <div className="flex items-center justify-between px-3 py-4 border-b border-gray-100">
           <span className={`font-heading text-white text-lg ${collapsed ? "opacity-0 w-0" : ""}`}>
-            Principal Panel
+            Library Panel
           </span>
 
           {isDesktop ? (
@@ -238,4 +244,4 @@ const PrincipalSidebar = ({ className = "" }: SidebarProps) => {
   );
 };
 
-export default PrincipalSidebar;
+export default LibrarianSidebar;
