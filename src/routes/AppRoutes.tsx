@@ -97,6 +97,20 @@ import ReportAnalytics from "../pages/Principal/Reports&Analytic";
 import PrincipalNotifications from "../pages/Principal/PrincipalNotifications";
 import LibrarianLayout from "../components/LibrarianLayout";
 import LibrarianDashboard from "../pages/Librarian/LibrarianDashboard";
+import LibrarianProfile from "../pages/Librarian/LibrarianProfile";
+import BookCatalog from "../pages/Librarian/BookCatalog";
+import ManageBooks from "../pages/Librarian/ManageBooks";
+import Circulation from "../pages/Librarian/Circulation";
+import BorrowersPage from "../pages/Librarian/BorrowersPage";
+import ReservationsPage from "../pages/Librarian/ReservationsPage";
+import OverdueItems from "../pages/Librarian/OverdueItems";
+import AdvancedSearch from "../pages/Librarian/AdvancedSearch";
+import TransactionHistory from "../pages/Librarian/TransactionHistory";
+import LibraryEvents from "../pages/Librarian/LibraryEvents";
+import ReportAnalytic from "../pages/Librarian/ReportAnalytics";
+
+
+
 
 
 
@@ -256,11 +270,17 @@ export default function AppRoutes() {
       </Route>
       <Route element={<LibrarianLayout />}>
         <Route path="/librarian/dashboard" element={<LibrarianDashboard />} />
-        {/* <Route path="/librarian/profile" element={<LibrarianProfile />} />
-        <Route path="/librarian/books" element={<BooksManagement />} />
-        <Route path="/librarian/issue-returns" element={<IssueReturns />} />
-        <Route path="/librarian/notifications" element={<LibrarianNotifications />} />
-        <Route path="/librarian/settings" element={<LibrarianSettings />} /> */}
+        <Route path="/librarian/profile" element={<LibrarianProfile />} />
+        <Route path="/librarian/catalog" element={<BookCatalog />} />
+        <Route path="/librarian/books" element={<ManageBooks />} />
+        <Route path="/librarian/circulation" element={<Circulation />} />
+        <Route path="/librarian/borrowers" element={<BorrowersPage />} />
+        <Route path="/librarian/reservations" element={<ReservationsPage />} />
+        <Route path="/librarian/overdue" element={<OverdueItems />} />
+        <Route path="/librarian/search" element={<AdvancedSearch />} />
+        <Route path="/librarian/history" element={<TransactionHistory />} />
+        <Route path="/librarian/events" element={<LibraryEvents />} />
+        <Route path="/librarian/reports" element={<ReportAnalytic />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />

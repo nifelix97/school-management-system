@@ -19,7 +19,7 @@ type BaseProps = {
 
 type InputProps =
   | (BaseProps & {
-      type?: "text" | "email" | "password" | "number" | "tel" | "url";
+      type?: "text" | "email" | "password" | "number" | "tel" | "url" | "date" | "time";
       textarea?: false;
       showPasswordToggle?: boolean;
       rows?: never;

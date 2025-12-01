@@ -10,12 +10,12 @@ import {
     IoNotificationsOutline,
     IoPeopleOutline,
     IoPersonCircleOutline,
-    IoQrCodeOutline,
+    // IoQrCodeOutline,
     IoSearchOutline,
     IoStatsChartOutline,
     IoSwapHorizontalOutline,
     IoTimeOutline,
-    IoTrendingUpOutline,
+    // IoTrendingUpOutline,
     IoWarningOutline,
 } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
@@ -70,16 +70,16 @@ const links = [
     label: "Advanced Search",
     icon: <IoSearchOutline className="w-5 h-5" />,
   },
-  {
-    to: "/librarian/acquisitions",
-    label: "Acquisitions",
-    icon: <IoTrendingUpOutline className="w-5 h-5" />,
-  },
-  {
-    to: "/librarian/barcode",
-    label: "Barcode Scanner",
-    icon: <IoQrCodeOutline className="w-5 h-5" />,
-  },
+  // {
+  //   to: "/librarian/acquisitions",
+  //   label: "Acquisitions",
+  //   icon: <IoTrendingUpOutline className="w-5 h-5" />,
+  // },
+  // {
+  //   to: "/librarian/barcode",
+  //   label: "Barcode Scanner",
+  //   icon: <IoQrCodeOutline className="w-5 h-5" />,
+  // },
   {
     to: "/librarian/history",
     label: "Transaction History",
