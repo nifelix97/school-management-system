@@ -108,6 +108,27 @@ import AdvancedSearch from "../pages/Librarian/AdvancedSearch";
 import TransactionHistory from "../pages/Librarian/TransactionHistory";
 import LibraryEvents from "../pages/Librarian/LibraryEvents";
 import ReportAnalytic from "../pages/Librarian/ReportAnalytics";
+import LibrarianNotification from "../pages/Librarian/LibrarianNotification";
+import ViceChancellorLayout from "../components/ViceChancellorLayout";
+import ViceChancellorDashboard from "../pages/v-chancellor/ViceChancellorDashboard";
+import ViceChancellorProfile from "../pages/v-chancellor/v-ChancellorProfile";
+import AcademicAffairs from "../pages/v-chancellor/AccademicAffairs";
+import ResearchDevelopment from "../pages/v-chancellor/Research&Development";
+import QualityAssurance from "../pages/v-chancellor/QualityAssurance";
+import InternationalRelation from "../pages/v-chancellor/InternationalRelation";
+import FacultyDevelopment from "../pages/v-chancellor/FacultyDevelopment";
+import Accreditation from "../pages/v-chancellor/Accreditation";
+import PartnershipCollaboration from "../pages/v-chancellor/Partnership&Collaboration";
+import CurriculumReview from "../pages/v-chancellor/CurriculumReview";
+import StrategicInitiative from "../pages/v-chancellor/StrategicInitiative";
+
+
+
+
+
+
+
+
 
 
 
@@ -281,6 +302,20 @@ export default function AppRoutes() {
         <Route path="/librarian/history" element={<TransactionHistory />} />
         <Route path="/librarian/events" element={<LibraryEvents />} />
         <Route path="/librarian/reports" element={<ReportAnalytic />} />
+        <Route path="/librarian/notifications" element={<LibrarianNotification />} />
+      </Route>
+      <Route element={<ViceChancellorLayout />}>
+        <Route path="/vice-chancellor/dashboard" element={<ViceChancellorDashboard />} />
+        <Route path="/vice-chancellor/profile" element={<ViceChancellorProfile />} />
+        <Route path="/vice-chancellor/academic-affairs" element={<AcademicAffairs />} />
+        <Route path="/vice-chancellor/research-development" element={<ResearchDevelopment />} />
+        <Route path="/vice-chancellor/quality-assurance" element={<QualityAssurance />} />
+        <Route path="/vice-chancellor/international-relations" element={<InternationalRelation />} />
+        <Route path="/vice-chancellor/faculty-development" element={<FacultyDevelopment />} />
+        <Route path="/vice-chancellor/accreditation" element={<Accreditation />} />
+        <Route path="/vice-chancellor/partnerships" element={<PartnershipCollaboration />} />
+        <Route path="/vice-chancellor/curriculum-review" element={<CurriculumReview />} />
+        <Route path="/vice-chancellor/strategic-initiatives" element={<StrategicInitiative />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />

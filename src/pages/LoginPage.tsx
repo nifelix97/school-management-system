@@ -14,6 +14,7 @@ const roles = [
   "Registrar",
   "Accountant",
   "Librarian",
+  "Vice Chancellor",
   "Nurse",
   "Alumni",
   "Manager",
@@ -23,7 +24,6 @@ const roles = [
   "Coaches",
   "Receptionist",
   "Vice Principal",
-  "Vice Chancellor",
   "Chancellor",
   "Parent",
 ];
@@ -133,6 +133,9 @@ const LoginPage = () => {
             break;
             case "Librarian":
             navigate("/librarian/dashboard");
+            break;
+            case "Vice Chancellor":
+            navigate("/vice-chancellor/dashboard");
             break;
           default:
             // For other roles, redirect to a general dashboard or role-specific page
