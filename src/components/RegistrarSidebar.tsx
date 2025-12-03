@@ -60,6 +60,11 @@ const links = [
     label: "Student Records",
     icon: <IoFolderOutline className="w-5 h-5" />,
   },
+  {
+    to: "/registrar/certificates",
+    label: "Generate Certificates",
+    icon: <IoDocumentTextOutline className="w-5 h-5" />,
+  },
 ];
 
 const RegistrarSidebar = ({ className = "" }: SidebarProps) => {

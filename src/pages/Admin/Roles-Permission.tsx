@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import {
-    IoAddOutline,
-    IoCreateOutline,
-    IoEllipsisVerticalOutline,
-    IoMailOutline,
-    IoPersonOutline,
-    IoSearchOutline,
-    IoShieldCheckmarkOutline,
-    IoTrashOutline
+  IoAddOutline,
+  IoCreateOutline,
+  IoEllipsisVerticalOutline,
+  IoMailOutline,
+  IoPersonOutline,
+  IoSearchOutline,
+  IoShieldCheckmarkOutline,
+  IoTrashOutline
 } from "react-icons/io5";
 
 interface User {
@@ -167,14 +167,6 @@ const RolesPermission: React.FC = () => {
     ));
   };
 
-  const toggleUserStatus = (userId: string) => {
-    setUsers(users.map(user => 
-      user.id === userId 
-        ? { ...user, status: user.status === "active" ? "inactive" : "active" }
-        : user
-    ));
-  };
-
   const deleteUser = (userId: string) => {
     setUsers(users.filter(user => user.id !== userId));
   };
@@ -280,7 +272,7 @@ const RolesPermission: React.FC = () => {
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-50 text-sm"
+            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-50 text-sm text-primary-50"
           >
             <option value="all">All Roles</option>
             {roles.map((role) => (
@@ -318,13 +310,13 @@ const RolesPermission: React.FC = () => {
                   Current Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-primary-50/60 uppercase tracking-wider">
+                  Current Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-primary-50/60 uppercase tracking-wider">
                   Change Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-primary-50/60 uppercase tracking-wider">
-                  Dashboard Access
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-primary-50/60 uppercase tracking-wider">
-                  Status
+                  Change Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-primary-50/60 uppercase tracking-wider">
                   Actions
@@ -359,6 +351,15 @@ const RolesPermission: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        user.status === "active"
+                          ? "bg-primary-100/10 text-primary-100"
+                          : "bg-gray-200 text-gray-600"
+                      }`}>
+                        {user.status === "active" ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-primary-50">
                       <select
                         value={user.role}
                         onChange={(e) => changeUserRole(user.id, e.target.value)}
@@ -371,22 +372,20 @@ const RolesPermission: React.FC = () => {
                         ))}
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded text-primary-50">
-                        {roleInfo?.dashboardPath}
-                      </code>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => toggleUserStatus(user.id)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          user.status === "active"
-                            ? "bg-primary-100/10 text-primary-100"
-                            : "bg-gray-200 text-gray-600"
-                        }`}
+                    <td className="px-6 py-4 whitespace-nowrap text-primary-50">
+                      <select
+                        value={user.status}
+                        onChange={(e) => {
+                          const newStatus = e.target.value as "active" | "inactive";
+                          setUsers(users.map(u => 
+                            u.id === user.id ? { ...u, status: newStatus } : u
+                          ));
+                        }}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-50"
                       >
-                        {user.status}
-                      </button>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
@@ -411,7 +410,6 @@ const RolesPermission: React.FC = () => {
         {/* Mobile Card View */}
         <div className="md:hidden p-4 space-y-4">
           {filteredUsers.map((user) => {
-            const roleInfo = getRoleInfo(user.role);
             return (
               <div
                 key={user.id}
@@ -451,7 +449,27 @@ const RolesPermission: React.FC = () => {
 
                 <div className="space-y-2">
                   <div>
-                    <div className="text-xs text-primary-50/60 mb-1">Role</div>
+                    <div className="text-xs text-primary-50/60 mb-1">Current Role</div>
+                    <div className="px-3 py-2 bg-gray-50 rounded-lg text-sm text-primary-50 font-medium">
+                      {roles.find(r => r.id === user.role)?.name}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-xs text-primary-50/60 mb-1">Current Status</div>
+                    <div className="px-3 py-2 bg-gray-50 rounded-lg">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium inline-block ${
+                        user.status === "active"
+                          ? "bg-primary-100/10 text-primary-100"
+                          : "bg-gray-200 text-gray-600"
+                      }`}>
+                        {user.status === "active" ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-xs text-primary-50/60 mb-1">Change Role</div>
                     <select
                       value={user.role}
                       onChange={(e) => changeUserRole(user.id, e.target.value)}
@@ -466,24 +484,20 @@ const RolesPermission: React.FC = () => {
                   </div>
 
                   <div>
-                    <div className="text-xs text-primary-50/60 mb-1">Dashboard Access</div>
-                    <code className="text-xs bg-gray-100 px-2 py-1 rounded text-primary-50 block">
-                      {roleInfo?.dashboardPath}
-                    </code>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-primary-50/60">Status</div>
-                    <button
-                      onClick={() => toggleUserStatus(user.id)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        user.status === "active"
-                          ? "bg-primary-100/10 text-primary-100"
-                          : "bg-gray-200 text-gray-600"
-                      }`}
+                    <div className="text-xs text-primary-50/60 mb-1">Change Status</div>
+                    <select
+                      value={user.status}
+                      onChange={(e) => {
+                        const newStatus = e.target.value as "active" | "inactive";
+                        setUsers(users.map(u => 
+                          u.id === user.id ? { ...u, status: newStatus } : u
+                        ));
+                      }}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-50"
                     >
-                      {user.status}
-                    </button>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
                   </div>
                 </div>
               </div>

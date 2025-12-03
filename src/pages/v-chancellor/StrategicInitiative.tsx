@@ -232,7 +232,7 @@ const StrategicInitiative: React.FC = () => {
 
       {/* Tabs */}
       <div className="bg-white rounded-lg shadow-sm border border-primary-50/20 mb-6">
-        <div className="flex border-b">
+        <div className="flex border-b border-primary-50/20">
           {[
             { id: "overview", label: "Overview" },
             { id: "initiatives", label: "Initiatives" },

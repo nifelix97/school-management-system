@@ -121,7 +121,16 @@ import Accreditation from "../pages/v-chancellor/Accreditation";
 import PartnershipCollaboration from "../pages/v-chancellor/Partnership&Collaboration";
 import CurriculumReview from "../pages/v-chancellor/CurriculumReview";
 import StrategicInitiative from "../pages/v-chancellor/StrategicInitiative";
-
+import PoliciesCompliance from "../pages/v-chancellor/Policies&Compliance";
+import EventsConferences from "../pages/v-chancellor/Events&Conferances";
+import GlobalRanking from "../pages/v-chancellor/GrobalRanking";
+import VChancellorReportAnalytic from "../pages/v-chancellor/Reports&Analytics";
+import PerformanceMetrics from "../pages/v-chancellor/PerformanceMetrics";
+import VcNotification from "../pages/v-chancellor/Vc-Notification";
+import ClearanceApplicationPage from "../pages/student/ClearanceApplication";
+import MarksAppealPage from "../pages/student/MarksAppeal";
+import OnlineExamPage from "../pages/student/OnlineExam";
+import CertificateGenerator from "../pages/Registrar/CertificateGenerator";
 
 
 
@@ -168,6 +177,9 @@ export default function AppRoutes() {
         <Route path="/attendance" element={<AttendancePage />} />
         <Route path="/leave-requests" element={<LeaveRequestsPage />} />
         <Route path="/results" element={<StudentMarks />} />
+        <Route path="/clearance" element={<ClearanceApplicationPage />} />
+        <Route path="/marks-appeal" element={<MarksAppealPage />} />
+        <Route path="/online-exam" element={<OnlineExamPage />} />
       </Route>
       <Route element={<TeacherLayout />}>
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
@@ -230,6 +242,7 @@ export default function AppRoutes() {
           element={<AdmissionLetters />}
         />
         <Route path="/registrar/student-records" element={<StudentRecords />} />
+        <Route path="/registrar/certificates" element={<CertificateGenerator />} />
       </Route>
       <Route element={<AccountantLayout />}>
         <Route path="/accountant/dashboard" element={<AccountantDashBoard />} />
@@ -316,6 +329,12 @@ export default function AppRoutes() {
         <Route path="/vice-chancellor/partnerships" element={<PartnershipCollaboration />} />
         <Route path="/vice-chancellor/curriculum-review" element={<CurriculumReview />} />
         <Route path="/vice-chancellor/strategic-initiatives" element={<StrategicInitiative />} />
+        <Route path="/vice-chancellor/policies" element={<PoliciesCompliance />} />
+        <Route path="/vice-chancellor/events" element={<EventsConferences />} />
+        <Route path="/vice-chancellor/global-rankings" element={<GlobalRanking />} />
+        <Route path="/vice-chancellor/reports" element={<VChancellorReportAnalytic />} />
+        <Route path="/vice-chancellor/performance-metrics" element={<PerformanceMetrics />} />
+        <Route path="/vice-chancellor/notifications" element={<VcNotification />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />

@@ -14,7 +14,11 @@ import {
   IoMenuOutline,
   IoChevronBackOutline,
   IoStatsChartOutline,
+  IoShieldCheckmarkSharp,
+  IoPlayOutline,
 } from "react-icons/io5";
+import { BsSendCheck } from "react-icons/bs";
+
 
 type SidebarProps = {
   className?: string;
@@ -85,6 +89,21 @@ const links = [
     to: "/attendance",
     label: "Attendance",
     icon: <IoCheckmarkDoneOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/clearance",
+    label: "Clearance",
+    icon: <BsSendCheck className="w-5 h-5" />,
+  },
+  {
+    to: "/marks-appeal",
+    label: "Marks Appeal",
+    icon: <IoShieldCheckmarkSharp className="w-5 h-5" />,
+  },
+  {
+    to: "/online-exam",
+    label: "Online Exam",
+    icon: <IoPlayOutline className="w-5 h-5" />,
   },
 ];
 
