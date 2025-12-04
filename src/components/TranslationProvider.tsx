@@ -55,7 +55,7 @@ const TranslationProvider: React.FC<TranslationProviderProps> = ({ children, ori
 
   useEffect(() => {
     const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
+      mutations.forEach((_mutation) => {
         // if (mutation.type === 'childList' && mutation.addedNodes.length) {
         //     mutation.addedNodes.forEach(node => {
         //         if (node.nodeName === 'IFRAME' && node.classList.contains('skiptranslate')) {
@@ -145,5 +145,6 @@ const TranslationProvider: React.FC<TranslationProviderProps> = ({ children, ori
 
 
 
-export { TranslationProvider, TranslationContext, useGoogleTranslateScript };
+export { TranslationContext, TranslationProvider, useGoogleTranslateScript };
 export type { TranslationContextType };
+
