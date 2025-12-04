@@ -1,12 +1,14 @@
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AppRoutes from './routes/AppRoutes';
+import { TranslationProvider } from './components/TranslationProvider';
 
 
 function App() {
 
   return (
     <>
+      <TranslationProvider originalLang="en">
       <AppRoutes/>
       <ToastContainer
         position="top-right"
@@ -20,6 +22,7 @@ function App() {
         pauseOnHover
         theme="light"
       />
+      </TranslationProvider>
     </>
   )
 }

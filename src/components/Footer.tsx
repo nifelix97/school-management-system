@@ -1,17 +1,20 @@
 import { Link } from "react-router-dom";
 import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
+import sanlogo from "../assets/snverse.png";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary-50 text-primary-400 py-12 mt-16 relative z-20">
+    <footer className="bg-primary-50 text-primary-400 py-8 mt-16 relative z-20 min-h-[300px] flex items-center">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           <div>
-            <div className="flex items-center mb-4">
-              <h3 className="font-heading m-0 text-primary-100 font-extrabold text-2xl">
-                SANVERSE
-              </h3>
+            <div className="flex items-center">
+              <img
+                src={sanlogo}
+                alt="Logo"
+                className="w-40 h-30 mr-2 object-contain"
+              />
             </div>
             <p className="leading-relaxed opacity-90 text-white">
               Transforming education through <br />
