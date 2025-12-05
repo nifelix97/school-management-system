@@ -1,9 +1,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import bk from "../assets/bk.jpg";
+import { default as bg3, default as bk } from "../assets/bk.jpg";
 import bg1 from "../assets/bk1.jpg";
 import bg2 from "../assets/bk2.jpg";
-import bg3 from "../assets/bk.jpg";
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

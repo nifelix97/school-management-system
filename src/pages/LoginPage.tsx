@@ -1,9 +1,9 @@
-import { useMemo, useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import { IoMdMail, IoMdLock } from "react-icons/io";
-import Input from "../components/ui/Input";
+import { useEffect, useMemo, useState } from "react";
+import { IoMdLock, IoMdMail } from "react-icons/io";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import Input from "../components/ui/Input";
 
 const roles = [
   "Admin",
@@ -98,6 +98,14 @@ const LoginPage = () => {
         // TODO: replace with real auth call
         await new Promise((r) => setTimeout(r, 800));
         console.log("Login data:", form);
+      
+        // Save authentication data to localStorage
+        localStorage.setItem('token', 'demo-auth-token-' + Date.now());
+        localStorage.setItem('user', JSON.stringify({
+          email: form.email,
+          role: role,
+          name: form.email.split('@')[0]
+        }));
       
         // show toast and navigate based on role
         toast.success("Welcome back!");

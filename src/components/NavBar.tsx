@@ -3,7 +3,8 @@ import { FaRegFileLines } from "react-icons/fa6";
 import { IoIosCheckmarkCircle, IoMdHome, IoMdPerson } from "react-icons/io";
 import { IoLogInOutline } from "react-icons/io5";
 import { MdEmail } from "react-icons/md";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import sanlogo from "../assets/sanverse.png";
 import FloatingLanguageSelector from "./FloatingLanguageSelector";
 import LoginDropdown from "./LoginPopUp";
@@ -25,6 +26,7 @@ import LoginDropdown from "./LoginPopUp";
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginSheetOpen, setLoginSheetOpen] = useState(false);
@@ -37,6 +39,7 @@ const NavBar = () => {
   //   );
   //   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -44,8 +47,29 @@ const NavBar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
   
-
- 
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      setIsAuthenticated(!!(token && user));
+    };
+    
+    checkAuth();
+    
+    // Listen for storage changes (login/logout in other tabs)
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, []);
+  
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully!');
+    setIsAuthenticated(false);
+    navigate('/');
+  };
 
 
   // const handleLogout = () => {
@@ -74,7 +98,9 @@ const NavBar = () => {
           <div className="flex gap-8 items-center">
             <Link
               to="/"
-              className="no-underline text-primary-50 font-medium hover:text-primary-100 flex align-items-center gap-1"
+              className={`no-underline font-medium hover:text-primary-100 flex align-items-center gap-1 ${
+                location.pathname === '/' ? 'text-primary-100' : 'text-primary-50'
+              }`}
             >
               <span className="font-bold ">
                 <IoMdHome className="size-5  " />
@@ -83,7 +109,9 @@ const NavBar = () => {
             </Link>
             <Link
               to="/admissions"
-              className="no-underline text-primary-50 font-medium hover:text-primary-100 flex align-items-center gap-1"
+              className={`no-underline font-medium hover:text-primary-100 flex align-items-center gap-1 ${
+                location.pathname === '/admissions' ? 'text-primary-100' : 'text-primary-50'
+              }`}
             >
               <span>
                 <IoMdPerson className="size-5  " />
@@ -100,8 +128,10 @@ const NavBar = () => {
               Teachers
             </Link> */}
             <Link
-              to="#"
-              className="no-underline text-primary-50 font-medium hover:text-primary-100 flex align-items-center gap-1"
+              to="/blog"
+              className={`no-underline font-medium hover:text-primary-100 flex align-items-center gap-1 ${
+                location.pathname === '/blog' ? 'text-primary-100' : 'text-primary-50'
+              }`}
             >
               <span>
                 <FaRegFileLines className="size-5  " />
@@ -109,8 +139,10 @@ const NavBar = () => {
               Blog
             </Link>
             <Link
-              to="#"
-              className="no-underline text-primary-50 font-medium hover:text-primary-100 flex align-items-center gap-1"
+              to="/about-us"
+              className={`no-underline font-medium hover:text-primary-100 flex align-items-center gap-1 ${
+                location.pathname === '/about-us' ? 'text-primary-100' : 'text-primary-50'
+              }`}
             >
               <span>
                 <IoIosCheckmarkCircle className="size-5  " />
@@ -118,8 +150,10 @@ const NavBar = () => {
               About
             </Link>
             <Link
-              to="#"
-              className="no-underline text-primary-50 font-medium hover:text-primary-100 flex align-items-center gap-1"
+              to="/contact-us"
+              className={`no-underline font-medium hover:text-primary-100 flex align-items-center gap-1 ${
+                location.pathname === '/contact-us' ? 'text-primary-100' : 'text-primary-50'
+              }`}
             >
               <span>
                 <MdEmail className="size-5  " />
@@ -135,15 +169,27 @@ const NavBar = () => {
               </span>
               SANVERSE
             </Link> */}
-            <button
-              type="button"
-              onClick={() => navigate("/login")}
-              className="no-underline text-primary-50 font-medium hover:text-primary-100 flex items-center gap-1 bg-transparent border-none cursor-pointer"
-              aria-label="Go to login"
-            >
-              <IoLogInOutline className="size-5" />
-              Login
-            </button>
+            {!isAuthenticated ? (
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="no-underline text-primary-50 font-medium hover:text-primary-100 flex items-center gap-1 bg-transparent border-none cursor-pointer"
+                aria-label="Go to login"
+              >
+                <IoLogInOutline className="size-5" />
+                Login
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="no-underline text-primary-50 font-medium hover:text-primary-100 flex items-center gap-1 bg-transparent border-none cursor-pointer"
+                aria-label="Logout"
+              >
+                <IoLogInOutline className="size-5" />
+                Logout
+              </button>
+            )}
 
             <div className="relative">
               <FloatingLanguageSelector />
@@ -277,15 +323,19 @@ const NavBar = () => {
               <Link
                 to="/"
                 onClick={() => setIsOpen(false)}
-                className="no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10"
+                className={`no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 ${
+                  location.pathname === '/' ? 'bg-primary-100/20' : ''
+                }`}
               >
                 <IoMdHome className="size-5 text-primary-100" />
                 <span className="font-medium">Home</span>
               </Link>
               <Link
-                to="/login"
+                to="/admissions"
                 onClick={() => setIsOpen(false)}
-                className="no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10"
+                className={`no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 ${
+                  location.pathname === '/admissions' ? 'bg-primary-100/20' : ''
+                }`}
               >
                 <IoMdPerson className="size-5 text-primary-100" />
                 <span className="font-medium">Admissions</span>
@@ -301,23 +351,29 @@ const NavBar = () => {
               <Link
                 to="/blog"
                 onClick={() => setIsOpen(false)}
-                className="no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10"
+                className={`no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 ${
+                  location.pathname === '/blog' ? 'bg-primary-100/20' : ''
+                }`}
               >
                 <FaRegFileLines className="size-5 text-primary-100" />
                 <span className="font-medium">Blog</span>
               </Link>
               <Link
-                to="/about"
+                to="/about-us"
                 onClick={() => setIsOpen(false)}
-                className="no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10"
+                className={`no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 ${
+                  location.pathname === '/about-us' ? 'bg-primary-100/20' : ''
+                }`}
               >
                 <IoIosCheckmarkCircle className="size-5 text-primary-100" />
                 <span className="font-medium">About</span>
               </Link>
               <Link
-                to="/contact"
+                to="/contact-us"
                 onClick={() => setIsOpen(false)}
-                className="no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10"
+                className={`no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 ${
+                  location.pathname === '/contact-us' ? 'bg-primary-100/20' : ''
+                }`}
               >
                 <MdEmail className="size-5 text-primary-100" />
                 <span className="font-medium">Contact</span>
@@ -331,14 +387,25 @@ const NavBar = () => {
                 <IoChevronForward className="size-5 text-primary-100" />
                 <span className="font-medium">SANVERSE</span>
               </Link> */}
-              <button
-                type="button"
-                onClick={() => setLoginSheetOpen(true)}
-                className="w-full no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 bg-transparent border-none text-left"
-              >
-                <IoLogInOutline className="size-5 text-primary-100" />
-                <span className="font-medium">Login</span>
-              </button>
+              {!isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={() => setLoginSheetOpen(true)}
+                  className="w-full no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 bg-transparent border-none text-left"
+                >
+                  <IoLogInOutline className="size-5 text-primary-100" />
+                  <span className="font-medium">Login</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 bg-transparent border-none text-left"
+                >
+                  <IoLogInOutline className="size-5 text-primary-100" />
+                  <span className="font-medium">Logout</span>
+                </button>
+              )}
               <div className="rounded-lg px-4 py-3 bg-white text-center">
                 <FloatingLanguageSelector inline={true} />
               </div>

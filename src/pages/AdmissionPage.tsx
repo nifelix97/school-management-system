@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, GraduationCap, CreditCard, Clock, CheckCircle, Upload, FileText } from 'lucide-react';
+import { CheckCircle, Clock, CreditCard, FileText, GraduationCap, Mail, MapPin, Phone, Upload, User } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import Input from '../components/ui/Input';
 
 interface FormData {
@@ -13,6 +13,15 @@ interface FormData {
   nationality: string;
   nationalId: string;
   
+  // Guardian/Emergency Contact
+  guardianName: string;
+  guardianRelationship: string;
+  guardianPhone: string;
+  guardianEmail: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  emergencyContactRelationship: string;
+  
   // Address Information
   address: string;
   city: string;
@@ -25,10 +34,33 @@ interface FormData {
   program2: string;
   program3: string;
   previousEducation: string;
+  previousSchool: string;
+  graduationYear: string;
+  gpa: string;
+  testScores: string;
+  
+  // Financial Information
+  scholarshipInterest: string;
+  financialAidNeeded: string;
+  paymentPlan: string;
+  
+  // Personal Background
+  languagesSpoken: string;
+  disabilities: string;
+  extracurricular: string;
+  workExperience: string;
+  
+  // Preferences
+  housingNeeded: string;
+  startSemester: string;
+  studyMode: string;
   
   // Documents
   transcript: File | null;
   personalStatement: File | null;
+  photoId: File | null;
+  birthCertificate: File | null;
+  recommendationLetter: File | null;
 }
 
 const AdmissionPage: React.FC = () => {
@@ -48,6 +80,13 @@ const AdmissionPage: React.FC = () => {
     gender: '',
     nationality: '',
     nationalId: '',
+    guardianName: '',
+    guardianRelationship: '',
+    guardianPhone: '',
+    guardianEmail: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    emergencyContactRelationship: '',
     address: '',
     city: '',
     state: '',
@@ -57,8 +96,25 @@ const AdmissionPage: React.FC = () => {
     program2: '',
     program3: '',
     previousEducation: '',
+    previousSchool: '',
+    graduationYear: '',
+    gpa: '',
+    testScores: '',
+    scholarshipInterest: '',
+    financialAidNeeded: '',
+    paymentPlan: '',
+    languagesSpoken: '',
+    disabilities: '',
+    extracurricular: '',
+    workExperience: '',
+    housingNeeded: '',
+    startSemester: '',
+    studyMode: '',
     transcript: null,
-    personalStatement: null
+    personalStatement: null,
+    photoId: null,
+    birthCertificate: null,
+    recommendationLetter: null
   });
 
   const [errors, setErrors] = useState<Partial<FormData>>({});
@@ -98,12 +154,26 @@ const AdmissionPage: React.FC = () => {
       if (!formData.gender) newErrors.gender = 'Gender is required';
       if (!formData.nationalId) newErrors.nationalId = 'National ID is required';
     } else if (step === 2) {
+      if (!formData.guardianName) newErrors.guardianName = 'Guardian name is required';
+      if (!formData.guardianPhone) newErrors.guardianPhone = 'Guardian phone is required';
+      if (!formData.emergencyContactName) newErrors.emergencyContactName = 'Emergency contact name is required';
+      if (!formData.emergencyContactPhone) newErrors.emergencyContactPhone = 'Emergency contact phone is required';
+    } else if (step === 3) {
       if (!formData.address) newErrors.address = 'Address is required';
       if (!formData.city) newErrors.city = 'City is required';
       if (!formData.country) newErrors.country = 'Country is required';
-    } else if (step === 4) {
+    } else if (step === 5) {
       if (!formData.program) newErrors.program = 'At least one program is required';
       if (!formData.previousEducation) newErrors.previousEducation = 'Previous education is required';
+      if (!formData.previousSchool) newErrors.previousSchool = 'Previous school is required';
+      if (!formData.graduationYear) newErrors.graduationYear = 'Graduation year is required';
+    } else if (step === 6) {
+      if (!formData.scholarshipInterest) newErrors.scholarshipInterest = 'Please indicate scholarship interest';
+      if (!formData.financialAidNeeded) newErrors.financialAidNeeded = 'Please indicate if financial aid is needed';
+    } else if (step === 7) {
+      if (!formData.housingNeeded) newErrors.housingNeeded = 'Please indicate housing preference';
+      if (!formData.startSemester) newErrors.startSemester = 'Start semester is required';
+      if (!formData.studyMode) newErrors.studyMode = 'Study mode is required';
     }
     
     setErrors(newErrors);
@@ -111,7 +181,7 @@ const AdmissionPage: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (currentStep === 3 && !paymentComplete) {
+    if (currentStep === 4 && !paymentComplete) {
       return; // Can't proceed to academic step without payment
     }
     if (validateStep(currentStep)) {
@@ -130,10 +200,13 @@ const AdmissionPage: React.FC = () => {
 
   const steps = [
     { number: 1, title: 'Personal Info', icon: User },
-    { number: 2, title: 'Address', icon: MapPin },
-    { number: 3, title: 'Payment', icon: CreditCard },
-    { number: 4, title: 'Academic', icon: GraduationCap },
-    { number: 5, title: 'Documents', icon: FileText }
+    { number: 2, title: 'Guardian', icon: User },
+    { number: 3, title: 'Address', icon: MapPin },
+    { number: 4, title: 'Payment', icon: CreditCard },
+    { number: 5, title: 'Academic', icon: GraduationCap },
+    { number: 6, title: 'Financial', icon: CreditCard },
+    { number: 7, title: 'Preferences', icon: Clock },
+    { number: 8, title: 'Documents', icon: FileText }
   ];
 
   const formatTime = (seconds: number) => {
@@ -145,8 +218,8 @@ const AdmissionPage: React.FC = () => {
   if (applicationSubmitted) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-3 xs:px-4 sm:px-6">
-        <div className="bg-white rounded-lg xs:rounded-xl shadow-lg p-6 xs:p-8 max-w-md w-full text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+        <div className="bg-white rounded-lg xs:rounded-xl shadow-lg p-6 xs:p-8 max-w-md w-full text-center animate-[scaleIn_0.5s_ease-out]">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4 animate-bounce" />
           <h2 className="text-xl xs:text-2xl font-bold text-primary-50 mb-2">Application Submitted!</h2>
           <p className="text-sm xs:text-base text-gray-600 mb-4">
             Your application has been successfully submitted. You will receive a confirmation email shortly.
@@ -163,7 +236,7 @@ const AdmissionPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <div className="max-w-4xl mx-auto px-3 xs:px-4 sm:px-6 py-4 xs:py-6 sm:py-8 w-full">
         {/* Header */}
-        <div className="text-center mb-6 xs:mb-8">
+        <div className="text-center mb-6 xs:mb-8 animate-[fadeIn_0.6s_ease-out]">
           <h1 className="text-2xl xs:text-3xl sm:text-4xl font-bold text-primary-50 mb-2">
             University Admission
           </h1>
@@ -173,15 +246,15 @@ const AdmissionPage: React.FC = () => {
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-6 xs:mb-8 overflow-hidden">
+        <div className="mb-6 xs:mb-8 overflow-hidden animate-[slideUp_0.6s_ease-out_0.2s_both]">
           <div className="flex justify-between items-center relative px-4">
             {steps.map((step, index) => (
               <div key={step.number} className="flex flex-col items-center flex-1 relative">
-                <div className={`w-8 h-8 xs:w-10 xs:h-10 rounded-full flex items-center justify-center text-xs xs:text-sm font-medium ${
+                <div className={`w-8 h-8 xs:w-10 xs:h-10 rounded-full flex items-center justify-center text-xs xs:text-sm font-medium transition-all duration-300 ${
                   currentStep >= step.number 
-                    ? 'bg-primary-50 text-white' 
+                    ? 'bg-primary-50 text-white scale-110 shadow-lg' 
                     : 'bg-gray-200 text-gray-500'
-                }`}>
+                } ${currentStep === step.number ? 'animate-pulse' : ''}`}>
                   {currentStep > step.number ? (
                     <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4" />
                   ) : (
@@ -192,7 +265,7 @@ const AdmissionPage: React.FC = () => {
                   {step.title}
                 </span>
                 {index < steps.length - 1 && (
-                  <div className={`absolute h-0.5 top-4 xs:top-5 left-1/2 -z-10 ${
+                  <div className={`absolute h-0.5 top-4 xs:top-5 left-1/2 -z-10 transition-all duration-500 ${
                     currentStep > step.number ? 'bg-primary-50' : 'bg-gray-200'
                   }`} style={{ width: '100%', transform: 'translateX(50%)' }} />
                 )}
@@ -202,10 +275,10 @@ const AdmissionPage: React.FC = () => {
         </div>
 
         {/* Form Content */}
-        <div className="bg-white rounded-lg xs:rounded-xl shadow-lg p-4 xs:p-6 sm:p-8">
+        <div className="bg-white rounded-lg xs:rounded-xl shadow-lg p-4 xs:p-6 sm:p-8 animate-[scaleIn_0.5s_ease-out_0.4s_both]">
           {/* Step 1: Personal Information */}
           {currentStep === 1 && (
-            <div>
+            <div className="animate-[fadeIn_0.4s_ease-out]">
               <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
                 Personal Information
               </h2>
@@ -294,9 +367,106 @@ const AdmissionPage: React.FC = () => {
             </div>
           )}
 
-          {/* Step 2: Address Information */}
+          {/* Step 2: Guardian/Emergency Contact */}
           {currentStep === 2 && (
-            <div>
+            <div className="animate-[fadeIn_0.4s_ease-out]">
+              <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
+                Guardian & Emergency Contact
+              </h2>
+              <div className="grid grid-cols-1 gap-4 xs:gap-6">
+                <h3 className="text-base font-semibold text-primary-50 mt-2">Guardian Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xs:gap-6">
+                  <Input
+                    label="Guardian Full Name"
+                    name="guardianName"
+                    value={formData.guardianName}
+                    onChange={(e) => handleInputChange('guardianName', e.target.value)}
+                    error={errors.guardianName}
+                    required
+                    leftIcon={<User className="w-4 h-4" />}
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-primary-50 mb-2">
+                      Relationship <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={formData.guardianRelationship}
+                      onChange={(e) => handleInputChange('guardianRelationship', e.target.value)}
+                      className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                    >
+                      <option value="">Select Relationship</option>
+                      <option value="parent">Parent</option>
+                      <option value="legal-guardian">Legal Guardian</option>
+                      <option value="spouse">Spouse</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <Input
+                    label="Guardian Phone"
+                    name="guardianPhone"
+                    type="tel"
+                    value={formData.guardianPhone}
+                    onChange={(e) => handleInputChange('guardianPhone', e.target.value)}
+                    error={errors.guardianPhone}
+                    required
+                    leftIcon={<Phone className="w-4 h-4" />}
+                  />
+                  <Input
+                    label="Guardian Email"
+                    name="guardianEmail"
+                    type="email"
+                    value={formData.guardianEmail}
+                    onChange={(e) => handleInputChange('guardianEmail', e.target.value)}
+                    leftIcon={<Mail className="w-4 h-4" />}
+                  />
+                </div>
+
+                <h3 className="text-base font-semibold text-primary-50 mt-4">Emergency Contact</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xs:gap-6">
+                  <Input
+                    label="Emergency Contact Name"
+                    name="emergencyContactName"
+                    value={formData.emergencyContactName}
+                    onChange={(e) => handleInputChange('emergencyContactName', e.target.value)}
+                    error={errors.emergencyContactName}
+                    required
+                    leftIcon={<User className="w-4 h-4" />}
+                  />
+                  <Input
+                    label="Emergency Contact Phone"
+                    name="emergencyContactPhone"
+                    type="tel"
+                    value={formData.emergencyContactPhone}
+                    onChange={(e) => handleInputChange('emergencyContactPhone', e.target.value)}
+                    error={errors.emergencyContactPhone}
+                    required
+                    leftIcon={<Phone className="w-4 h-4" />}
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-primary-50 mb-2">
+                      Relationship
+                    </label>
+                    <select
+                      value={formData.emergencyContactRelationship}
+                      onChange={(e) => handleInputChange('emergencyContactRelationship', e.target.value)}
+                      className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                    >
+                      <option value="">Select Relationship</option>
+                      <option value="parent">Parent</option>
+                      <option value="sibling">Sibling</option>
+                      <option value="spouse">Spouse</option>
+                      <option value="friend">Friend</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Address Information */}
+          {currentStep === 3 && (
+            <div className="animate-[fadeIn_0.4s_ease-out]">
               <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
                 Address Information
               </h2>
@@ -346,9 +516,9 @@ const AdmissionPage: React.FC = () => {
             </div>
           )}
 
-          {/* Step 3: Payment */}
-          {currentStep === 3 && (
-            <div>
+          {/* Step 4: Payment */}
+          {currentStep === 4 && (
+            <div className="animate-[fadeIn_0.4s_ease-out]">
               <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
                 Application Fee Payment
               </h2>
@@ -400,9 +570,9 @@ const AdmissionPage: React.FC = () => {
             </div>
           )}
 
-          {/* Step 4: Academic Information */}
-          {currentStep === 4 && paymentComplete && (
-            <div>
+          {/* Step 5: Academic Information */}
+          {currentStep === 5 && paymentComplete && (
+            <div className="animate-[fadeIn_0.4s_ease-out]">
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
                 <p className="text-sm text-green-700">
                   <span className="font-semibold">Student Code:</span> {studentCode}
@@ -482,15 +652,214 @@ const AdmissionPage: React.FC = () => {
                   {errors.previousEducation && <p className="mt-2 text-sm text-red-500">{errors.previousEducation}</p>}
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xs:gap-6">
+                  <Input
+                    label="Previous School/Institution"
+                    name="previousSchool"
+                    value={formData.previousSchool}
+                    onChange={(e) => handleInputChange('previousSchool', e.target.value)}
+                    error={errors.previousSchool}
+                    required
+                    placeholder="Name of your previous school"
+                  />
+                  <Input
+                    label="Graduation Year"
+                    name="graduationYear"
+                    value={formData.graduationYear}
+                    onChange={(e) => handleInputChange('graduationYear', e.target.value)}
+                    error={errors.graduationYear}
+                    required
+                    placeholder="YYYY"
+                  />
+                  <Input
+                    label="GPA / Grade Average"
+                    name="gpa"
+                    value={formData.gpa}
+                    onChange={(e) => handleInputChange('gpa', e.target.value)}
+                    placeholder="e.g., 3.5 or 85%"
+                  />
+                  <Input
+                    label="Test Scores (SAT/ACT/Other)"
+                    name="testScores"
+                    value={formData.testScores}
+                    onChange={(e) => handleInputChange('testScores', e.target.value)}
+                    placeholder="e.g., SAT: 1400"
+                  />
+                </div>
+
               </div>
             </div>
           )}
 
 
 
-          {/* Step 5: Documents */}
-          {currentStep === 5 && paymentComplete && (
-            <div>
+          {/* Step 6: Financial Information */}
+          {currentStep === 6 && paymentComplete && (
+            <div className="animate-[fadeIn_0.4s_ease-out]">
+              <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
+                Financial Information
+              </h2>
+              <div className="grid grid-cols-1 gap-4 xs:gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Are you interested in scholarships? <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.scholarshipInterest}
+                    onChange={(e) => handleInputChange('scholarshipInterest', e.target.value)}
+                    className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                  >
+                    <option value="">Select Option</option>
+                    <option value="yes">Yes, I'm interested</option>
+                    <option value="no">No, not interested</option>
+                    <option value="maybe">Maybe, need more information</option>
+                  </select>
+                  {errors.scholarshipInterest && <p className="mt-2 text-sm text-red-500">{errors.scholarshipInterest}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Do you need financial aid? <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.financialAidNeeded}
+                    onChange={(e) => handleInputChange('financialAidNeeded', e.target.value)}
+                    className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                  >
+                    <option value="">Select Option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                  {errors.financialAidNeeded && <p className="mt-2 text-sm text-red-500">{errors.financialAidNeeded}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Preferred Payment Plan
+                  </label>
+                  <select
+                    value={formData.paymentPlan}
+                    onChange={(e) => handleInputChange('paymentPlan', e.target.value)}
+                    className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                  >
+                    <option value="">Select Payment Plan</option>
+                    <option value="full">Full Payment (Upfront)</option>
+                    <option value="semester">Per Semester</option>
+                    <option value="monthly">Monthly Installments</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 7: Preferences & Background */}
+          {currentStep === 7 && paymentComplete && (
+            <div className="animate-[fadeIn_0.4s_ease-out]">
+              <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
+                Preferences & Personal Background
+              </h2>
+              <div className="grid grid-cols-1 gap-4 xs:gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Do you need on-campus housing? <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.housingNeeded}
+                    onChange={(e) => handleInputChange('housingNeeded', e.target.value)}
+                    className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                  >
+                    <option value="">Select Option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="maybe">Maybe</option>
+                  </select>
+                  {errors.housingNeeded && <p className="mt-2 text-sm text-red-500">{errors.housingNeeded}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Preferred Start Semester <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.startSemester}
+                    onChange={(e) => handleInputChange('startSemester', e.target.value)}
+                    className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                  >
+                    <option value="">Select Semester</option>
+                    <option value="fall-2025">Fall 2025</option>
+                    <option value="spring-2026">Spring 2026</option>
+                    <option value="summer-2026">Summer 2026</option>
+                    <option value="fall-2026">Fall 2026</option>
+                  </select>
+                  {errors.startSemester && <p className="mt-2 text-sm text-red-500">{errors.startSemester}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Study Mode <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.studyMode}
+                    onChange={(e) => handleInputChange('studyMode', e.target.value)}
+                    className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                  >
+                    <option value="">Select Study Mode</option>
+                    <option value="full-time">Full-Time</option>
+                    <option value="part-time">Part-Time</option>
+                    <option value="online">Online</option>
+                    <option value="hybrid">Hybrid</option>
+                  </select>
+                  {errors.studyMode && <p className="mt-2 text-sm text-red-500">{errors.studyMode}</p>}
+                </div>
+
+                <Input
+                  label="Languages Spoken"
+                  name="languagesSpoken"
+                  value={formData.languagesSpoken}
+                  onChange={(e) => handleInputChange('languagesSpoken', e.target.value)}
+                  placeholder="e.g., English, French, Spanish"
+                />
+
+                <Input
+                  label="Disabilities or Special Needs"
+                  name="disabilities"
+                  value={formData.disabilities}
+                  onChange={(e) => handleInputChange('disabilities', e.target.value)}
+                  placeholder="Please specify if any (optional)"
+                />
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Extracurricular Activities
+                  </label>
+                  <textarea
+                    value={formData.extracurricular}
+                    onChange={(e) => handleInputChange('extracurricular', e.target.value)}
+                    rows={3}
+                    className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                    placeholder="List any clubs, sports, volunteer work, etc."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Work Experience
+                  </label>
+                  <textarea
+                    value={formData.workExperience}
+                    onChange={(e) => handleInputChange('workExperience', e.target.value)}
+                    rows={3}
+                    className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                    placeholder="Briefly describe any relevant work experience"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 8: Documents */}
+          {currentStep === 8 && paymentComplete && (
+            <div className="animate-[fadeIn_0.4s_ease-out]">
               <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
                 Upload Documents
               </h2>
@@ -499,10 +868,17 @@ const AdmissionPage: React.FC = () => {
                   <label className="block text-sm font-medium text-primary-50 mb-2">
                     Academic Transcript
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+                  <div 
+                    onClick={() => document.getElementById('transcript-upload')?.click()}
+                    className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-primary-100 hover:bg-gray-50 transition-colors"
+                  >
                     <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
+                    <p className="text-sm text-gray-600">
+                      {formData.transcript ? formData.transcript.name : 'Click to upload or drag and drop'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX</p>
                     <input
+                      id="transcript-upload"
                       type="file"
                       accept=".pdf,.doc,.docx"
                       onChange={(e) => handleFileChange('transcript', e.target.files?.[0] || null)}
@@ -514,13 +890,86 @@ const AdmissionPage: React.FC = () => {
                   <label className="block text-sm font-medium text-primary-50 mb-2">
                     Personal Statement
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+                  <div 
+                    onClick={() => document.getElementById('personal-statement-upload')?.click()}
+                    className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-primary-100 hover:bg-gray-50 transition-colors"
+                  >
                     <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
+                    <p className="text-sm text-gray-600">
+                      {formData.personalStatement ? formData.personalStatement.name : 'Click to upload or drag and drop'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX</p>
                     <input
+                      id="personal-statement-upload"
                       type="file"
                       accept=".pdf,.doc,.docx"
                       onChange={(e) => handleFileChange('personalStatement', e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Photo ID / Passport
+                  </label>
+                  <div 
+                    onClick={() => document.getElementById('photo-id-upload')?.click()}
+                    className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-primary-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">
+                      {formData.photoId ? formData.photoId.name : 'Click to upload or drag and drop'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">PDF, JPG, PNG</p>
+                    <input
+                      id="photo-id-upload"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange('photoId', e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Birth Certificate
+                  </label>
+                  <div 
+                    onClick={() => document.getElementById('birth-certificate-upload')?.click()}
+                    className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-primary-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">
+                      {formData.birthCertificate ? formData.birthCertificate.name : 'Click to upload or drag and drop'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">PDF, JPG, PNG</p>
+                    <input
+                      id="birth-certificate-upload"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange('birthCertificate', e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Recommendation Letter (Optional)
+                  </label>
+                  <div 
+                    onClick={() => document.getElementById('recommendation-letter-upload')?.click()}
+                    className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-primary-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">
+                      {formData.recommendationLetter ? formData.recommendationLetter.name : 'Click to upload or drag and drop'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX</p>
+                    <input
+                      id="recommendation-letter-upload"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => handleFileChange('recommendationLetter', e.target.files?.[0] || null)}
                       className="hidden"
                     />
                   </div>
@@ -539,7 +988,7 @@ const AdmissionPage: React.FC = () => {
               Previous
             </button>
             
-            {currentStep < 5 && currentStep !== 3 && (
+            {currentStep < 8 && currentStep !== 4 && (
               <button
                 onClick={handleNext}
                 className="px-4 xs:px-6 py-2 xs:py-3 bg-primary-50 text-white rounded-xl hover:bg-primary-100 text-sm xs:text-base"
@@ -548,25 +997,16 @@ const AdmissionPage: React.FC = () => {
               </button>
             )}
             
-            {currentStep === 3 && paymentComplete && (
+            {currentStep === 4 && paymentComplete && (
               <button
-                onClick={() => setCurrentStep(4)}
+                onClick={() => setCurrentStep(5)}
                 className="px-4 xs:px-6 py-2 xs:py-3 bg-primary-50 text-white rounded-xl hover:bg-primary-100 text-sm xs:text-base"
               >
                 Continue to Academic Info
               </button>
             )}
             
-            {currentStep === 4 && (
-              <button
-                onClick={handleNext}
-                className="px-4 xs:px-6 py-2 xs:py-3 bg-primary-50 text-white rounded-xl hover:bg-primary-100 text-sm xs:text-base"
-              >
-                Next
-              </button>
-            )}
-            
-            {currentStep === 5 && (
+            {currentStep === 8 && (
               <button
                 onClick={handleSubmitApplication}
                 className="px-4 xs:px-6 py-2 xs:py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 text-sm xs:text-base"
