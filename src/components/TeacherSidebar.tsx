@@ -92,6 +92,11 @@ const links = [
     label: "Manage Messages",
     icon: <IoChatbubbleEllipsesOutline className="w-5 h-5" />,
   },
+  {
+    to: "/teacher/manage-exams",
+    label: "Manage Exams",
+    icon: <IoBookOutline className="w-5 h-5" />,
+  },
 ];
 
 const TeacherSidebar = ({ className = "" }: SidebarProps) => {

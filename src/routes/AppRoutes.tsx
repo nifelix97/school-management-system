@@ -134,6 +134,7 @@ import StrategicInitiative from "../pages/v-chancellor/StrategicInitiative";
 import VcNotification from "../pages/v-chancellor/Vc-Notification";
 import ViceChancellorDashboard from "../pages/v-chancellor/ViceChancellorDashboard";
 import ViceChancellorProfile from "../pages/v-chancellor/v-ChancellorProfile";
+import ManageExamsPage from "../pages/Teacher/ManageExams";
 
 
 
@@ -199,6 +200,7 @@ export default function AppRoutes() {
         <Route path="/teacher/mark-sheets" element={<MarkSheet />} />
         <Route path="/teacher/exam-attendance" element={<ExamAttendance />} />
         <Route path="/teacher/messages" element={<TeacherMessage />} />
+        <Route path="/teacher/manage-exams" element={<ManageExamsPage />} />
       </Route>
       <Route element={<HODLayout />}>
         <Route path="/hod/dashboard" element={<HODDashboard />} />
