@@ -10,7 +10,7 @@ import {
     IoPersonCircleOutline,
     IoSchoolOutline,
     IoSettingsOutline,
-    IoShieldCheckmarkOutline,
+    // IoShieldCheckmarkOutline,
     IoStatsChartOutline,
 } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
@@ -60,11 +60,11 @@ const links = [
     label: "Notifications",
     icon: <IoNotificationsOutline className="w-5 h-5" />,
   },
-  {
-    to: "/admin/user-roles",
-    label: "Roles & Permissions",
-    icon: <IoShieldCheckmarkOutline className="w-5 h-5" />,
-  },
+  // {
+  //   to: "/admin/user-roles",
+  //   label: "Roles & Permissions",
+  //   icon: <IoShieldCheckmarkOutline className="w-5 h-5" />,
+  // },
   {
     to: "/admin/settings",
     label: "System Settings",

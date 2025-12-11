@@ -24,7 +24,6 @@ import AdminProfile from "../pages/Admin/AdminProfile";
 import CoursesManagement from "../pages/Admin/CourseManagement";
 import DepartmentsManagement from "../pages/Admin/DepartmentsManagement";
 import ReportsAnalytics from "../pages/Admin/ReportsAnalytics";
-import RolesPermission from "../pages/Admin/Roles-Permission";
 import StudentManagement from "../pages/Admin/StudentManagement";
 import SystemSetting from "../pages/Admin/SystemSetting";
 import TeacherManagement from "../pages/Admin/TeacherManagement";
@@ -35,7 +34,8 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import Announcement from "../pages/HOD/Announcement";
 import AssignTeacher from "../pages/HOD/AssignTeacher";
 import CourseManagement from "../pages/HOD/CourseManagement";
-import DepartmentCourses from "../pages/HOD/DepartmentCourses";
+import RolesPermission from "../pages/Principal/Roles-Permission";
+
 import ExamsQuestions from "../pages/HOD/ExamsQuestions";
 import GenerateReport from "../pages/HOD/GenerateReport";
 import HODProfilePage from "../pages/HOD/HODProfilePage";
@@ -92,6 +92,7 @@ import CreateAssignment from "../pages/Teacher/CreateAssignment";
 import ExamAttendance from "../pages/Teacher/ExamAttendance";
 import Grading from "../pages/Teacher/Grading";
 import ManageAttendance from "../pages/Teacher/ManageAttendance";
+import ManageExamsPage from "../pages/Teacher/ManageExams";
 import MarkSheet from "../pages/Teacher/MarkSheet";
 import SetCourse from "../pages/Teacher/SetCourse";
 import StudentInfo from "../pages/Teacher/StudentInfo";
@@ -134,7 +135,8 @@ import StrategicInitiative from "../pages/v-chancellor/StrategicInitiative";
 import VcNotification from "../pages/v-chancellor/Vc-Notification";
 import ViceChancellorDashboard from "../pages/v-chancellor/ViceChancellorDashboard";
 import ViceChancellorProfile from "../pages/v-chancellor/v-ChancellorProfile";
-import ManageExamsPage from "../pages/Teacher/ManageExams";
+import AssignTeachers from "../pages/Principal/AssignTeachers";
+
 
 
 
@@ -205,7 +207,7 @@ export default function AppRoutes() {
       <Route element={<HODLayout />}>
         <Route path="/hod/dashboard" element={<HODDashboard />} />
         <Route path="/hod/profile" element={<HODProfilePage />} />
-        <Route path="/hod/department-courses" element={<DepartmentCourses />} />
+
         <Route path="/hod/approve-courses" element={<CourseManagement />} />
         <Route path="/hod/assign-teachers" element={<AssignTeacher />} />
         <Route path="/hod/teachers-activity" element={<TeachersActivity />} />
@@ -272,7 +274,6 @@ export default function AppRoutes() {
         <Route path="/admin/departments" element={<DepartmentsManagement />} />
         <Route path="/admin/reports" element={<ReportsAnalytics />} />
         <Route path="/admin/notifications" element={<AdminNotifications />} />
-        <Route path="/admin/user-roles" element={<RolesPermission />} />
         <Route path="/admin/settings" element={<SystemSetting />} />
       </Route>
       <Route element={<PrincipalLayout />}>
@@ -301,6 +302,8 @@ export default function AppRoutes() {
         <Route path="/principal/performance" element={<PerformanceReports />} />
         <Route path="/principal/reports" element={<ReportAnalytics />} />
         <Route path="/principal/notifications" element={<PrincipalNotifications />} />
+        <Route path="/principal/roles-permissions" element={<RolesPermission />} />
+        <Route path="/principal/assign-teachers" element={<AssignTeachers />} />
       </Route>
       <Route element={<LibrarianLayout />}>
         <Route path="/librarian/dashboard" element={<LibrarianDashboard />} />

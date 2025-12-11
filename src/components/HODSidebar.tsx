@@ -5,7 +5,7 @@ import {
   // IoCalendarOutline,
   IoTimeOutline,
   IoPeopleOutline,
-  IoBookOutline,
+  // IoBookOutline,
   IoAlertCircleOutline,
   IoChatbubbleEllipsesOutline,
   IoClipboardOutline,
@@ -35,11 +35,11 @@ const links = [
     label: "Profile",
     icon: <IoPersonCircleOutline className="w-5 h-5" />,
   },
-  {
-    to: "/hod/department-courses",
-    label: "Department Courses",
-    icon: <IoBookOutline className="w-5 h-5" />,
-  },
+  // {
+  //   to: "/hod/department-courses",
+  //   label: "Department Courses",
+  //   icon: <IoBookOutline className="w-5 h-5" />,
+  // },
   {
     to: "/hod/approve-courses",
     label: "Courses Management",
@@ -47,7 +47,7 @@ const links = [
   },
   {
     to: "/hod/assign-Teachers",
-    label: "Assign Teachers",
+    label: "Assigned Teachers",
     icon: <IoPeopleOutline className="w-5 h-5" />,
   },
   {

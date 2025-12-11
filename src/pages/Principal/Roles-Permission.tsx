@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import {
   IoAddOutline,
+  IoChevronBackOutline,
+  IoChevronForwardOutline,
   IoCreateOutline,
   IoEllipsisVerticalOutline,
   IoMailOutline,
@@ -32,6 +34,10 @@ const RolesPermission: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [showAddUser, setShowAddUser] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
   
   // New user form state
   const [newUserName, setNewUserName] = useState("");
@@ -205,6 +211,17 @@ const RolesPermission: React.FC = () => {
     return matchesSearch && matchesRole;
   });
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterRole]);
+
   const getUserCountByRole = (roleId: string) => {
     return users.filter(u => u.role === roleId).length;
   };
@@ -324,7 +341,7 @@ const RolesPermission: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => {
+              {paginatedUsers.map((user) => {
                 const roleInfo = getRoleInfo(user.role);
                 return (
                   <tr key={user.id} className="hover:bg-gray-50 transition-colors">
@@ -409,7 +426,7 @@ const RolesPermission: React.FC = () => {
 
         {/* Mobile Card View */}
         <div className="md:hidden p-4 space-y-4">
-          {filteredUsers.map((user) => {
+          {paginatedUsers.map((user) => {
             return (
               <div
                 key={user.id}
@@ -509,6 +526,82 @@ const RolesPermission: React.FC = () => {
           <div className="text-center py-12">
             <IoPersonOutline className="w-16 h-16 text-primary-50/20 mx-auto mb-4" />
             <p className="text-primary-50/60">No users found</p>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {filteredUsers.length > 0 && totalPages > 1 && (
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Page Info */}
+              <div className="text-sm text-primary-50/60">
+                Showing <span className="font-medium text-primary-50">{startIndex + 1}</span> to{" "}
+                <span className="font-medium text-primary-50">
+                  {Math.min(endIndex, filteredUsers.length)}
+                </span>{" "}
+                of <span className="font-medium text-primary-50">{filteredUsers.length}</span> users
+              </div>
+
+              {/* Pagination Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Previous page"
+                >
+                  <IoChevronBackOutline className="w-5 h-5 text-primary-50" />
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Show first page, last page, current page, and pages around current
+                    const showPage = 
+                      page === 1 || 
+                      page === totalPages || 
+                      (page >= currentPage - 1 && page <= currentPage + 1);
+                    
+                    const showEllipsis = 
+                      (page === currentPage - 2 && currentPage > 3) ||
+                      (page === currentPage + 2 && currentPage < totalPages - 2);
+
+                    if (showEllipsis) {
+                      return (
+                        <span key={page} className="px-2 text-primary-50/40">
+                          ...
+                        </span>
+                      );
+                    }
+
+                    if (!showPage) return null;
+
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === page
+                            ? "bg-primary-50 text-white"
+                            : "border border-gray-200 text-primary-50 hover:bg-gray-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Next page"
+                >
+                  <IoChevronForwardOutline className="w-5 h-5 text-primary-50" />
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

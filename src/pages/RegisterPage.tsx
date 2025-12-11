@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Upload, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { IoMdCall, IoMdLock, IoMdMail, IoMdPerson } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
@@ -34,6 +34,20 @@ type FormState = {
   password: string;
   confirmPassword: string;
   role: string;
+  // Role-specific fields
+  department?: string;
+  specialization?: string;
+  qualification?: string;
+  yearsOfExperience?: string;
+  studentId?: string;
+  yearLevel?: string;
+  program?: string;
+  studentName?: string;
+  relationship?: string;
+  emergencyContact?: string;
+  librarySection?: string;
+  licenseNumber?: string;
+  contractDocument?: File | null;
 };
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
@@ -47,12 +61,58 @@ const STEPS = [
   { id: 1, title: "Personal Info", fields: ["fullName", "email"] },
   { id: 2, title: "Contact & Security", fields: ["phone", "password", "confirmPassword"] },
   { id: 3, title: "Role Selection", fields: ["role"] },
+  { id: 4, title: "Additional Info", fields: [] }, // Dynamic fields based on role
 ];
 
 const ROLES_PER_PAGE = 12;
 
+// Roles that require contract document upload
+const ROLES_REQUIRING_CONTRACT = [
+  "Teacher",
+  "HOD",
+  "Librarian",
+  "Nurse",
+  "Accountant",
+  "Admin",
+  "Principal",
+  "Vice Principal",
+  "Registrar",
+  "Manager",
+  "Warden",
+  "Auditor",
+  "Receptionist",
+  "Vice Chancellor",
+  "Chancellor",
+  "Coaches",
+];
+
+// Role-specific field configurations
+const ROLE_FIELDS: Record<string, Array<keyof FormState>> = {
+  "Teacher": ["department", "specialization", "qualification", "yearsOfExperience"],
+  "HOD": ["department", "qualification", "yearsOfExperience"],
+  "Student": ["studentId", "yearLevel", "program"],
+  "Parent": ["studentName", "relationship", "emergencyContact"],
+  "Librarian": ["librarySection", "qualification"],
+  "Nurse": ["qualification", "licenseNumber"],
+  "Accountant": ["qualification"],
+  "Admin": [],
+  "Principal": ["qualification", "yearsOfExperience"],
+  "Vice Principal": ["qualification", "yearsOfExperience"],
+  "Registrar": [],
+  "Manager": [],
+  "Warden": [],
+  "Auditor": ["qualification"],
+  "Vendors": ["specialization"],
+  "Coaches": ["specialization", "yearsOfExperience"],
+  "Receptionist": [],
+  "Vice Chancellor": ["qualification", "yearsOfExperience"],
+  "Chancellor": ["qualification", "yearsOfExperience"],
+  "Alumni": ["program", "yearLevel"],
+};
+
 const RegisterPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [additionalInfoPage, setAdditionalInfoPage] = useState(1);
   const [rolePage, setRolePage] = useState(1);
   const [form, setForm] = useState<FormState>({
     fullName: "",
@@ -61,10 +121,24 @@ const RegisterPage = () => {
     password: "",
     confirmPassword: "",
     role: "",
+    // Role-specific fields
+    department: "",
+    specialization: "",
+    qualification: "",
+    yearsOfExperience: "",
+    studentId: "",
+    yearLevel: "",
+    program: "",
+    studentName: "",
+    relationship: "",
+    emergencyContact: "",
+    librarySection: "",
+    licenseNumber: "",
+    contractDocument: null,
   });
   const navigate = useNavigate();
 
-  const [touched, setTouched] = useState<Record<keyof FormState, boolean>>({
+  const [touched, setTouched] = useState<Partial<Record<keyof FormState, boolean>>>({
     fullName: false,
     email: false,
     phone: false,
@@ -102,6 +176,26 @@ const RegisterPage = () => {
     if (!form.role) e.role = "Please select your role.";
     else if (!roles.includes(form.role)) e.role = "Invalid role.";
 
+    // Validate role-specific fields
+    if (form.role && ROLE_FIELDS[form.role]) {
+      ROLE_FIELDS[form.role].forEach((field) => {
+        if (!form[field]) {
+          // Format field name for error message (e.g., "yearsOfExperience" -> "Years of Experience")
+          const formattedName = field
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase());
+          e[field] = `${formattedName} is required.`;
+        }
+      });
+    }
+
+    // Validate contract document for applicable roles
+    if (form.role && ROLES_REQUIRING_CONTRACT.includes(form.role)) {
+      if (!form.contractDocument) {
+        e.contractDocument = "Contract document is required for this role.";
+      }
+    }
+
     return e;
   }, [form]);
 
@@ -127,6 +221,37 @@ const RegisterPage = () => {
     setForm((prev) => ({ ...prev, [name as keyof FormState]: value }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type (PDF, DOC, DOCX)
+      const allowedTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast.error("Please upload a PDF or Word document");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        toast.error("File size must be less than 5MB");
+        return;
+      }
+
+      setForm((prev) => ({ ...prev, contractDocument: file }));
+      setTouched((prev) => ({ ...prev, contractDocument: true }));
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setForm((prev) => ({ ...prev, contractDocument: null }));
+  };
+
   const handleBlur: React.FocusEventHandler<
     HTMLInputElement | HTMLTextAreaElement
   > = (e) => {
@@ -145,6 +270,10 @@ const RegisterPage = () => {
 
     if (isCurrentStepValid && currentStep < STEPS.length) {
       setCurrentStep((prev) => prev + 1);
+      // Reset additional info page when entering step 4
+      if (currentStep === 3) {
+        setAdditionalInfoPage(1);
+      }
     }
   };
 
@@ -156,14 +285,21 @@ const RegisterPage = () => {
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    setTouched({
+
+    // Prevent submission if not on the last step
+    if (currentStep < STEPS.length) {
+      return;
+    }
+
+    setTouched((prev) => ({
+      ...prev,
       fullName: true,
       email: true,
       phone: true,
       password: true,
       confirmPassword: true,
       role: true,
-    });
+    }));
     if (!isValid) return;
 
     try {
@@ -466,6 +602,215 @@ const RegisterPage = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Step 4: Role-Specific Information */}
+                {currentStep === 4 && (() => {
+                  const roleFields = form.role && ROLE_FIELDS[form.role] ? ROLE_FIELDS[form.role] : [];
+                  const hasContractUpload = form.role && ROLES_REQUIRING_CONTRACT.includes(form.role);
+                  
+                  // Calculate pagination
+                  const FIELDS_PER_PAGE = 2;
+                  const allItems = [...roleFields];
+                  if (hasContractUpload) allItems.push('contractDocument' as keyof FormState);
+                  
+                  const totalPages = Math.max(1, Math.ceil(allItems.length / FIELDS_PER_PAGE));
+                  const startIndex = (additionalInfoPage - 1) * FIELDS_PER_PAGE;
+                  const endIndex = startIndex + FIELDS_PER_PAGE;
+                  const currentPageItems = allItems.slice(startIndex, endIndex);
+                  
+                  const fieldLabels: Record<string, string> = {
+                    department: "Department",
+                    specialization: "Specialization",
+                    qualification: "Qualification",
+                    yearsOfExperience: "Years of Experience",
+                    studentId: "Student ID",
+                    yearLevel: "Year Level",
+                    program: "Program/Course",
+                    studentName: "Student Name",
+                    relationship: "Relationship",
+                    emergencyContact: "Emergency Contact",
+                    librarySection: "Library Section",
+                    licenseNumber: "License Number",
+                  };
+
+                  const fieldPlaceholders: Record<string, string> = {
+                    department: "Enter department name",
+                    specialization: "Enter your specialization",
+                    qualification: "e.g., PhD, Masters, Bachelor's",
+                    yearsOfExperience: "Enter years of experience",
+                    studentId: "Enter student ID",
+                    yearLevel: "e.g., Year 1, Year 2",
+                    program: "Enter program/course name",
+                    studentName: "Enter student's full name",
+                    relationship: "e.g., Father, Mother, Guardian",
+                    emergencyContact: "Enter emergency contact number",
+                    librarySection: "e.g., Reference, Circulation",
+                    licenseNumber: "Enter professional license number",
+                  };
+
+                  return (
+                    <div className="space-y-5">
+                      {allItems.length > 0 ? (
+                        <>
+                          <div className="bg-primary-50/5 rounded-xl p-4 border border-primary-50/20">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm text-primary-50">
+                                <strong>{form.role}</strong> - Please provide additional information
+                              </p>
+                              {totalPages > 1 && (
+                                <p className="text-xs text-primary-50/70">
+                                  Page {additionalInfoPage} of {totalPages}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Current Page Fields */}
+                          <div className="space-y-5">
+                            {currentPageItems.map((field) => {
+                              if (field === 'contractDocument') {
+                                return (
+                                  <div key="contractDocument">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                      Contract Document <span className="text-red-500">*</span>
+                                    </label>
+                                    <p className="text-xs text-gray-500 mb-3">
+                                      Upload your employment contract or agreement (PDF, DOC, DOCX - Max 5MB)
+                                    </p>
+                                    
+                                    {!form.contractDocument ? (
+                                      <div className="relative">
+                                        <input
+                                          type="file"
+                                          id="contractDocument"
+                                          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                          onChange={handleFileChange}
+                                          className="hidden"
+                                        />
+                                        <label
+                                          htmlFor="contractDocument"
+                                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-primary-50 hover:bg-primary-50/5 transition-all duration-200"
+                                        >
+                                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                                          <span className="text-sm text-gray-600 font-medium">
+                                            Click to upload contract document
+                                          </span>
+                                          <span className="text-xs text-gray-400 mt-1">
+                                            PDF, DOC, or DOCX (Max 5MB)
+                                          </span>
+                                        </label>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center justify-between p-4 bg-primary-50/5 border border-primary-50/20 rounded-xl">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                          <div className="flex-shrink-0 w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
+                                            <Upload className="w-5 h-5 text-white" />
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate">
+                                              {form.contractDocument.name}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                              {(form.contractDocument.size / 1024).toFixed(2)} KB
+                                            </p>
+                                          </div>
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={handleRemoveFile}
+                                          className="flex-shrink-0 ml-3 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                          title="Remove file"
+                                        >
+                                          <X className="w-5 h-5" />
+                                        </button>
+                                      </div>
+                                    )}
+                                    
+                                    {touched.contractDocument && errors.contractDocument && (
+                                      <p className="mt-2 text-sm text-red-500">
+                                        {errors.contractDocument}
+                                      </p>
+                                    )}
+                                  </div>
+                                );
+                              }
+                              
+                              return (
+                                <Input
+                                  key={field}
+                                  label={fieldLabels[field]}
+                                  name={field}
+                                  type="text"
+                                  placeholder={fieldPlaceholders[field]}
+                                  value={form[field] || ""}
+                                  onChange={handleChange}
+                                  onBlur={handleBlur}
+                                  leftIcon={<IoMdPerson className="w-5 h-5" />}
+                                  error={touched[field] ? errors[field] : undefined}
+                                  required
+                                />
+                              );
+                            })}
+                          </div>
+
+                          {/* Pagination Controls */}
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-center gap-3 pt-4">
+                              <button
+                                type="button"
+                                onClick={() => setAdditionalInfoPage((prev) => Math.max(1, prev - 1))}
+                                disabled={additionalInfoPage === 1}
+                                className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
+                                  additionalInfoPage === 1
+                                    ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                                    : "border-primary-50/30 text-primary-50 hover:bg-primary-50/5"
+                                }`}
+                              >
+                                <ChevronLeft className="w-5 h-5" />
+                              </button>
+                              
+                              <div className="flex gap-2">
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                  <button
+                                    key={page}
+                                    type="button"
+                                    onClick={() => setAdditionalInfoPage(page)}
+                                    className={`w-10 h-10 rounded-lg transition-all duration-200 ${
+                                      additionalInfoPage === page
+                                        ? "bg-primary-50 text-white font-semibold shadow-md"
+                                        : "border border-gray-300 text-gray-600 hover:bg-gray-50"
+                                    }`}
+                                  >
+                                    {page}
+                                  </button>
+                                ))}
+                              </div>
+                              
+                              <button
+                                type="button"
+                                onClick={() => setAdditionalInfoPage((prev) => Math.min(totalPages, prev + 1))}
+                                disabled={additionalInfoPage === totalPages}
+                                className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
+                                  additionalInfoPage === totalPages
+                                    ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                                    : "border-primary-50/30 text-primary-50 hover:bg-primary-50/5"
+                                }`}
+                              >
+                                <ChevronRight className="w-5 h-5" />
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 text-center">
+                          <p className="text-gray-500">
+                            No additional information required for this role.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Navigation Buttons */}
                 <div className="mt-8 flex gap-4">

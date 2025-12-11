@@ -16,6 +16,7 @@ import {
     IoShieldCheckmarkOutline,
     IoStatsChartOutline,
     IoTrophyOutline,
+    IoKeyOutline,
 } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
 
@@ -88,6 +89,16 @@ const links = [
     to: "/principal/notifications",
     label: "Notifications",
     icon: <IoNotificationsOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/principal/roles-permissions",
+    label: "Roles & Permissions",
+    icon: <IoKeyOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/principal/assign-teachers",
+    label: "Assign Teachers",
+    icon: <IoKeyOutline className="w-5 h-5" />,
   },
   // {
   //   to: "/principal/settings",
