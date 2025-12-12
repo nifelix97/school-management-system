@@ -1,511 +1,362 @@
 import React, { useState } from "react";
 import {
-    IoBarChartOutline,
-    IoCalendarOutline,
-    IoDocumentTextOutline,
-    IoDownloadOutline,
-    IoPeopleOutline,
-    IoPieChartOutline,
-    IoSchoolOutline,
-    IoStatsChartOutline,
-    IoTrendingDownOutline,
-    IoTrendingUpOutline,
-    IoWalletOutline,
+  IoBarChartOutline,
+  IoCalendarOutline,
+  IoCloudDownloadOutline,
+  IoDownloadOutline,
+  IoFilterOutline,
+  IoPeopleOutline,
+  IoPersonAddOutline,
+  IoSearchOutline,
+  IoTrendingUpOutline,
 } from "react-icons/io5";
 
-interface MetricCard {
-  title: string;
-  value: string | number;
-  change: string;
-  trend: "up" | "down";
-  icon: React.ReactNode;
-  color: string;
-}
-
-interface ChartData {
-  label: string;
-  value: number;
-  color: string;
-  opacity?: number;
-}
-
-interface ReportItem {
-  id: string;
+interface UserData {
+  id: number;
   name: string;
-  type: string;
-  date: string;
-  size: string;
+  email: string;
+  role: string;
+  status: "active" | "inactive" | "offline";
+  joinDate: string;
+  lastLogin: string;
+  avatar: string;
+}
+
+interface RegistrationStat {
+  month: string;
+  count: number;
 }
 
 const ReportsAnalytics: React.FC = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("month");
-  const [selectedReport, setSelectedReport] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<"trends" | "directory">("trends");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 7;
 
-  // Key Metrics
-  const metrics: MetricCard[] = [
-    {
-      title: "Total Revenue",
-      value: "$284,750",
-      change: "+18.2%",
-      trend: "up",
-      icon: <IoWalletOutline className="w-6 h-6 sm:w-8 sm:h-8" />,
-      color: "bg-primary-50",
-    },
-    {
-      title: "Student Growth",
-      value: "+342",
-      change: "+12.5%",
-      trend: "up",
-      icon: <IoSchoolOutline className="w-6 h-6 sm:w-8 sm:h-8" />,
-      color: "bg-primary-100",
-    },
-    {
-      title: "Attendance Rate",
-      value: "94.8%",
-      change: "+2.3%",
-      trend: "up",
-      icon: <IoPeopleOutline className="w-6 h-6 sm:w-8 sm:h-8" />,
-      color: "bg-primary-50",
-    },
-    {
-      title: "Course Completion",
-      value: "87.5%",
-      change: "-1.2%",
-      trend: "down",
-      icon: <IoStatsChartOutline className="w-6 h-6 sm:w-8 sm:h-8" />,
-      color: "bg-primary-100",
-    },
+  // Mock Data: User Registrations (Bar Chart)
+  const registrationStats: RegistrationStat[] = [
+    { month: "Jan", count: 45 },
+    { month: "Feb", count: 52 },
+    { month: "Mar", count: 38 },
+    { month: "Apr", count: 65 },
+    { month: "May", count: 48 },
+    { month: "Jun", count: 72 },
   ];
 
-  // Enrollment Trends (Monthly)
-  const enrollmentData: ChartData[] = [
-    { label: "Jan", value: 85, color: "bg-primary-50", opacity: 1.0 },
-    { label: "Feb", value: 92, color: "bg-primary-50", opacity: 0.85 },
-    { label: "Mar", value: 78, color: "bg-primary-50", opacity: 0.7 },
-    { label: "Apr", value: 95, color: "bg-primary-50", opacity: 0.55 },
-    { label: "May", value: 88, color: "bg-primary-50", opacity: 0.4 },
-    { label: "Jun", value: 100, color: "bg-primary-50", opacity: 0.25 },
+  // Mock Data: Users List
+  const users: UserData[] = [
+    { id: 1, name: "Dr. Sarah Wilson", email: "sarah.w@school.edu", role: "Teacher", status: "active", joinDate: "2024-01-15", lastLogin: "2 mins ago", avatar: "SW" },
+    { id: 2, name: "John Smith", email: "john.s@student.edu", role: "Student", status: "active", joinDate: "2024-02-10", lastLogin: "1 hour ago", avatar: "JS" },
+    { id: 3, name: "Admin User", email: "admin@school.edu", role: "Admin", status: "active", joinDate: "2023-11-05", lastLogin: "Just now", avatar: "AD" },
+    { id: 4, name: "Prof. Michael Brown", email: "m.brown@school.edu", role: "Teacher", status: "inactive", joinDate: "2024-01-20", lastLogin: "2 days ago", avatar: "MB" },
+    { id: 5, name: "Emma Davis", email: "emma.d@student.edu", role: "Student", status: "active", joinDate: "2024-03-12", lastLogin: "5 hours ago", avatar: "ED" },
+    { id: 6, name: "James Wilson", email: "j.wilson@school.edu", role: "Registrar", status: "active", joinDate: "2023-12-01", lastLogin: "30 mins ago", avatar: "JW" },
+    { id: 7, name: "Lisa Anderson", email: "l.anderson@school.edu", role: "Librarian", status: "offline", joinDate: "2024-02-28", lastLogin: "1 day ago", avatar: "LA" },
+    { id: 8, name: "Robert Taylor", email: "r.taylor@school.edu", role: "HOD", status: "active", joinDate: "2024-01-10", lastLogin: "15 mins ago", avatar: "RT" },
+    { id: 9, name: "Emily Johnson", email: "emily.j@student.edu", role: "Student", status: "active", joinDate: "2024-04-05", lastLogin: "2 hours ago", avatar: "EJ" },
+    { id: 10, name: "David Miller", email: "david.m@student.edu", role: "Student", status: "offline", joinDate: "2024-04-18", lastLogin: "3 days ago", avatar: "DM" },
+    { id: 11, name: "Jennifer Wu", email: "jennifer.w@teacher.edu", role: "Teacher", status: "active", joinDate: "2024-02-15", lastLogin: "10 mins ago", avatar: "JW" },
+    { id: 12, name: "Thomas Anderson", email: "thomas.a@student.edu", role: "Student", status: "inactive", joinDate: "2024-03-22", lastLogin: "1 week ago", avatar: "TA" },
   ];
 
-  // Department Performance
-  const departmentPerformance: ChartData[] = [
-    { label: "Computer Science", value: 92, color: "bg-primary-100", opacity: 1.0 },
-    { label: "Engineering", value: 88, color: "bg-primary-100", opacity: 0.85 },
-    { label: "Business", value: 85, color: "bg-primary-100", opacity: 0.7 },
-    { label: "Medicine", value: 95, color: "bg-primary-100", opacity: 0.55 },
-    { label: "Arts", value: 78, color: "bg-primary-100", opacity: 0.4 },
-    { label: "Sciences", value: 90, color: "bg-primary-100", opacity: 0.25 },
-  ];
+  // Logic for Directory Tab
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = roleFilter === "all" || user.role.toLowerCase() === roleFilter.toLowerCase();
+    return matchesSearch && matchesRole;
+  });
 
-  // Revenue Breakdown
-  const revenueBreakdown: ChartData[] = [
-    { label: "Tuition Fees", value: 65, color: "bg-primary-50" },
-    { label: "Lab Fees", value: 15, color: "bg-primary-100" },
-    { label: "Library Fees", value: 8, color: "bg-primary-50" },
-    { label: "Transport", value: 7, color: "bg-primary-100" },
-    { label: "Others", value: 5, color: "bg-primary-50" },
-  ];
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Available Reports
-  const reports: ReportItem[] = [
-    {
-      id: "1",
-      name: "Student Enrollment Report",
-      type: "PDF",
-      date: "2025-11-20",
-      size: "2.4 MB",
-    },
-    {
-      id: "2",
-      name: "Financial Summary Q4",
-      type: "Excel",
-      date: "2025-11-18",
-      size: "1.8 MB",
-    },
-    {
-      id: "3",
-      name: "Teacher Performance Analysis",
-      type: "PDF",
-      date: "2025-11-15",
-      size: "3.1 MB",
-    },
-    {
-      id: "4",
-      name: "Course Completion Rates",
-      type: "PDF",
-      date: "2025-11-12",
-      size: "1.5 MB",
-    },
-    {
-      id: "5",
-      name: "Attendance Analytics",
-      type: "Excel",
-      date: "2025-11-10",
-      size: "2.2 MB",
-    },
-  ];
+  // Reset page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, roleFilter]);
 
-
+  const handleDownloadCSV = () => {
+    alert("Downloading user_report.csv...");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-3 xs:p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary-50 mb-2">
-              Reports & Analytics
-            </h1>
-            <p className="text-sm sm:text-base text-primary-50/60">
-              Comprehensive insights and data analysis for your institution
-            </p>
-          </div>
-          
-          {/* Period Selector */}
-          <div className="flex gap-2">
-            {["week", "month", "year"].map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                  selectedPeriod === period
-                    ? "bg-primary-100 text-white"
-                    : "bg-white text-primary-50 border border-gray-200 hover:border-primary-100"
-                }`}
-              >
-                {period.charAt(0).toUpperCase() + period.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-primary-50 mb-2">
+          User Analytics
+        </h1>
+        <p className="text-sm sm:text-base text-primary-50/60">
+          Monitor user growth and manage system access.
+        </p>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-        {metrics.map((metric, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${metric.color} p-3 rounded-lg text-white`}>
-                {metric.icon}
-              </div>
-              <div
-                className="flex items-center gap-1 text-xs sm:text-sm font-medium text-primary-100"
-              >
-                {metric.trend === "up" ? (
-                  <IoTrendingUpOutline className="w-4 h-4" />
-                ) : (
-                  <IoTrendingDownOutline className="w-4 h-4" />
-                )}
-                {metric.change}
-              </div>
-            </div>
-            <div className="text-xs sm:text-sm text-primary-50/60 mb-1">
-              {metric.title}
-            </div>
-            <div className="text-xl sm:text-2xl font-bold text-primary-50">
-              {metric.value}
-            </div>
-          </div>
-        ))}
+      {/* Tabs */}
+      <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-gray-100 w-fit mb-6 sm:mb-8">
+        <button
+          onClick={() => setActiveTab("trends")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === "trends"
+              ? "bg-primary-50 text-white shadow-sm"
+              : "text-primary-50/60 hover:bg-gray-50"
+          }`}
+        >
+          <IoBarChartOutline className="w-4 h-4" />
+          Trend Analysis
+        </button>
+        <button
+          onClick={() => setActiveTab("directory")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === "directory"
+              ? "bg-primary-50 text-white shadow-sm"
+              : "text-primary-50/60 hover:bg-gray-50"
+          }`}
+        >
+          <IoPeopleOutline className="w-4 h-4" />
+          User Directory
+        </button>
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Enrollment Trends */}
-        <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-primary-50 flex items-center gap-2">
-              <IoBarChartOutline className="w-5 h-5 sm:w-6 sm:h-6 text-primary-100" />
-              Enrollment Trends
-            </h2>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            {/* Single Donut Chart */}
-            <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 200 200">
-                {(() => {
-                  const total = enrollmentData.reduce((sum, d) => sum + d.value, 0);
-                  let currentAngle = 0;
-                  const radius = 80;
-                  const centerX = 100;
-                  const centerY = 100;
-                  
-                  return enrollmentData.map((data, index) => {
-                    const percentage = (data.value / total) * 100;
-                    const angle = (percentage / 100) * 360;
-                    const startAngle = currentAngle;
-                    const endAngle = currentAngle + angle;
-                    
-                    // Convert angles to radians
-                    const startRad = (startAngle - 90) * (Math.PI / 180);
-                    const endRad = (endAngle - 90) * (Math.PI / 180);
-                    
-                    // Calculate arc path
-                    const x1 = centerX + radius * Math.cos(startRad);
-                    const y1 = centerY + radius * Math.sin(startRad);
-                    const x2 = centerX + radius * Math.cos(endRad);
-                    const y2 = centerY + radius * Math.sin(endRad);
-                    
-                    const largeArcFlag = angle > 180 ? 1 : 0;
-                    
-                    const pathData = [
-                      `M ${centerX} ${centerY}`,
-                      `L ${x1} ${y1}`,
-                      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-                      'Z'
-                    ].join(' ');
-                    
-                    currentAngle = endAngle;
-                    
-                    return (
-                      <path
-                        key={index}
-                        d={pathData}
-                        fill="currentColor"
-                        className={data.color.replace('bg-', 'text-')}
-                        opacity={data.opacity || 0.9}
-                      />
-                    );
-                  });
-                })()}
-                {/* Center white circle to create donut effect */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="50"
-                  fill="white"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl sm:text-3xl font-bold text-primary-50">
-                  {enrollmentData.reduce((sum, d) => sum + d.value, 0)}
-                </span>
-                <span className="text-xs text-primary-50/60">Total</span>
-              </div>
-            </div>
-            
-            {/* Legend */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full">
-              {enrollmentData.map((data, index) => {
-                const total = enrollmentData.reduce((sum, d) => sum + d.value, 0);
-                const percentage = (data.value / total) * 100;
-                
-                return (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${data.color}`} />
-                    <div className="flex-1">
-                      <div className="text-xs font-medium text-primary-50">
-                        {data.label}
-                      </div>
-                      <div className="text-xs text-primary-50/60">
-                        {data.value} ({Math.round(percentage)}%)
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Department Performance */}
-        <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-primary-50 flex items-center gap-2">
-              <IoStatsChartOutline className="w-5 h-5 sm:w-6 sm:h-6 text-primary-100" />
-              Department Performance
-            </h2>
-          </div>
-          
-          <div className="flex flex-col items-center">
-            {/* Single Donut Chart */}
-            <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 200 200">
-                {(() => {
-                  const total = departmentPerformance.reduce((sum, d) => sum + d.value, 0);
-                  let currentAngle = 0;
-                  const radius = 80;
-                  const centerX = 100;
-                  const centerY = 100;
-                  
-                  return departmentPerformance.map((data, index) => {
-                    const percentage = (data.value / total) * 100;
-                    const angle = (percentage / 100) * 360;
-                    const startAngle = currentAngle;
-                    const endAngle = currentAngle + angle;
-                    
-                    // Convert angles to radians
-                    const startRad = (startAngle - 90) * (Math.PI / 180);
-                    const endRad = (endAngle - 90) * (Math.PI / 180);
-                    
-                    // Calculate arc path
-                    const x1 = centerX + radius * Math.cos(startRad);
-                    const y1 = centerY + radius * Math.sin(startRad);
-                    const x2 = centerX + radius * Math.cos(endRad);
-                    const y2 = centerY + radius * Math.sin(endRad);
-                    
-                    const largeArcFlag = angle > 180 ? 1 : 0;
-                    
-                    const pathData = [
-                      `M ${centerX} ${centerY}`,
-                      `L ${x1} ${y1}`,
-                      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-                      'Z'
-                    ].join(' ');
-                    
-                    currentAngle = endAngle;
-                    
-                    return (
-                      <path
-                        key={index}
-                        d={pathData}
-                        fill="currentColor"
-                        className={data.color.replace('bg-', 'text-')}
-                        opacity={data.opacity || 0.9}
-                      />
-                    );
-                  });
-                })()}
-                {/* Center white circle to create donut effect */}
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="50"
-                  fill="white"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl sm:text-3xl font-bold text-primary-50">
-                  {Math.round(departmentPerformance.reduce((sum, d) => sum + d.value, 0) / departmentPerformance.length)}%
-                </span>
-                <span className="text-xs text-primary-50/60">Avg</span>
-              </div>
-            </div>
-            
-            {/* Legend */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-              {departmentPerformance.map((data, index) => {
-                const total = departmentPerformance.reduce((sum, d) => sum + d.value, 0);
-                const percentage = (data.value / total) * 100;
-                
-                return (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${data.color}`} />
-                    <div className="flex-1">
-                      <div className="text-xs font-medium text-primary-50">
-                        {data.label}
-                      </div>
-                      <div className="text-xs text-primary-50/60">
-                        {data.value}% ({Math.round(percentage)}% of total)
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Revenue Breakdown & Reports */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Revenue Breakdown */}
-        <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-primary-50 flex items-center gap-2">
-              <IoPieChartOutline className="w-5 h-5 sm:w-6 sm:h-6 text-primary-100" />
-              Revenue Sources
-            </h2>
-          </div>
-          
-          <div className="space-y-4">
-            {revenueBreakdown.map((data, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <div className={`${data.color} w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold`}>
-                  {data.value}%
+      {/* TABS CONTENT */}
+      {activeTab === "trends" ? (
+        <div className="space-y-6">
+          {/* Key Metrics Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                  <IoPeopleOutline className="w-6 h-6" />
                 </div>
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-primary-50">
-                    {data.label}
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden mt-1">
-                    <div
-                      className={`${data.color} h-full rounded-full transition-all duration-500`}
-                      style={{ width: `${data.value}%` }}
-                    />
-                  </div>
+                <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                  <IoTrendingUpOutline className="mr-1" /> +12%
+                </span>
+              </div>
+              <h3 className="text-primary-50/60 text-sm font-medium">Total Users</h3>
+              <p className="text-2xl font-bold text-primary-50">2,847</p>
+            </div>
+            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-purple-50 text-purple-600 rounded-lg">
+                  <IoPersonAddOutline className="w-6 h-6" />
+                </div>
+                <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                  <IoTrendingUpOutline className="mr-1" /> +5%
+                </span>
+              </div>
+              <h3 className="text-primary-50/60 text-sm font-medium">New This Month</h3>
+              <p className="text-2xl font-bold text-primary-50">142</p>
+            </div>
+            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-green-50 text-green-600 rounded-lg">
+                  <IoCloudDownloadOutline className="w-6 h-6" />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Available Reports */}
-        <div className="lg:col-span-2 bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-primary-50 flex items-center gap-2">
-              <IoDocumentTextOutline className="w-5 h-5 sm:w-6 sm:h-6 text-primary-100" />
-              Available Reports
-            </h2>
-            
-            {/* Report Type Filter */}
-            <select
-              value={selectedReport}
-              onChange={(e) => setSelectedReport(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary-100"
-            >
-              <option value="all">All Reports</option>
-              <option value="pdf">PDF Only</option>
-              <option value="excel">Excel Only</option>
-            </select>
+              <h3 className="text-primary-50/60 text-sm font-medium">Active Now</h3>
+              <p className="text-2xl font-bold text-primary-50">894</p>
+            </div>
           </div>
 
-          <div className="space-y-3">
-            {reports
-              .filter(
-                (report) =>
-                  selectedReport === "all" ||
-                  report.type.toLowerCase() === selectedReport
-              )
-              .map((report) => (
-                <div
-                  key={report.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border border-gray-200 hover:border-primary-100 hover:bg-primary-100/5 transition-all"
-                >
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="bg-primary-100/10 p-3 rounded-lg">
-                      <IoDocumentTextOutline className="w-5 h-5 text-primary-100" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-primary-50 mb-1">
-                        {report.name}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-primary-50/60">
-                        <span className="flex items-center gap-1">
-                          <IoCalendarOutline className="w-3 h-3" />
-                          {report.date}
-                        </span>
-                        <span>{report.size}</span>
-                        <span className="px-2 py-0.5 bg-primary-100/10 text-primary-100 rounded">
-                          {report.type}
-                        </span>
-                      </div>
+          {/* Registration Bar Chart */}
+          <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <h2 className="text-lg font-bold text-primary-50 mb-6">User Registration Trends</h2>
+            <div className="h-64 flex items-end justify-between gap-2 sm:gap-4 px-2">
+              {registrationStats.map((stat, index) => (
+                <div key={index} className="flex flex-col items-center gap-2 w-full group h-full">
+                  <div className="relative w-full bg-gray-100 rounded-t-lg flex-1 flex items-end overflow-hidden">
+                    <div 
+                      className="w-full bg-primary-50 group-hover:bg-gradient-to-r from-primary-50 to-primary-100 transition-all duration-500 rounded-t-lg relative"
+                      style={{ height: `${(stat.count / 100) * 100}%` }}
+                    >
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary-50 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                            {stat.count}
+                        </div>
                     </div>
                   </div>
-                  
-                  <button className="flex items-center gap-2 px-4 py-2 bg-primary-50 text-white rounded-lg hover:bg-primary-50/90 transition-colors text-sm font-medium">
-                    <IoDownloadOutline className="w-4 h-4" />
-                    Download
-                  </button>
+                  <span className="text-xs font-medium text-primary-50/60">{stat.month}</span>
                 </div>
               ))}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        /* User Directory Tab */
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* Toolbar */}
+          <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+             <div className="flex items-center gap-2">
+                <div className="p-2 bg-primary-50/5 rounded-lg">
+                    <IoFilterOutline className="w-5 h-5 text-primary-50" />
+                </div>
+                <h2 className="text-lg font-bold text-primary-50">User List</h2>
+             </div>
+             
+             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <select 
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-50"
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                >
+                    <option value="all">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                </select>
+                <div className="relative">
+                    <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input 
+                        type="text" 
+                        placeholder="Search by name or email..." 
+                        className="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-50 w-full sm:w-64"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+                <button 
+                    onClick={handleDownloadCSV}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-primary-50 text-white rounded-lg hover:bg-primary-50/90 transition-colors text-sm font-medium"
+                >
+                    <IoDownloadOutline className="w-4 h-4" />
+                    Export CSV
+                </button>
+             </div>
+          </div>
+
+          {/* Mobile View: Cards */}
+          <div className="md:hidden">
+            {paginatedUsers.map((user) => (
+              <div key={user.id} className="p-4 border-b border-gray-100 flex flex-col gap-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary-50 text-white flex items-center justify-center text-sm font-medium">
+                      {user.avatar}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-primary-50">{user.name}</div>
+                      <div className="text-xs text-primary-50/60">{user.email}</div>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                    user.role === 'Admin' ? 'bg-purple-50 text-purple-600 border-purple-100' :
+                    user.role === 'Teacher' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                    user.role === 'Student' ? 'bg-green-50 text-green-600 border-green-100' :
+                    'bg-gray-50 text-gray-600 border-gray-100'
+                  }`}>
+                    {user.role}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm mt-1">
+                    <div className="flex flex-col">
+                        <span className="text-xs text-primary-50/40">Status</span>
+                        <div className="flex items-center gap-1.5">
+                            <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'active' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                            <span className="text-primary-50/80 capitalize">{user.status}</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-xs text-primary-50/40">Joined</span>
+                        <span className="text-primary-50/80">{user.joinDate}</span>
+                    </div>
+                </div>
+              </div>
+            ))}
+             {paginatedUsers.length === 0 && (
+                <div className="p-8 text-center text-primary-50/60 text-sm">
+                   No users found.
+                </div>
+             )}
+          </div>
+
+          {/* Desktop View: Table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-6 py-4 text-xs font-semibold text-primary-50 uppercase tracking-wider">User Profile</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-primary-50 uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-primary-50 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-primary-50 uppercase tracking-wider">Join Date</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-primary-50 uppercase tracking-wider text-right">Last Login</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {paginatedUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary-50 text-white flex items-center justify-center text-sm font-medium shadow-sm">
+                          {user.avatar}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-primary-50">{user.name}</div>
+                          <div className="text-xs text-primary-50/60">{user.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2.5 py-1 text-xs font-medium rounded-full border ${
+                        user.role === 'Admin' ? 'bg-purple-50 text-purple-600 border-purple-100' :
+                        user.role === 'Teacher' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                        'bg-gray-50 text-gray-600 border-gray-100'
+                      }`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-green-500' : user.status === 'offline' ? 'bg-gray-400' : 'bg-red-500'}`}></div>
+                        <span className="text-sm text-primary-50/80 capitalize">{user.status}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-primary-50/70 text-sm">
+                        <div className="flex items-center gap-2">
+                            <IoCalendarOutline className="w-4 h-4 text-primary-50/40" />
+                            {user.joinDate}
+                        </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-primary-50/60">
+                      {user.lastLogin}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+             {paginatedUsers.length === 0 && (
+                <div className="p-8 text-center text-primary-50/60 text-sm">
+                   No users found matching filters.
+                </div>
+             )}
+          </div>
+          
+           {/* Pagination Controls */}
+          {filteredUsers.length > 0 && (
+            <div className="px-4 py-3 sm:px-6 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+              <div className="text-xs sm:text-sm text-primary-50/60">
+                <span className="hidden sm:inline">Showing </span>
+                <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">{Math.min(startIndex + ITEMS_PER_PAGE, filteredUsers.length)}</span> of <span className="font-medium">{filteredUsers.length}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-md border border-gray-200 bg-white text-primary-50 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-xs sm:text-sm"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-md border border-gray-200 bg-white text-primary-50 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-xs sm:text-sm"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

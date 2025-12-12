@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import {
-    IoAlertCircleOutline,
-    IoCheckmarkCircleOutline,
-    IoCloseCircleOutline,
-    IoEllipsisVerticalOutline,
-    IoFilterOutline,
-    IoInformationCircleOutline,
-    IoMailOpenOutline,
-    IoMailOutline,
-    IoNotificationsOutline,
-    IoTimeOutline,
-    IoTrashOutline,
+  IoAlertCircleOutline,
+  IoCheckmarkCircleOutline,
+  IoCloseCircleOutline,
+  IoEllipsisVerticalOutline,
+  IoFilterOutline,
+  IoInformationCircleOutline,
+  IoMailOpenOutline,
+  IoMailOutline,
+  IoNotificationsOutline,
+  IoTimeOutline,
+  IoTrashOutline,
 } from "react-icons/io5";
 
 interface Notification {
@@ -24,6 +24,8 @@ interface Notification {
 }
 
 const AdminNotifications: React.FC = () => {
+  const ITEMS_PER_PAGE = 5;
+  const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<string>("all");
   const [notifications, setNotifications] = useState<Notification[]>([
     {
@@ -151,6 +153,15 @@ const AdminNotifications: React.FC = () => {
     return notif.type === filter;
   });
 
+  const totalPages = Math.ceil(filteredNotifications.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedNotifications = filteredNotifications.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Reset page on filter change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
@@ -256,14 +267,14 @@ const AdminNotifications: React.FC = () => {
           </span>
         </h2>
 
-        {filteredNotifications.length === 0 ? (
+        {paginatedNotifications.length === 0 ? (
           <div className="text-center py-12">
             <IoNotificationsOutline className="w-16 h-16 text-primary-50/20 mx-auto mb-4" />
             <p className="text-primary-50/60">No notifications found</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredNotifications.map((notification) => (
+            {paginatedNotifications.map((notification) => (
               <div
                 key={notification.id}
                 className={`relative flex gap-3 sm:gap-4 p-4 rounded-lg border transition-all ${
@@ -346,6 +357,29 @@ const AdminNotifications: React.FC = () => {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Pagination Controls */}
+        {filteredNotifications.length > ITEMS_PER_PAGE && (
+            <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
+              <button
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="text-xs sm:text-sm text-primary-50 hover:text-primary-100 disabled:opacity-50 disabled:cursor-not-allowed font-medium px-3 py-1 bg-gray-50 rounded-lg"
+              >
+                Previous
+              </button>
+              <span className="text-xs sm:text-sm text-primary-50/60">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="text-xs sm:text-sm text-primary-50 hover:text-primary-100 disabled:opacity-50 disabled:cursor-not-allowed font-medium px-3 py-1 bg-gray-50 rounded-lg"
+              >
+                Next
+              </button>
+            </div>
         )}
       </div>
     </div>

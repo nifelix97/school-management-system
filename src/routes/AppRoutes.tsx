@@ -21,7 +21,9 @@ import StudentPayments from "../pages/Accountant/StudentPayments";
 import AdminDashboard from "../pages/Admin/AdminDashBoard";
 import AdminNotifications from "../pages/Admin/AdminNotifications";
 import AdminProfile from "../pages/Admin/AdminProfile";
+import AuditLogs from "../pages/Admin/AuditLogs";
 import CoursesManagement from "../pages/Admin/CourseManagement";
+import DataRecovery from "../pages/Admin/DataRecovery";
 import DepartmentsManagement from "../pages/Admin/DepartmentsManagement";
 import ReportsAnalytics from "../pages/Admin/ReportsAnalytics";
 import StudentManagement from "../pages/Admin/StudentManagement";
@@ -65,6 +67,7 @@ import LoginPage from "../pages/LoginPage";
 import NotFound from "../pages/NotFound";
 import AcademicOversight from "../pages/Principal/AcademiOversight";
 import Announcements from "../pages/Principal/Announcements";
+import AssignTeachers from "../pages/Principal/AssignTeachers";
 import BudgetsFinance from "../pages/Principal/BudgetsFinance";
 import DepartmentsHeads from "../pages/Principal/DepartmentsHeads";
 import EventsCalendar from "../pages/Principal/Events&Calendar";
@@ -135,7 +138,6 @@ import StrategicInitiative from "../pages/v-chancellor/StrategicInitiative";
 import VcNotification from "../pages/v-chancellor/Vc-Notification";
 import ViceChancellorDashboard from "../pages/v-chancellor/ViceChancellorDashboard";
 import ViceChancellorProfile from "../pages/v-chancellor/v-ChancellorProfile";
-import AssignTeachers from "../pages/Principal/AssignTeachers";
 
 
 
@@ -275,6 +277,8 @@ export default function AppRoutes() {
         <Route path="/admin/reports" element={<ReportsAnalytics />} />
         <Route path="/admin/notifications" element={<AdminNotifications />} />
         <Route path="/admin/settings" element={<SystemSetting />} />
+        <Route path="/admin/audit-logs" element={<AuditLogs />} />
+        <Route path="/admin/data-recovery" element={<DataRecovery />} />
       </Route>
       <Route element={<PrincipalLayout />}>
         <Route path="/principal/dashboard" element={<PrincipalDashboard />} />

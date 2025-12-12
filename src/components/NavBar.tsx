@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaRegFileLines } from "react-icons/fa6";
 import { IoIosCheckmarkCircle, IoMdHome, IoMdPerson } from "react-icons/io";
-import { IoLogInOutline } from "react-icons/io5";
+import { IoLogInOutline, IoStatsChartOutline } from "react-icons/io5";
 import { MdEmail } from "react-icons/md";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -195,14 +195,36 @@ const NavBar = () => {
               <FloatingLanguageSelector />
             </div>
 
-            {/* {isAdmin && (
+            {isAuthenticated && (
               <Link
-                to="/dashboard"
-                className="no-underline text-primary-400 font-medium hover:text-primary-200"
+                to={(() => {
+                  try {
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    const role = user.role;
+                    switch (role) {
+                      case "Student": return "/dashboard";
+                      case "Teacher": return "/teacher/dashboard";
+                      case "HOD": return "/hod/dashboard";
+                      case "Registrar": return "/registrar/dashboard";
+                      case "Accountant": return "/accountant/dashboard";
+                      case "Parent": return "/parent/dashboard";
+                      case "Admin": return "/admin/dashboard";
+                      case "Principal": return "/principal/dashboard";
+                      case "Vice Principal": return "/vice-principal/dashboard";
+                      case "Librarian": return "/librarian/dashboard";
+                      case "Vice Chancellor": return "/vice-chancellor/dashboard";
+                      default: return "/dashboard";
+                    }
+                  } catch (e) {
+                    return "/dashboard";
+                  }
+                })()}
+                className="no-underline text-primary-50 font-medium hover:text-primary-100 flex items-center gap-1"
               >
+                <IoStatsChartOutline className="size-5" />
                 Dashboard
               </Link>
-            )} */}
+            )}
             {/* <LoginDropdown
               open={loginOpen}
               onClose={() => setLoginOpen(false)}
@@ -379,14 +401,37 @@ const NavBar = () => {
                 <span className="font-medium">Contact</span>
               </Link>
 
-              {/* <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className="no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10"
-              >
-                <IoChevronForward className="size-5 text-primary-100" />
-                <span className="font-medium">SANVERSE</span>
-              </Link> */}
+              {isAuthenticated && (
+                <Link
+                  to={(() => {
+                    try {
+                      const user = JSON.parse(localStorage.getItem('user') || '{}');
+                      const role = user.role;
+                      switch (role) {
+                        case "Student": return "/dashboard";
+                        case "Teacher": return "/teacher/dashboard";
+                        case "HOD": return "/hod/dashboard";
+                        case "Registrar": return "/registrar/dashboard";
+                        case "Accountant": return "/accountant/dashboard";
+                        case "Parent": return "/parent/dashboard";
+                        case "Admin": return "/admin/dashboard";
+                        case "Principal": return "/principal/dashboard";
+                        case "Vice Principal": return "/vice-principal/dashboard";
+                        case "Librarian": return "/librarian/dashboard";
+                        case "Vice Chancellor": return "/vice-chancellor/dashboard";
+                        default: return "/dashboard";
+                      }
+                    } catch (e) {
+                      return "/dashboard";
+                    }
+                  })()}
+                  onClick={() => setIsOpen(false)}
+                  className="no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 bg-primary-100/20"
+                >
+                  <IoStatsChartOutline className="size-5 text-primary-100" />
+                  <span className="font-medium">Dashboard</span>
+                </Link>
+              )}
               {!isAuthenticated ? (
                 <button
                   type="button"

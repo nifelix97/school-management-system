@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import {
-    IoCalendarOutline,
-    IoChevronBackOutline,
-    IoDocumentTextOutline,
-    IoLayersOutline,
-    IoMenuOutline,
-    IoNotificationsOutline,
-    IoPeopleOutline,
-    IoPersonCircleOutline,
-    IoSchoolOutline,
-    IoSettingsOutline,
-    // IoShieldCheckmarkOutline,
-    IoStatsChartOutline,
+  // IoCalendarOutline,
+  IoChevronBackOutline,
+  IoDocumentTextOutline,
+  // IoLayersOutline,
+  IoMenuOutline,
+  IoNotificationsOutline,
+  // IoPeopleOutline,
+  IoPersonCircleOutline,
+  // IoSchoolOutline,
+  IoSettingsOutline,
+  IoShieldCheckmarkOutline,
+  IoStatsChartOutline,
+  IoTrashBinOutline,
 } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
 
@@ -30,26 +31,26 @@ const links = [
     label: "Profile",
     icon: <IoPersonCircleOutline className="w-5 h-5" />,
   },
-  {
-    to: "/admin/students",
-    label: "Student Management",
-    icon: <IoSchoolOutline className="w-5 h-5" />,
-  },
-  {
-    to: "/admin/teachers",
-    label: "Teacher Management",
-    icon: <IoPeopleOutline className="w-5 h-5" />,
-  },
-  {
-    to: "/admin/courses",
-    label: "Course Management",
-    icon: <IoLayersOutline className="w-5 h-5" />,
-  },
-  {
-    to: "/admin/departments",
-    label: "D-Management",
-    icon: <IoCalendarOutline className="w-5 h-5" />,
-  },
+  // {
+  //   to: "/admin/students",
+  //   label: "Student Management",
+  //   icon: <IoSchoolOutline className="w-5 h-5" />,
+  // },
+  // {
+  //   to: "/admin/teachers",
+  //   label: "Teacher Management",
+  //   icon: <IoPeopleOutline className="w-5 h-5" />,
+  // },
+  // {
+  //   to: "/admin/courses",
+  //   label: "Course Management",
+  //   icon: <IoLayersOutline className="w-5 h-5" />,
+  // },
+  // {
+  //   to: "/admin/departments",
+  //   label: "D-Management",
+  //   icon: <IoCalendarOutline className="w-5 h-5" />,
+  // },
   {
     to: "/admin/reports",
     label: "Reports & Analytics",
@@ -69,6 +70,16 @@ const links = [
     to: "/admin/settings",
     label: "System Settings",
     icon: <IoSettingsOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/admin/audit-logs",
+    label: "Audit Logs",
+    icon: <IoShieldCheckmarkOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/admin/data-recovery",
+    label: "Data Recovery",
+    icon: <IoTrashBinOutline className="w-5 h-5" />,
   },
 ];
 
