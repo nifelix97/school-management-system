@@ -15,6 +15,9 @@ const roles = [
   "Accountant",
   "Librarian",
   "Vice Chancellor",
+  "Vice Principal",
+  "Chancellor",
+  "Dean",
   "Nurse",
   "Alumni",
   "Manager",
@@ -23,8 +26,6 @@ const roles = [
   "Vendors",
   "Coaches",
   "Receptionist",
-  "Vice Principal",
-  "Chancellor",
   "Parent",
 ];
 
@@ -39,6 +40,21 @@ type FormErrors = Partial<Record<keyof FormState, string>>;
 
 const emailRegex =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/;
+
+const ROLE_DASHBOARDS: Record<string, string> = {
+  "Admin": "/admin/dashboard",
+  "Principal": "/principal/dashboard",
+  "Student": "/dashboard",
+  "Teacher": "/teacher/dashboard",
+  "HOD": "/hod/dashboard",
+  "Registrar": "/registrar/dashboard",
+  "Accountant": "/accountant/dashboard",
+  "Librarian": "/librarian/dashboard",
+  "Vice Chancellor": "/vice-chancellor/dashboard",
+  "Vice Principal": "/vice-principal/dashboard",
+  "Chancellor": "/chancellor/dashboard",
+  "Dean": "/dean/dashboard",
+};
 
 const LoginPage = () => {
     const [form, setForm] = useState<FormState>({ email: "", password: "", role: "" });
@@ -111,44 +127,12 @@ const LoginPage = () => {
         toast.success("Welcome back!");
         
         // Role-based redirection
-        switch (role) {
-          case "Student":
-            navigate("/dashboard");
-            break;
-          case "Teacher":
-            navigate("/teacher/dashboard");
-            break;
-            case "HOD":
-            navigate("/hod/dashboard");
-            break;
-          case "Registrar":
-            navigate("/registrar/dashboard");
-            break;
-          case "Accountant":
-            navigate("/accountant/dashboard");
-            break;
-          case "Parent":
-            navigate("/parent/dashboard");
-            break;
-          case "Admin":
-            navigate("/admin/dashboard");
-            break;
-          case "Principal":
-            navigate("/principal/dashboard");
-            break;
-          case "Vice Principal":
-            navigate("/vice-principal/dashboard");
-            break;
-            case "Librarian":
-            navigate("/librarian/dashboard");
-            break;
-            case "Vice Chancellor":
-            navigate("/vice-chancellor/dashboard");
-            break;
-          default:
-            // For other roles, redirect to a general dashboard or role-specific page
-            navigate("/dashboard");
-            break;
+        const targetPath = ROLE_DASHBOARDS[role];
+        if (targetPath) {
+          navigate(targetPath);
+        } else {
+          // Fallback for unexpected roles
+          navigate("/dashboard");
         }
       } finally {
         setSubmitting(false);
@@ -160,32 +144,44 @@ const LoginPage = () => {
     <div className="min-h-screen w-full bg-white">
       <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
         {/* Left panel */}
-        <div className="bg-primary-50 text-white px-6 sm:px-10 lg:px-16 py-10 flex items-center">
-          <div className="w-full max-w-3xl mx-auto">
-            <h1 className="font-heading m-0 text-primary-100 font-extrabold text-5xl sm:text-6xl lg:text-7xl">
+        <div className="bg-primary-50 text-white px-6 sm:px-10 lg:px-16 py-8 flex items-center">
+          <div className="w-full max-w-4xl mx-auto">
+            <h1 className="font-heading m-0 text-primary-100 font-extrabold text-5xl sm:text-6xl">
               SANVERSE
             </h1>
-            <p className="mt-6 text-white/90 text-lg sm:text-xl max-w-2xl">
+            <p className="mt-4 text-white/90 text-base sm:text-lg max-w-2xl mb-16">
               Welcome to our School Management System. Access your educational
               journey with secure and modern technology.
             </p>
 
-            <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {roles.map((r, idx) => {
                 const active = role === r;
+                const isBlocked = !ROLE_DASHBOARDS[r];
+
                 return (
                   <button
                     key={`${r}-${idx}`}
                     type="button"
-                    onClick={() => setRole(r)}
+                    onClick={() => {
+                      if (isBlocked) {
+                        toast.info("This portal is currently under maintenance.");
+                        return;
+                      }
+                      setRole(r);
+                    }}
                     aria-pressed={active}
-                    className={`rounded-xl px-4 py-3 text-white border transition-colors text-sm sm:text-base
+                    disabled={isBlocked}
+                    className={`relative rounded-xl px-2 py-2 text-white border transition-all text-xs sm:text-sm flex items-center justify-center gap-1.5
           ${
             active
               ? "border-primary-100 bg-white/15"
+              : isBlocked
+              ? "border-white/10 bg-white/5 opacity-50 cursor-not-allowed"
               : "border-white/20 bg-white/5 hover:bg-white/10"
           }`}
                   >
+                    {isBlocked && <IoMdLock className="w-3 h-3" />}
                     {r}
                   </button>
                 );
@@ -198,8 +194,8 @@ const LoginPage = () => {
         </div>
 
         {/* Right panel */}
-        <div className="bg-white">
-          <div className="px-4 sm:px-6 lg:px-16 pt-6">
+        <div className="bg-white flex flex-col justify-center">
+          <div className="px-4 sm:px-6 lg:px-16 pt-6 absolute top-0 right-0 left-0 lg:left-auto lg:w-1/2">
             <Link
               to="/"
               className="inline-flex items-center gap-2 text-primary-50 hover:text-primary-100 text-sm sm:text-base no-underline"
@@ -208,17 +204,17 @@ const LoginPage = () => {
             </Link>
           </div>
 
-          <div className="flex items-center justify-center px-4 sm:px-6 lg:px-16 py-10">
-            <div className="w-full max-w-xl bg-white rounded-2xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.25)] p-8 sm:p-10">
-              <h2 className="text-3xl sm:text-4xl font-bold text-primary-50 text-center">
+          <div className="flex items-center justify-center px-4 sm:px-6 lg:px-16 py-6 w-full h-full">
+            <div className="w-full max-w-xl bg-white rounded-2xl shadow-[0_30px_80px_-20px_rgba(0,0,0,0.25)] p-6 sm:p-8">
+              <h2 className="text-3xl font-bold text-primary-50 text-center">
                 Welcome Back
               </h2>
-              <p className="text-center text-gray-500 mt-2">
+              <p className="text-center text-gray-500 mt-2 text-sm">
                 Sign in to your SANVERSE account
               </p>
 
               <form
-                className="mt-8 space-y-6"
+                className="mt-6 space-y-4"
                 onSubmit={handleSubmit}
                 noValidate
               >
@@ -252,7 +248,7 @@ const LoginPage = () => {
                 <div className="text-right">
                   <Link
                     to="/forgot-password"
-                    className="text-primary-50 hover:text-primary-100 text-sm no-underline"
+                    className="text-primary-50 hover:text-primary-100 text-xs sm:text-sm no-underline"
                   >
                     Forgot your password?
                   </Link>
@@ -261,7 +257,7 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={!isValid || submitting}
-                  className={`w-full rounded-xl py-3 font-semibold text-white transition-opacity ${
+                  className={`w-full rounded-xl py-2.5 font-semibold text-white transition-opacity ${
                     !isValid || submitting
                       ? "bg-primary-50/60 cursor-not-allowed"
                       : "bg-primary-50 hover:opacity-95"
@@ -269,7 +265,7 @@ const LoginPage = () => {
                 >
                   {submitting ? "Logging in..." : "Login"}
                 </button>
-                <p className="text-center text-gray-500">
+                <p className="text-center text-gray-500 text-sm">
                   Don't have an account?{" "}
                   <Link
                     to="/register"

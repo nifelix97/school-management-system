@@ -38,6 +38,12 @@ import AssignTeacher from "../pages/HOD/AssignTeacher";
 import CourseManagement from "../pages/HOD/CourseManagement";
 import RolesPermission from "../pages/Principal/Roles-Permission";
 
+import ChancellorLayout from "../components/ChancellorLayout";
+import VicePrincipalLayout from "../components/VicePLayout";
+import ChancellorDashboard from "../pages/Chancellor/ChancellorDashboard";
+import ChancellorNotification from "../pages/Chancellor/ChancellorNotification";
+import ChancellorProfile from "../pages/Chancellor/ChancellorProfile";
+import ChancellorReportAnalytic from "../pages/Chancellor/Reports&Analytics";
 import ExamsQuestions from "../pages/HOD/ExamsQuestions";
 import GenerateReport from "../pages/HOD/GenerateReport";
 import HODProfilePage from "../pages/HOD/HODProfilePage";
@@ -138,11 +144,35 @@ import StrategicInitiative from "../pages/v-chancellor/StrategicInitiative";
 import VcNotification from "../pages/v-chancellor/Vc-Notification";
 import ViceChancellorDashboard from "../pages/v-chancellor/ViceChancellorDashboard";
 import ViceChancellorProfile from "../pages/v-chancellor/v-ChancellorProfile";
+import VicePrincipalPerformanceReports from "../pages/vice-principal/PerformanceReports";
+import VicePrincipalNotifications from "../pages/vice-principal/PrincipalNotifications";
+import VicePrincipalDashboard from "../pages/vice-principal/VicePrincipalDashboard";
+import VicePrincipalProfile from "../pages/vice-principal/VicePrincipalProfile";
+
+import DeanLayout from "../components/DeanLayout";
+import C_AcademicAffairs from "../pages/Chancellor/AccademicAffairs";
+import C_CurriculumReview from "../pages/Chancellor/CurriculumReview";
+import C_EventsConferences from "../pages/Chancellor/Events&Conferances";
+import C_GlobalRanking from "../pages/Chancellor/GrobalRanking";
+import C_InternationalRelation from "../pages/Chancellor/InternationalRelation";
+import C_PartnershipCollaboration from "../pages/Chancellor/Partnership&Collaboration";
+import C_PerformanceMetrics from "../pages/Chancellor/PerformanceMetrics";
+import C_PoliciesCompliance from "../pages/Chancellor/Policies&Compliance";
+import C_ResearchDevelopment from "../pages/Chancellor/Research&Development";
+import C_StrategicInitiative from "../pages/Chancellor/StrategicInitiative";
 
 
 
 
-
+import AssessmentsGrading from "../pages/Dean/AssessmentsGrading";
+import CurriculumPlanning from "../pages/Dean/CurriculumPlanning";
+import DeanDashboard from "../pages/Dean/DeanDashboard";
+import DeanDepartmentEvents from "../pages/Dean/DeanDepartmentEvents";
+import DeanNotifications from "../pages/Dean/DeanNotifications";
+import DeanProfile from "../pages/Dean/DeanProfile";
+import DeanReports from "../pages/Dean/DeanReports";
+import DeanFacultyManagement from "../pages/Dean/FacultyManagement";
+import StudentOversight from "../pages/Dean/StudentOversight";
 
 export default function AppRoutes() {
   return (
@@ -342,6 +372,68 @@ export default function AppRoutes() {
         <Route path="/vice-chancellor/reports" element={<VChancellorReportAnalytic />} />
         <Route path="/vice-chancellor/performance-metrics" element={<PerformanceMetrics />} />
         <Route path="/vice-chancellor/notifications" element={<VcNotification />} />
+      </Route>
+      <Route element={<VicePrincipalLayout />}>
+        <Route path="/vice-principal/dashboard" element={<VicePrincipalDashboard />} />
+        <Route path="/vice-principal/profile" element={<VicePrincipalProfile />} />
+        <Route path="/vice-principal/notifications" element={<VicePrincipalNotifications />} />
+        <Route
+          path="/vice-principal/strategic-planning"
+          element={<StrategicPlanning />}
+        />
+        <Route
+          path="/vice-principal/academic-oversight"
+          element={<AcademicOversight />}
+        />
+        <Route
+          path="/vice-principal/faculty-management"
+          element={<FacultyManagement />}
+        />
+        <Route
+          path="/vice-principal/department-heads"
+          element={<DepartmentsHeads />}
+        />
+        <Route path="/vice-principal/policies" element={<PoliciesGovernance />} />
+        <Route path="/vice-principal/events" element={<EventsCalendar />} />
+        <Route path="/vice-principal/announcements" element={<Announcements />} />
+        <Route path="/vice-principal/performance" element={<VicePrincipalPerformanceReports />} />
+        <Route path="/vice-principal/reports" element={<ReportAnalytics />} />
+        <Route path="/vice-principal/roles-permissions" element={<RolesPermission />} />
+        <Route path="/vice-principal/assign-teachers" element={<AssignTeachers />} />
+      </Route>
+      <Route element={<ChancellorLayout />}>
+        <Route path="/chancellor/dashboard" element={<ChancellorDashboard />} />
+        <Route path="/chancellor/profile" element={<ChancellorProfile />} />
+        <Route path="/chancellor/academic-affairs" element={<C_AcademicAffairs />} />
+        <Route path="/chancellor/research-development" element={<C_ResearchDevelopment />} />
+        {/* Placeholder for missing Qual. Assurance in Chancellor folder */}
+        <Route path="/chancellor/quality-assurance" element={<QualityAssurance />} />
+        <Route path="/chancellor/international-relations" element={<C_InternationalRelation />} />
+        {/* Placeholder for missing Faculty Dev in Chancellor folder */}
+        <Route path="/chancellor/faculty-development" element={<FacultyDevelopment />} />
+        {/* Placeholder for missing Accreditation in Chancellor folder */}
+        <Route path="/chancellor/accreditation" element={<Accreditation />} />
+        <Route path="/chancellor/partnerships" element={<C_PartnershipCollaboration />} />
+        <Route path="/chancellor/curriculum-review" element={<C_CurriculumReview />} />
+        <Route path="/chancellor/strategic-initiatives" element={<C_StrategicInitiative />} />
+        <Route path="/chancellor/policies" element={<C_PoliciesCompliance />} />
+        <Route path="/chancellor/events" element={<C_EventsConferences />} />
+        <Route path="/chancellor/global-rankings" element={<C_GlobalRanking />} />
+        <Route path="/chancellor/reports" element={<ChancellorReportAnalytic />} />
+        <Route path="/chancellor/performance-metrics" element={<C_PerformanceMetrics />} />
+        <Route path="/chancellor/notifications" element={<ChancellorNotification />} />
+      </Route>
+
+      <Route element={<DeanLayout />}>
+        <Route path="/dean/dashboard" element={<DeanDashboard />} />
+        <Route path="/dean/profile" element={<DeanProfile />} />
+        <Route path="/dean/faculty-management" element={<DeanFacultyManagement />} />
+        <Route path="/dean/student-oversight" element={<StudentOversight />} />
+        <Route path="/dean/curriculum-planning" element={<CurriculumPlanning />} />
+        <Route path="/dean/assessments" element={<AssessmentsGrading />} />
+        <Route path="/dean/department-events" element={<DeanDepartmentEvents />} />
+        <Route path="/dean/reports" element={<DeanReports />} />
+        <Route path="/dean/notifications" element={<DeanNotifications />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
