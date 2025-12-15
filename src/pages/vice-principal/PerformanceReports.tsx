@@ -439,7 +439,7 @@ const PerformanceReports: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="block md:table-row-group space-y-4 md:space-y-0">
-                  {currentMetrics.map((metric, index) => (
+                  {currentMetrics.map((metric) => (
                     <tr
                       key={metric.id}
                       className="block md:table-row bg-white rounded-2xl md:rounded-none p-4 md:p-0 shadow-sm md:shadow-none border border-gray-100 md:border-0 md:border-b hover:bg-gray-50/50 transition-colors"
