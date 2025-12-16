@@ -164,6 +164,7 @@ import C_StrategicInitiative from "../pages/Chancellor/StrategicInitiative";
 
 
 
+import NurseLayout from "../components/NurseLayout";
 import AssessmentsGrading from "../pages/Dean/AssessmentsGrading";
 import CurriculumPlanning from "../pages/Dean/CurriculumPlanning";
 import DeanDashboard from "../pages/Dean/DeanDashboard";
@@ -173,6 +174,48 @@ import DeanProfile from "../pages/Dean/DeanProfile";
 import DeanReports from "../pages/Dean/DeanReports";
 import DeanFacultyManagement from "../pages/Dean/FacultyManagement";
 import StudentOversight from "../pages/Dean/StudentOversight";
+import EmergencyCase from "../pages/Nurse/EmergencyCase";
+import HealthRecord from "../pages/Nurse/HealthRecord";
+import HealthReport from "../pages/Nurse/HealthReport";
+import LabTests from "../pages/Nurse/LabTests";
+import MedicalInventory from "../pages/Nurse/MedicalInventory";
+import NurseAppointment from "../pages/Nurse/NurseAppointment";
+import NurseDashboard from "../pages/Nurse/NurseDashboard";
+import NurseNotifications from "../pages/Nurse/NurseNotifications";
+import NurseProfile from "../pages/Nurse/NurseProfile";
+import Prescriptions from "../pages/Nurse/Prescriptions";
+import Vaccinations from "../pages/Nurse/Vaccinations";
+import WellnessProgram from "../pages/Nurse/WellnessProgram";
+
+import ManagerLayout from "../components/ManagerLayout";
+import ReceptionistLayout from "../components/ReceptionistLayout";
+import WardenLayout from "../components/wardenLayout";
+import Events from "../pages/Manager/Events";
+import Financials from "../pages/Manager/Financials";
+import ManagerDashboard from "../pages/Manager/ManagerDashboard";
+import ManagerNotifications from "../pages/Manager/ManagerNotifications";
+import ManagerProfile from "../pages/Manager/ManagerProfile";
+import Reports from "../pages/Manager/Reports";
+import StaffManagement from "../pages/Manager/StaffManagement";
+import StudentOverview from "../pages/Manager/StudentOverview";
+import Appointments from "../pages/Receptionist/Appointments";
+import CallLogs from "../pages/Receptionist/CallLogs";
+import Enquiries from "../pages/Receptionist/Enquiries";
+import FrontDeskReports from "../pages/Receptionist/FrontDeskReports";
+import MailPackages from "../pages/Receptionist/MailPackages";
+import ReceptionistDashboard from "../pages/Receptionist/ReceptionistDashboard";
+import ReceptionistNotifications from "../pages/Receptionist/ReceptionistNotifications";
+import ReceptionistProfile from "../pages/Receptionist/ReceptionistProfile";
+import StaffDirectory from "../pages/Receptionist/StaffDirectory";
+import VisitorLog from "../pages/Receptionist/VisitorLog";
+import Complaints from "../pages/warden/Complaints";
+import HostelInventory from "../pages/warden/HostelInventory";
+import Notices from "../pages/warden/Notices";
+import Report from "../pages/warden/Report";
+import RoomAllocation from "../pages/warden/RoomAllocation";
+import WardenDashboard from "../pages/warden/WardenDashboard";
+import WardenNotifications from "../pages/warden/WardenNotifications";
+import WardenProfile from "../pages/warden/WardenProfile";
 
 export default function AppRoutes() {
   return (
@@ -434,6 +477,58 @@ export default function AppRoutes() {
         <Route path="/dean/department-events" element={<DeanDepartmentEvents />} />
         <Route path="/dean/reports" element={<DeanReports />} />
         <Route path="/dean/notifications" element={<DeanNotifications />} />
+      </Route>
+
+      <Route element={<NurseLayout />}>
+        <Route path="/nurse/dashboard" element={<NurseDashboard />} />
+        <Route path="/nurse/profile" element={<NurseProfile />} />
+        <Route path="/nurse/appointments" element={<NurseAppointment />} />
+        <Route path="/nurse/health-records" element={<HealthRecord />} />
+        <Route path="/nurse/medical-inventory" element={<MedicalInventory />} />
+        <Route path="/nurse/prescriptions" element={<Prescriptions />} />
+        <Route path="/nurse/emergency-cases" element={<EmergencyCase />} />
+        <Route path="/nurse/vaccinations" element={<Vaccinations />} />
+        <Route path="/nurse/lab-tests" element={<LabTests />} />
+        <Route path="/nurse/wellness-programs" element={<WellnessProgram />} />
+        <Route path="/nurse/health-reports" element={<HealthReport />} />
+        <Route path="/nurse/notifications" element={<NurseNotifications />} />
+      </Route>
+
+      <Route element={<ReceptionistLayout />}>
+        <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
+        <Route path="/receptionist/profile" element={<ReceptionistProfile />} />
+        <Route path="/receptionist/visitors" element={<VisitorLog />} />
+        <Route path="/receptionist/calls" element={<CallLogs />} />
+        <Route path="/receptionist/inquiries" element={<Enquiries />} />
+        <Route path="/receptionist/appointments" element={<Appointments />} />
+        <Route path="/receptionist/mail" element={<MailPackages />} />
+        <Route path="/receptionist/directory" element={<StaffDirectory />} />
+        <Route path="/receptionist/reports" element={<FrontDeskReports />} />
+        <Route path="/receptionist/notifications" element={<ReceptionistNotifications />} />
+      </Route>
+
+       {/* Warden Routes */}
+       <Route element={<WardenLayout />}>
+        <Route path="/warden/dashboard" element={<WardenDashboard />} />
+        <Route path="/warden/profile" element={<WardenProfile />} />
+        <Route path="/warden/rooms" element={<RoomAllocation />} />
+        <Route path="/warden/complaints" element={<Complaints />} />
+        <Route path="/warden/notices" element={<Notices />} />
+        <Route path="/warden/inventory" element={<HostelInventory />} />
+        <Route path="/warden/reports" element={<Report />} />
+        <Route path="/warden/notifications" element={<WardenNotifications />} />
+      </Route>
+
+      {/* Manager Routes */}
+      <Route path="/manager" element={<ManagerLayout />}>
+        <Route path="dashboard" element={<ManagerDashboard />} />
+        <Route path="profile" element={<ManagerProfile />} />
+        <Route path="staff" element={<StaffManagement />} />
+        <Route path="students" element={<StudentOverview />} />
+        <Route path="finance" element={<Financials />} />
+        <Route path="events" element={<Events />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="notifications" element={<ManagerNotifications />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />

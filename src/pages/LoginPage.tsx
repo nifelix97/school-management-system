@@ -19,13 +19,13 @@ const roles = [
   "Chancellor",
   "Dean",
   "Nurse",
+  "Receptionist",
+  "Warden",
   "Alumni",
   "Manager",
-  "Warden",
   "Auditor",
   "Vendors",
   "Coaches",
-  "Receptionist",
   "Parent",
 ];
 
@@ -54,6 +54,10 @@ const ROLE_DASHBOARDS: Record<string, string> = {
   "Vice Principal": "/vice-principal/dashboard",
   "Chancellor": "/chancellor/dashboard",
   "Dean": "/dean/dashboard",
+  "Nurse": "/nurse/dashboard",
+  "Receptionist": "/receptionist/dashboard",
+  "Warden": "/warden/dashboard",
+  "Manager": "/manager/dashboard",
 };
 
 const LoginPage = () => {
