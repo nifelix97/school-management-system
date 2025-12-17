@@ -22,9 +22,9 @@ const roles = [
   "Receptionist",
   "Warden",
   "Manager",
-  "Alumni",
   "Auditor",
-  "Vendors",
+  "Alumni",
+  "Vendor",
   "Coaches",
   "Parent",
 ];
@@ -58,6 +58,10 @@ const ROLE_DASHBOARDS: Record<string, string> = {
   "Receptionist": "/receptionist/dashboard",
   "Warden": "/warden/dashboard",
   "Manager": "/manager/dashboard",
+  "Auditor": "/auditor/dashboard",
+  "Alumni": "/alumni/dashboard",
+  "Vendor": "/vendor/dashboard",
+  "Coaches": "/coach/dashboard",
 };
 
 const LoginPage = () => {

@@ -187,9 +187,38 @@ import Prescriptions from "../pages/Nurse/Prescriptions";
 import Vaccinations from "../pages/Nurse/Vaccinations";
 import WellnessProgram from "../pages/Nurse/WellnessProgram";
 
+import AlumniLayout from "../components/AlumniLayout";
+import AuditorLayout from "../components/AuditorLayout";
+import CoacheLayout from "../components/CoacheLayout";
 import ManagerLayout from "../components/ManagerLayout";
 import ReceptionistLayout from "../components/ReceptionistLayout";
+import VendorLayout from "../components/VendorLayout";
 import WardenLayout from "../components/wardenLayout";
+import Achievements from "../pages/Alumni/Achievements";
+import AlumniDashboard from "../pages/Alumni/AlumniDashboard";
+import AlumniNetwork from "../pages/Alumni/AlumniNetwork";
+import AlumniNotifications from "../pages/Alumni/AlumniNotifications";
+import AlumniProfile from "../pages/Alumni/AlumniProfile";
+import CareerServices from "../pages/Alumni/CareerServices";
+import AlumniEvents from "../pages/Alumni/Events";
+import Mentorship from "../pages/Alumni/Mentorship";
+import NewsAndUpdates from "../pages/Alumni/NewsAndUpdates";
+import AuditReport from "../pages/Auditor/AuditReport";
+import AuditorDashboard from "../pages/Auditor/AuditorDashboard";
+import AuditorNotification from "../pages/Auditor/AuditorNotification";
+import AuditorProfile from "../pages/Auditor/AuditorProfile";
+import Compliance from "../pages/Auditor/Compliance";
+import FinancialAudits from "../pages/Auditor/FinancialAudits";
+import SystemLogs from "../pages/Auditor/SystemLogs";
+import CoachAchievements from "../pages/Coache/Achievements";
+import CoachDashboard from "../pages/Coache/CoachDashboard";
+import CoacheNotifications from "../pages/Coache/CoacheNotifications";
+import CoacheProfile from "../pages/Coache/CoacheProfile";
+import CoacheReport from "../pages/Coache/CoacheReport";
+import MyTeams from "../pages/Coache/MyTeams";
+import CoachPerformance from "../pages/Coache/Performance";
+import Schedules from "../pages/Coache/Schedules";
+import TrainingPlans from "../pages/Coache/TrainingPlans";
 import Events from "../pages/Manager/Events";
 import Financials from "../pages/Manager/Financials";
 import ManagerDashboard from "../pages/Manager/ManagerDashboard";
@@ -208,6 +237,12 @@ import ReceptionistNotifications from "../pages/Receptionist/ReceptionistNotific
 import ReceptionistProfile from "../pages/Receptionist/ReceptionistProfile";
 import StaffDirectory from "../pages/Receptionist/StaffDirectory";
 import VisitorLog from "../pages/Receptionist/VisitorLog";
+import VendorInvoices from "../pages/Vendor/Invoices";
+import Orders from "../pages/Vendor/Orders";
+import ProductsServices from "../pages/Vendor/ProductsServices";
+import VendorDashboard from "../pages/Vendor/VendorDashboard";
+import VendorNotifications from "../pages/Vendor/VendorNotifications";
+import VendorProfile from "../pages/Vendor/VendorProfile";
 import Complaints from "../pages/warden/Complaints";
 import HostelInventory from "../pages/warden/HostelInventory";
 import Notices from "../pages/warden/Notices";
@@ -216,6 +251,10 @@ import RoomAllocation from "../pages/warden/RoomAllocation";
 import WardenDashboard from "../pages/warden/WardenDashboard";
 import WardenNotifications from "../pages/warden/WardenNotifications";
 import WardenProfile from "../pages/warden/WardenProfile";
+
+
+
+
 
 export default function AppRoutes() {
   return (
@@ -529,6 +568,53 @@ export default function AppRoutes() {
         <Route path="events" element={<Events />} />
         <Route path="reports" element={<Reports />} />
         <Route path="notifications" element={<ManagerNotifications />} />
+      </Route>
+
+      {/* Auditor Routes */}
+      <Route element={<AuditorLayout />}>
+        <Route path="/auditor/dashboard" element={<AuditorDashboard />} />
+        <Route path="/auditor/profile" element={<AuditorProfile />} />
+        <Route path="/auditor/financial-audits" element={<FinancialAudits />} />
+        <Route path="/auditor/compliance" element={<Compliance />} />
+        <Route path="/auditor/reports" element={<AuditReport />} />
+        <Route path="/auditor/logs" element={<SystemLogs />} />
+        <Route path="/auditor/notifications" element={<AuditorNotification />} />
+      </Route>
+
+      {/* Alumni Routes */}
+      <Route element={<AlumniLayout />}>
+        <Route path="/alumni/dashboard" element={<AlumniDashboard />} />
+        <Route path="/alumni/profile" element={<AlumniProfile />} />
+        <Route path="/alumni/network" element={<AlumniNetwork />} />
+        <Route path="/alumni/events" element={<AlumniEvents />} />
+        <Route path="/alumni/career" element={<CareerServices />} />
+        <Route path="/alumni/mentorship" element={<Mentorship />} />
+        <Route path="/alumni/achievements" element={<Achievements />} />
+        <Route path="/alumni/news" element={<NewsAndUpdates />} />
+        <Route path="/alumni/notifications" element={<AlumniNotifications />} />
+      </Route>
+
+      {/* Vendor Routes */}
+      <Route element={<VendorLayout />}>
+        <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+        <Route path="/vendor/profile" element={<VendorProfile />} />
+        <Route path="/vendor/products" element={<ProductsServices />} />
+        <Route path="/vendor/orders" element={<Orders />} />
+        <Route path="/vendor/invoices" element={<VendorInvoices />} />
+        <Route path="/vendor/notifications" element={<VendorNotifications />} />
+      </Route>
+
+      {/* Coach Routes */}
+      <Route element={<CoacheLayout />}>
+        <Route path="/coach/dashboard" element={<CoachDashboard />} />
+        <Route path="/coach/profile" element={<CoacheProfile />} />
+        <Route path="/coach/teams" element={<MyTeams />} />
+        <Route path="/coach/schedules" element={<Schedules />} />
+        <Route path="/coach/training" element={<TrainingPlans />} />
+        <Route path="/coach/performance" element={<CoachPerformance />} />
+        <Route path="/coach/achievements" element={<CoachAchievements />} />
+        <Route path="/coach/report" element={<CoacheReport />} />
+        <Route path="/coach/notifications" element={<CoacheNotifications />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
