@@ -4,28 +4,7 @@ import { IoMdCall, IoMdLock, IoMdMail, IoMdPerson } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Input from "../components/ui/Input";
-
-const roles = [
-  "Teacher",
-  "HOD",
-  "Registrar",
-  "Accountant",
-  "Admin",
-  "Librarian",
-  "Nurse",
-  "Alumni",
-  "Manager",
-  "Warden",
-  "Auditor",
-  "Vendors",
-  "Coaches",
-  "Receptionist",
-  "Vice Principal",
-  "Principal",
-  "Vice Chancellor",
-  "Chancellor",
-  "Parent",
-];
+import { getEnabledRoles } from "../utils/roles";
 
 type FormState = {
   fullName: string;
@@ -102,7 +81,7 @@ const ROLE_FIELDS: Record<string, Array<keyof FormState>> = {
   "Manager": [],
   "Warden": [],
   "Auditor": ["qualification"],
-  "Vendors": ["specialization"],
+  "Vendor": ["specialization"],
   "Coaches": ["specialization", "yearsOfExperience"],
   "Receptionist": [],
   "Vice Chancellor": ["qualification", "yearsOfExperience"],
@@ -111,6 +90,7 @@ const ROLE_FIELDS: Record<string, Array<keyof FormState>> = {
 };
 
 const RegisterPage = () => {
+  const roles = useMemo(() => getEnabledRoles(), []);
   const [currentStep, setCurrentStep] = useState(1);
   const [additionalInfoPage, setAdditionalInfoPage] = useState(1);
   const [rolePage, setRolePage] = useState(1);

@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     IoBookmark,
     IoBookmarkOutline,
@@ -7,15 +6,14 @@ import {
     IoBusinessOutline,
     IoCalendarOutline,
     IoCashOutline,
-    IoCheckmarkCircleOutline,
-    IoChevronDownOutline,
+    IoChevronBackOutline,
+    IoChevronForwardOutline,
+    IoCloseOutline,
     IoFilterOutline,
     IoLocationOutline,
     IoPeopleOutline,
-    IoSchoolOutline,
     IoSearchOutline,
-    IoTimeOutline,
-    IoTrendingUpOutline,
+    IoTimeOutline
 } from "react-icons/io5";
 
 // Types
@@ -43,6 +41,9 @@ const CareerServices: React.FC = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [showApplicationModal, setShowApplicationModal] = useState(false);
     const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
     const [applicationForm, setApplicationForm] = useState({
         fullName: "",
         email: "",
@@ -54,7 +55,7 @@ const CareerServices: React.FC = () => {
         availability: "Immediate"
     });
 
-    // Mock data
+    // Mock data - Expanded
     const [jobs, setJobs] = useState<JobPosting[]>([
         {
             id: "1",
@@ -63,10 +64,10 @@ const CareerServices: React.FC = () => {
             location: "Remote",
             type: "Full-time",
             level: "Senior",
-            salary: "$120,000 - $160,000",
+            salary: "$120k - $160k",
             postedDate: "2025-01-10",
             description: "Join our dynamic team to build cutting-edge software solutions. We're looking for an experienced engineer passionate about innovation.",
-            requirements: ["5+ years experience", "React/Node.js", "Cloud platforms (AWS/Azure)", "Team leadership"],
+            requirements: ["5+ years experience", "React/Node.js", "AWS/Azure"],
             postedBy: "Sarah Johnson '15",
             industry: "Technology",
             isSaved: false
@@ -74,14 +75,14 @@ const CareerServices: React.FC = () => {
         {
             id: "2",
             title: "Marketing Director",
-            company: "Global Marketing Solutions",
+            company: "Global Solutions",
             location: "New York, NY",
             type: "Full-time",
             level: "Executive",
-            salary: "$140,000 - $180,000",
+            salary: "$140k - $180k",
             postedDate: "2025-01-12",
             description: "Lead our marketing strategy and team to drive brand growth and market presence.",
-            requirements: ["10+ years in marketing", "Strategic planning", "Team management", "Digital marketing expertise"],
+            requirements: ["10+ years in marketing", "Strategic planning", "Team management"],
             postedBy: "Michael Chen '18",
             industry: "Marketing",
             isSaved: true
@@ -93,10 +94,10 @@ const CareerServices: React.FC = () => {
             location: "San Francisco, CA",
             type: "Full-time",
             level: "Mid",
-            salary: "$100,000 - $130,000",
+            salary: "$100k - $130k",
             postedDate: "2025-01-08",
             description: "Analyze complex datasets and build predictive models to drive business insights.",
-            requirements: ["Python/R proficiency", "Machine Learning", "Statistical analysis", "3+ years experience"],
+            requirements: ["Python/R proficiency", "Machine Learning", "3+ years exp"],
             postedBy: "Alumni Network",
             industry: "Technology",
             isSaved: false
@@ -104,14 +105,14 @@ const CareerServices: React.FC = () => {
         {
             id: "4",
             title: "Financial Analyst",
-            company: "Investment Partners LLC",
+            company: "Investment Partners",
             location: "Chicago, IL",
             type: "Full-time",
             level: "Entry",
-            salary: "$65,000 - $85,000",
+            salary: "$65k - $85k",
             postedDate: "2025-01-14",
             description: "Support our investment team with financial modeling and market analysis.",
-            requirements: ["Bachelor's in Finance", "Excel proficiency", "Analytical skills", "CFA Level 1 preferred"],
+            requirements: ["Bachelor's in Finance", "Excel proficiency", "Analytical skills"],
             postedBy: "David Anderson '14",
             industry: "Finance",
             isSaved: false
@@ -123,10 +124,10 @@ const CareerServices: React.FC = () => {
             location: "Austin, TX",
             type: "Contract",
             level: "Mid",
-            salary: "$80,000 - $100,000",
+            salary: "$80k - $100k",
             postedDate: "2025-01-11",
-            description: "Design beautiful and intuitive user experiences for our digital products.",
-            requirements: ["Figma/Sketch expertise", "Portfolio required", "User research", "3+ years experience"],
+            description: "Design beautiful and intuitive user experiences for our digital products. Focus on clean visuals and high accessibility.",
+            requirements: ["Figma expertise", "Portfolio required", "3+ years exp"],
             postedBy: "Daniel Lee '13",
             industry: "Design",
             isSaved: true
@@ -134,106 +135,167 @@ const CareerServices: React.FC = () => {
         {
             id: "6",
             title: "Project Manager",
-            company: "Engineering Innovations",
+            company: "Engineering Co.",
             location: "Boston, MA",
             type: "Full-time",
             level: "Mid",
-            salary: "$90,000 - $120,000",
+            salary: "$90k - $120k",
             postedDate: "2025-01-09",
             description: "Lead cross-functional teams to deliver complex engineering projects on time and within budget.",
-            requirements: ["PMP certification", "5+ years PM experience", "Agile/Scrum", "Engineering background"],
+            requirements: ["PMP certification", "5+ years PM exp", "Agile/Scrum"],
             postedBy: "Alumni Network",
             industry: "Engineering",
             isSaved: false
         },
         {
             id: "7",
-            title: "Sales Representative",
-            company: "Tech Solutions Corp",
+            title: "Cloud Architect",
+            company: "CloudScale Systems",
             location: "Seattle, WA",
             type: "Full-time",
+            level: "Senior",
+            salary: "$150k - $200k",
+            postedDate: "2025-01-15",
+            description: "Design and implement scalable cloud infrastructures for enterprise clients.",
+            requirements: ["AWS Certified", "Terraform/K8s", "Security focus"],
+            postedBy: "Jessica Wu '16",
+            industry: "Technology",
+            isSaved: false
+        },
+        {
+            id: "8",
+            title: "Product Designer",
+            company: "Innovate Apps",
+            location: "Remote",
+            type: "Full-time",
+            level: "Mid",
+            salary: "$95k - $130k",
+            postedDate: "2025-01-16",
+            description: "Help us shape the future of mobile education through thoughtful product design.",
+            requirements: ["Product strategy", "Visual design", "User testing"],
+            postedBy: "Alumni Network",
+            industry: "Design",
+            isSaved: false
+        },
+        {
+            id: "9",
+            title: "HR specialist",
+            company: "Talent Hub",
+            location: "Miami, FL",
+            type: "Part-time",
             level: "Entry",
-            salary: "$50,000 + Commission",
-            postedDate: "2025-01-13",
-            description: "Drive revenue growth by building relationships with clients and closing deals.",
-            requirements: ["Excellent communication", "Sales experience preferred", "Self-motivated", "Bachelor's degree"],
+            salary: "$30/hr - $45/hr",
+            postedDate: "2025-01-05",
+            description: "Assist with recruitment and employee onboarding processes for a growing startup.",
+            requirements: ["Communication skills", "Organizational skills"],
+            postedBy: "Sarah Adams '21",
+            industry: "Healthcare",
+            isSaved: false
+        },
+        {
+            id: "10",
+            title: "AI Research Engineer",
+            company: "Future Lab",
+            location: "London, UK",
+            type: "Full-time",
+            level: "Senior",
+            salary: "£90k - £120k",
+            postedDate: "2025-01-17",
+            description: "Conduct cutting-edge research in Large Language Models and Generative AI.",
+            requirements: ["PhD in CS/AI", "PyTorch/Tensorflow", "Publications"],
+            postedBy: "Dr. Robert King '12",
+            industry: "Technology",
+            isSaved: false
+        },
+        {
+            id: "11",
+            title: "Sales Executive",
+            company: "Growth Partners",
+            location: "Toronto, CA",
+            type: "Full-time",
+            level: "Mid",
+            salary: "$70k + Bonus",
+            postedDate: "2025-01-03",
+            description: "Drive business growth through B2B sales and strategic partnerships.",
+            requirements: ["CRM experience", "Negotiation", "3+ years sales"],
             postedBy: "Alumni Network",
             industry: "Sales",
             isSaved: false
         },
         {
-            id: "8",
-            title: "Research Scientist",
-            company: "BioTech Research",
-            location: "San Diego, CA",
+            id: "12",
+            title: "Civil Engineer",
+            company: "Metro Infrastructure",
+            location: "Denver, CO",
             type: "Full-time",
             level: "Senior",
-            salary: "$110,000 - $140,000",
-            postedDate: "2025-01-07",
-            description: "Conduct groundbreaking research in biotechnology and contribute to scientific publications.",
-            requirements: ["PhD in Biology/Chemistry", "Research experience", "Lab skills", "Publication record"],
-            postedBy: "Sophia Martinez '20",
-            industry: "Healthcare",
+            salary: "$110k - $145k",
+            postedDate: "2024-12-28",
+            description: "Oversee major urban infrastructure projects including bridges and highways.",
+            requirements: ["PE License", "Project Management", "AutoCAD"],
+            postedBy: "Mark Stevens '98",
+            industry: "Engineering",
             isSaved: false
         }
     ]);
 
-    // Statistics
-    const totalJobs = jobs.length;
-    const savedJobs = jobs.filter(j => j.isSaved).length;
-    const newJobs = jobs.filter(j => {
-        const posted = new Date(j.postedDate);
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return posted >= weekAgo;
-    }).length;
-
-    const stats = [
+    // Statistics calculations
+    const stats = useMemo(() => [
         {
             title: "Total Opportunities",
             value: "247",
-            subtitle: `${totalJobs} shown`,
-            icon: <IoBriefcaseOutline className="w-6 h-6 sm:w-7 sm:h-7" />,
-            gradient: "from-blue-500 via-blue-600 to-blue-700",
+            subtitle: "Recent postings",
+            icon: <IoBriefcaseOutline className="w-6 h-6" />,
+            gradient: "from-blue-500 to-blue-600",
         },
         {
             title: "Saved Jobs",
-            value: savedJobs.toString(),
-            subtitle: "in your list",
-            icon: <IoBookmark className="w-6 h-6 sm:w-7 sm:h-7" />,
-            gradient: "from-purple-500 via-purple-600 to-purple-700",
-        },
-        {
-            title: "New This Week",
-            value: newJobs.toString(),
-            subtitle: "fresh postings",
-            icon: <IoTrendingUpOutline className="w-6 h-6 sm:w-7 sm:h-7" />,
-            gradient: "from-emerald-500 via-emerald-600 to-emerald-700",
+            value: jobs.filter(j => j.isSaved).length.toString(),
+            subtitle: "Watchlist",
+            icon: <IoBookmark className="w-6 h-6" />,
+            gradient: "from-purple-500 to-purple-600",
         },
         {
             title: "Alumni Network",
             value: "2,847",
-            subtitle: "connections",
-            icon: <IoPeopleOutline className="w-6 h-6 sm:w-7 sm:h-7" />,
-            gradient: "from-amber-500 via-amber-600 to-amber-700",
+            subtitle: "Active connections",
+            icon: <IoPeopleOutline className="w-6 h-6" />,
+            gradient: "from-emerald-500 to-emerald-600",
         },
-    ];
+        {
+            title: "Career Events",
+            value: "12",
+            subtitle: "Coming soon",
+            icon: <IoCalendarOutline className="w-6 h-6" />,
+            gradient: "from-amber-500 to-amber-600",
+        },
+    ], [jobs]);
 
-    // Filter jobs
-    const filteredJobs = jobs.filter(job => {
-        const matchesSearch = 
-            job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.description.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesType = filterType === "All" || job.type === filterType;
-        const matchesLevel = filterLevel === "All" || job.level === filterLevel;
-        const matchesIndustry = filterIndustry === "All" || job.industry === filterIndustry;
+    // Filtered jobs
+    const filteredJobs = useMemo(() => {
+        return jobs.filter(job => {
+            const matchesSearch = 
+                job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                job.description.toLowerCase().includes(searchTerm.toLowerCase());
+            
+            const matchesType = filterType === "All" || job.type === filterType;
+            const matchesLevel = filterLevel === "All" || job.level === filterLevel;
+            const matchesIndustry = filterIndustry === "All" || job.industry === filterIndustry;
 
-        return matchesSearch && matchesType && matchesLevel && matchesIndustry;
-    });
+            return matchesSearch && matchesType && matchesLevel && matchesIndustry;
+        });
+    }, [jobs, searchTerm, filterType, filterLevel, filterIndustry]);
 
-    // Helper functions
+    // Pagination
+    const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+    const paginatedJobs = filteredJobs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    // Reset page on search or filter change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterType, filterLevel, filterIndustry]);
+
     const toggleSaveJob = (jobId: string) => {
         setJobs(jobs.map(job => 
             job.id === jobId ? { ...job, isSaved: !job.isSaved } : job
@@ -242,17 +304,17 @@ const CareerServices: React.FC = () => {
 
     const getTypeColor = (type: string) => {
         switch (type) {
-            case "Full-time": return "bg-blue-50 text-blue-700 border-blue-200";
-            case "Part-time": return "bg-purple-50 text-purple-700 border-purple-200";
-            case "Contract": return "bg-amber-50 text-amber-700 border-amber-200";
-            case "Internship": return "bg-emerald-50 text-emerald-700 border-emerald-200";
-            default: return "bg-gray-50 text-gray-700 border-gray-200";
+            case "Full-time": return "bg-blue-50 text-blue-700 border-blue-100";
+            case "Part-time": return "bg-purple-50 text-purple-700 border-purple-100";
+            case "Contract": return "bg-amber-50 text-amber-700 border-amber-100";
+            case "Internship": return "bg-emerald-50 text-emerald-700 border-emerald-100";
+            default: return "bg-gray-50 text-gray-700 border-gray-100";
         }
     };
 
     const getLevelColor = (level: string) => {
         switch (level) {
-            case "Entry": return "bg-green-50 text-green-700";
+            case "Entry": return "bg-emerald-50 text-emerald-700";
             case "Mid": return "bg-blue-50 text-blue-700";
             case "Senior": return "bg-purple-50 text-purple-700";
             case "Executive": return "bg-red-50 text-red-700";
@@ -265,461 +327,250 @@ const CareerServices: React.FC = () => {
         const now = new Date();
         const diffTime = Math.abs(now.getTime() - date.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
         if (diffDays === 0) return "Today";
         if (diffDays === 1) return "Yesterday";
-        if (diffDays < 7) return `${diffDays} days ago`;
-        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return date.toLocaleDateString();
     };
 
-    // Application handlers
     const handleApply = (jobId: string) => {
         setSelectedJobId(jobId);
         setShowApplicationModal(true);
     };
 
     const submitApplication = () => {
-        // Validate form
         if (!applicationForm.fullName || !applicationForm.email || !applicationForm.phone) {
-            alert("Please fill in all required fields (Name, Email, Phone).");
+            alert("Required: Name, Email, Phone");
             return;
         }
-
-        // Email validation
-        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(applicationForm.email)) {
-            alert("Please enter a valid email address.");
-            return;
-        }
-
-        if (selectedJobId) {
-            const job = jobs.find(j => j.id === selectedJobId);
-            alert(`✅ Application submitted successfully!\n\nYou have applied for: ${job?.title} at ${job?.company}\n\nWe'll send a confirmation email to ${applicationForm.email}`);
-            
-            // Reset form and close modal
-            setApplicationForm({
-                fullName: "",
-                email: "",
-                phone: "",
-                resumeUrl: "",
-                coverLetter: "",
-                linkedInUrl: "",
-                yearsExperience: "",
-                availability: "Immediate"
-            });
-            setShowApplicationModal(false);
-            setSelectedJobId(null);
-        }
+        const job = jobs.find(j => j.id === selectedJobId);
+        alert(`Application sent for ${job?.title} at ${job?.company}! Check your email for confirmation.`);
+        setShowApplicationModal(false);
+        setApplicationForm({
+            fullName: "", email: "", phone: "", resumeUrl: "", 
+            coverLetter: "", linkedInUrl: "", yearsExperience: "", availability: "Immediate"
+        });
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 p-3 xs:p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-gray-50 p-2 sm:p-4 lg:p-6 space-y-6">
             {/* Header */}
-            <div className="mb-6 sm:mb-8">
-                <h1 className="text-3xl sm:text-4xl font-bold text-primary-50 mb-2">
-                    Career Services
-                </h1>
-                <p className="text-sm sm:text-base text-primary-50/70">
-                    Explore job opportunities posted by alumni and industry partners.
-                </p>
+            <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Career Services</h1>
+                <p className="text-sm text-gray-500">Exclusive job opportunities and career resources for our alumni network.</p>
             </div>
 
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-                {stats.map((stat, index) => (
-                    <div 
-                        key={index} 
-                        className="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 hover:-translate-y-1"
-                    >
-                        <div className="flex flex-col gap-3 sm:gap-4">
-                            <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br ${stat.gradient} text-white shadow-md w-fit group-hover:scale-110 transition-transform duration-300`}>
-                                {stat.icon}
-                            </div>
-                            <div>
-                                <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                                <div className="text-xs sm:text-sm text-gray-500 font-medium mb-1">{stat.title}</div>
-                                <div className="text-xs text-gray-400">{stat.subtitle}</div>
-                            </div>
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                {stats.map((stat, i) => (
+                    <div key={i} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+                        <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.gradient} text-white shadow-sm`}>
+                            {stat.icon}
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">{stat.value}</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 truncate">{stat.title}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Search and Filters */}
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
-                    {/* Search */}
+            {/* Filters Bar */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 sm:p-3 overflow-hidden">
+                <div className="flex flex-col lg:flex-row gap-2 lg:gap-4">
                     <div className="flex-1 relative">
-                        <IoSearchOutline className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search by job title, company, or keywords..."
+                            placeholder="Find your next career move..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent text-sm sm:text-base"
+                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-primary-50/20 text-sm transition-all"
                         />
                     </div>
-
-                    {/* Filter Toggle Button */}
-                    <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-50 text-white rounded-lg sm:rounded-xl hover:bg-primary-100 transition-colors font-medium text-sm sm:text-base shadow-sm"
-                    >
-                        <IoFilterOutline className="w-5 h-5" />
-                        <span className="hidden xs:inline">Filters</span>
-                        <IoChevronDownOutline className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-                    </button>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${showFilters ? 'bg-primary-50 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >
+                            <IoFilterOutline /> Filters
+                        </button>
+                    </div>
                 </div>
 
-                {/* Filter Options */}
                 {showFilters && (
-                    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-gray-100">
-                        <div>
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Job Type</label>
-                            <select
-                                value={filterType}
-                                onChange={(e) => setFilterType(e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 text-sm sm:text-base"
-                            >
-                                <option value="All">All Types</option>
-                                <option value="Full-time">Full-time</option>
-                                <option value="Part-time">Part-time</option>
-                                <option value="Contract">Contract</option>
-                                <option value="Internship">Internship</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Experience Level</label>
-                            <select
-                                value={filterLevel}
-                                onChange={(e) => setFilterLevel(e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 text-sm sm:text-base"
-                            >
-                                <option value="All">All Levels</option>
-                                <option value="Entry">Entry Level</option>
-                                <option value="Mid">Mid Level</option>
-                                <option value="Senior">Senior Level</option>
-                                <option value="Executive">Executive</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Industry</label>
-                            <select
-                                value={filterIndustry}
-                                onChange={(e) => setFilterIndustry(e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 text-sm sm:text-base"
-                            >
-                                <option value="All">All Industries</option>
-                                <option value="Technology">Technology</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Finance">Finance</option>
-                                <option value="Design">Design</option>
-                                <option value="Engineering">Engineering</option>
-                                <option value="Sales">Sales</option>
-                                <option value="Healthcare">Healthcare</option>
-                            </select>
-                        </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-3 mt-3 border-t border-gray-100 animate-slide-down">
+                        <select 
+                            value={filterType} 
+                            onChange={(e) => setFilterType(e.target.value)}
+                            className="bg-gray-50 border-none rounded-lg p-2 text-xs font-bold text-gray-600"
+                        >
+                            <option value="All">All Types</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Internship">Internship</option>
+                        </select>
+                        <select 
+                            value={filterLevel} 
+                            onChange={(e) => setFilterLevel(e.target.value)}
+                            className="bg-gray-50 border-none rounded-lg p-2 text-xs font-bold text-gray-600"
+                        >
+                            <option value="All">All Levels</option>
+                            <option value="Entry">Entry</option>
+                            <option value="Mid">Mid</option>
+                            <option value="Senior">Senior</option>
+                        </select>
+                        <select 
+                            value={filterIndustry} 
+                            onChange={(e) => setFilterIndustry(e.target.value)}
+                            className="bg-gray-50 border-none rounded-lg p-2 text-xs font-bold text-gray-600 col-span-2 md:col-span-1"
+                        >
+                            <option value="All">All Industries</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Design">Design</option>
+                            <option value="Finance">Finance</option>
+                        </select>
                     </div>
                 )}
             </div>
 
-            {/* Job Listings */}
-            {filteredJobs.length === 0 ? (
-                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-8 sm:p-12 text-center">
-                    <IoBriefcaseOutline className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No jobs found</h3>
-                    <p className="text-sm sm:text-base text-gray-500">Try adjusting your search or filter criteria.</p>
-                </div>
-            ) : (
-                <>
-                    <div className="space-y-4 sm:space-y-6">
-                        {filteredJobs.map((job) => (
-                            <div
-                                key={job.id}
-                                className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg hover:border-primary-100 transition-all duration-300 group"
-                            >
-                                <div className="flex flex-col lg:flex-row gap-4">
-                                    {/* Company Logo Placeholder */}
-                                    <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center text-white shadow-md">
-                                        <IoBusinessOutline className="w-8 h-8 sm:w-10 sm:h-10" />
+            {/* Jobs List */}
+            <div className="space-y-3">
+                {paginatedJobs.length > 0 ? (
+                    paginatedJobs.map((job) => (
+                        <div key={job.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-primary-50/30 transition-all group">
+                            <div className="flex gap-4">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-primary-50/5 text-primary-50 flex items-center justify-center shrink-0 border border-primary-50/10 shadow-inner">
+                                    <IoBusinessOutline className="text-2xl sm:text-3xl" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between gap-4 mb-2">
+                                        <div className="min-w-0">
+                                            <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate group-hover:text-primary-50 transition-colors uppercase tracking-tight">
+                                                {job.title}
+                                            </h3>
+                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest leading-none mt-1">{job.company}</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => toggleSaveJob(job.id)}
+                                            className={`p-2 rounded-xl transition-all ${job.isSaved ? 'bg-primary-50 text-white' : 'bg-gray-50 text-gray-400 hover:text-primary-50'}`}
+                                        >
+                                            {job.isSaved ? <IoBookmark /> : <IoBookmarkOutline />}
+                                        </button>
                                     </div>
 
-                                    {/* Job Details */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
-                                            <div className="flex-1">
-                                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 group-hover:text-primary-100 transition-colors">
-                                                    {job.title}
-                                                </h3>
-                                                <p className="text-base sm:text-lg text-gray-700 font-medium mb-2">{job.company}</p>
-                                                <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-600">
-                                                    <span className="flex items-center gap-1">
-                                                        <IoLocationOutline className="w-4 h-4 text-primary-50" />
-                                                        {job.location}
-                                                    </span>
-                                                    {job.salary && (
-                                                        <span className="flex items-center gap-1">
-                                                            <IoCashOutline className="w-4 h-4 text-primary-50" />
-                                                            {job.salary}
-                                                        </span>
-                                                    )}
-                                                    <span className="flex items-center gap-1">
-                                                        <IoCalendarOutline className="w-4 h-4 text-primary-50" />
-                                                        {formatDate(job.postedDate)}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Save Button */}
-                                            <button
-                                                onClick={() => toggleSaveJob(job.id)}
-                                                className={`p-2.5 sm:p-3 rounded-lg transition-all ${
-                                                    job.isSaved 
-                                                        ? 'bg-primary-50 text-white' 
-                                                        : 'border border-gray-300 text-gray-600 hover:bg-gray-50'
-                                                }`}
-                                            >
-                                                {job.isSaved ? (
-                                                    <IoBookmark className="w-5 h-5" />
-                                                ) : (
-                                                    <IoBookmarkOutline className="w-5 h-5" />
-                                                )}
-                                            </button>
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3">
+                                        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-gray-500">
+                                            <IoLocationOutline className="text-primary-50 text-sm" /> {job.location}
                                         </div>
-
-                                        {/* Tags */}
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold border ${getTypeColor(job.type)}`}>
-                                                <IoTimeOutline className="w-3 h-3" />
-                                                {job.type}
-                                            </span>
-                                            <span className={`px-3 py-1 rounded-lg text-xs font-bold ${getLevelColor(job.level)}`}>
-                                                <IoSchoolOutline className="w-3 h-3 inline mr-1" />
-                                                {job.level}
-                                            </span>
-                                            <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold">
-                                                {job.industry}
-                                            </span>
+                                        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-gray-500">
+                                            <IoCashOutline className="text-primary-50 text-sm" /> {job.salary}
                                         </div>
-
-                                        {/* Description */}
-                                        <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2">
-                                            {job.description}
-                                        </p>
-
-                                        {/* Requirements */}
-                                        <div className="mb-4">
-                                            <h4 className="text-sm font-semibold text-gray-900 mb-2">Key Requirements:</h4>
-                                            <div className="flex flex-wrap gap-2">
-                                                {job.requirements.slice(0, 4).map((req, idx) => (
-                                                    <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs">
-                                                        <IoCheckmarkCircleOutline className="w-3 h-3" />
-                                                        {req}
-                                                    </span>
-                                                ))}
-                                            </div>
+                                        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-gray-500">
+                                            <IoTimeOutline className="text-primary-50 text-sm" /> {formatDate(job.postedDate)}
                                         </div>
+                                    </div>
 
-                                        {/* Footer */}
-                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
-                                            <p className="text-xs sm:text-sm text-gray-500">
-                                                Posted by <span className="font-semibold text-gray-700">{job.postedBy}</span>
-                                            </p>
-                                            <button 
-                                                onClick={() => handleApply(job.id)}
-                                                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-primary-50 text-white rounded-lg hover:bg-primary-100 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
-                                            >
-                                                Apply Now
-                                            </button>
-                                        </div>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter border ${getTypeColor(job.type)}`}>{job.type}</span>
+                                        <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter ${getLevelColor(job.level)}`}>{job.level}</span>
+                                        <span className="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter bg-gray-50 text-gray-400 border border-gray-100">{job.industry}</span>
+                                    </div>
+
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-gray-50">
+                                        <p className="text-[10px] font-medium text-gray-400 italic">Posted by <span className="font-black text-gray-600 non-italic">{job.postedBy}</span></p>
+                                        <button 
+                                            onClick={() => handleApply(job.id)}
+                                            className="px-6 py-2 bg-primary-50 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:shadow-lg hover:shadow-primary-50/20 active:scale-95 transition-all"
+                                        >
+                                            Apply Now
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                        </div>
+                    ))
+                ) : (
+                    <div className="bg-white p-12 text-center rounded-3xl border-2 border-dashed border-gray-100">
+                        <p className="text-gray-400 font-bold uppercase tracking-widest">No opportunities found match your criteria</p>
                     </div>
+                )}
+            </div>
 
-                    {/* Results Count */}
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-500">
-                            Showing <span className="font-semibold text-gray-900">{filteredJobs.length}</span> of <span className="font-semibold text-gray-900">{totalJobs}</span> opportunities
-                        </p>
-                    </div>
-                </>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-6">
+                    <button 
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        className="p-2 rounded-xl bg-white border border-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                    >
+                        <IoChevronBackOutline />
+                    </button>
+                    {Array.from({ length: totalPages }).map((_, i) => (
+                        <button 
+                            key={i}
+                            onClick={() => setCurrentPage(i + 1)}
+                            className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${currentPage === i + 1 ? 'bg-primary-50 text-white shadow-lg shadow-primary-50/20' : 'bg-white border border-gray-100 text-gray-400 hover:border-primary-50/50'}`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                    <button 
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        className="p-2 rounded-xl bg-white border border-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                    >
+                        <IoChevronForwardOutline />
+                    </button>
+                </div>
             )}
 
             {/* Application Modal */}
-            {showApplicationModal && selectedJobId && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => {
-                    setShowApplicationModal(false);
-                    setSelectedJobId(null);
-                }}>
-                    <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Job Application</h2>
-                        <p className="text-gray-600 mb-6">
-                            {jobs.find(j => j.id === selectedJobId)?.title} at {jobs.find(j => j.id === selectedJobId)?.company}
-                        </p>
-
-                        <div className="space-y-4">
-                            {/* Full Name */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Full Name <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={applicationForm.fullName}
-                                    onChange={(e) => setApplicationForm({ ...applicationForm, fullName: e.target.value })}
-                                    placeholder="Enter your full name"
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                    required
-                                />
-                            </div>
-
-                            {/* Email */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Email Address <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="email"
-                                    value={applicationForm.email}
-                                    onChange={(e) => setApplicationForm({ ...applicationForm, email: e.target.value })}
-                                    placeholder="your.email@example.com"
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                    required
-                                />
-                            </div>
-
-                            {/* Phone */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Phone Number <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="tel"
-                                    value={applicationForm.phone}
-                                    onChange={(e) => setApplicationForm({ ...applicationForm, phone: e.target.value })}
-                                    placeholder="+250 788 123 456"
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                    required
-                                />
-                            </div>
-
-                            {/* Resume URL */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Resume/CV Link (Optional)
-                                </label>
-                                <input
-                                    type="url"
-                                    value={applicationForm.resumeUrl}
-                                    onChange={(e) => setApplicationForm({ ...applicationForm, resumeUrl: e.target.value })}
-                                    placeholder="https://drive.google.com/your-resume"
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                />
-                            </div>
-
-                            {/* LinkedIn URL */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    LinkedIn Profile (Optional)
-                                </label>
-                                <input
-                                    type="url"
-                                    value={applicationForm.linkedInUrl}
-                                    onChange={(e) => setApplicationForm({ ...applicationForm, linkedInUrl: e.target.value })}
-                                    placeholder="https://linkedin.com/in/yourprofile"
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                />
-                            </div>
-
-                            {/* Years of Experience */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Years of Experience
-                                </label>
-                                <select
-                                    value={applicationForm.yearsExperience}
-                                    onChange={(e) => setApplicationForm({ ...applicationForm, yearsExperience: e.target.value })}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                >
-                                    <option value="">Select experience level</option>
-                                    <option value="0-1">0-1 years</option>
-                                    <option value="1-3">1-3 years</option>
-                                    <option value="3-5">3-5 years</option>
-                                    <option value="5-10">5-10 years</option>
-                                    <option value="10+">10+ years</option>
-                                </select>
-                            </div>
-
-                            {/* Availability */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Availability
-                                </label>
-                                <select
-                                    value={applicationForm.availability}
-                                    onChange={(e) => setApplicationForm({ ...applicationForm, availability: e.target.value })}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                >
-                                    <option value="Immediate">Immediate</option>
-                                    <option value="2 weeks">2 weeks notice</option>
-                                    <option value="1 month">1 month notice</option>
-                                    <option value="2+ months">2+ months</option>
-                                </select>
-                            </div>
-
-                            {/* Cover Letter */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Cover Letter (Optional)
-                                </label>
-                                <textarea
-                                    value={applicationForm.coverLetter}
-                                    onChange={(e) => setApplicationForm({ ...applicationForm, coverLetter: e.target.value })}
-                                    placeholder="Tell us why you're a great fit for this position..."
-                                    rows={5}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent resize-none"
-                                />
-                            </div>
-
-                            {/* Info Box */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <p className="text-sm text-blue-800">
-                                    <strong>Note:</strong> Your application will be sent directly to the hiring manager. You'll receive a confirmation email shortly.
+            {showApplicationModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowApplicationModal(false)} />
+                    <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative animate-slide-up overflow-hidden">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-primary-50/5">
+                            <div className="min-w-0">
+                                <h2 className="text-xl font-bold text-gray-900 truncate">Quick Application</h2>
+                                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-0.5 truncate">
+                                    For {jobs.find(j => j.id === selectedJobId)?.title}
                                 </p>
                             </div>
+                            <button onClick={() => setShowApplicationModal(false)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors"><IoCloseOutline className="text-2xl" /></button>
                         </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
-                            <button
-                                onClick={() => {
-                                    setShowApplicationModal(false);
-                                    setSelectedJobId(null);
-                                    setApplicationForm({
-                                        fullName: "",
-                                        email: "",
-                                        phone: "",
-                                        resumeUrl: "",
-                                        coverLetter: "",
-                                        linkedInUrl: "",
-                                        yearsExperience: "",
-                                        availability: "Immediate"
-                                    });
-                                }}
-                                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={submitApplication}
-                                className="flex-1 px-6 py-3 bg-primary-50 text-white rounded-xl hover:bg-primary-100 transition-colors font-medium shadow-md hover:shadow-lg"
-                            >
-                                Submit Application
-                            </button>
+                        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Full Name</label>
+                                <input type="text" placeholder="John Doe" className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-50/10 text-sm font-medium" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label>
+                                <input type="email" placeholder="john@example.com" className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-50/10 text-sm font-medium" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label>
+                                    <input type="tel" placeholder="+250..." className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-50/10 text-sm font-medium" />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Experience</label>
+                                    <select className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-50/10 text-sm font-bold text-gray-600">
+                                        <option>0-2 Years</option>
+                                        <option>3-5 Years</option>
+                                        <option>5+ Years</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Resume Link</label>
+                                <input type="url" placeholder="https://drive.google.com/..." className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-50/10 text-sm font-medium" />
+                            </div>
+                        </div>
+                        <div className="p-6 bg-gray-50 flex gap-3">
+                            <button onClick={() => setShowApplicationModal(false)} className="flex-1 py-3 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Cancel</button>
+                            <button onClick={submitApplication} className="flex-[2] py-3 bg-primary-50 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary-50/20 active:scale-95 transition-all">Submit Application</button>
                         </div>
                     </div>
                 </div>

@@ -4,30 +4,7 @@ import { IoMdLock, IoMdMail } from "react-icons/io";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Input from "../components/ui/Input";
-
-const roles = [
-  "Admin",
-  "Principal",
-  "Student",
-  "Teacher",
-  "HOD",
-  "Registrar",
-  "Accountant",
-  "Librarian",
-  "Vice Chancellor",
-  "Vice Principal",
-  "Chancellor",
-  "Dean",
-  "Nurse",
-  "Receptionist",
-  "Warden",
-  "Manager",
-  "Auditor",
-  "Alumni",
-  "Vendor",
-  "Coaches",
-  "Parent",
-];
+import { getEnabledRoles, ROLE_DASHBOARDS } from "../utils/roles";
 
 type FormState = {
   email: string;
@@ -41,30 +18,9 @@ type FormErrors = Partial<Record<keyof FormState, string>>;
 const emailRegex =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,})+$/;
 
-const ROLE_DASHBOARDS: Record<string, string> = {
-  "Admin": "/admin/dashboard",
-  "Principal": "/principal/dashboard",
-  "Student": "/dashboard",
-  "Teacher": "/teacher/dashboard",
-  "HOD": "/hod/dashboard",
-  "Registrar": "/registrar/dashboard",
-  "Accountant": "/accountant/dashboard",
-  "Librarian": "/librarian/dashboard",
-  "Vice Chancellor": "/vice-chancellor/dashboard",
-  "Vice Principal": "/vice-principal/dashboard",
-  "Chancellor": "/chancellor/dashboard",
-  "Dean": "/dean/dashboard",
-  "Nurse": "/nurse/dashboard",
-  "Receptionist": "/receptionist/dashboard",
-  "Warden": "/warden/dashboard",
-  "Manager": "/manager/dashboard",
-  "Auditor": "/auditor/dashboard",
-  "Alumni": "/alumni/dashboard",
-  "Vendor": "/vendor/dashboard",
-  "Coaches": "/coach/dashboard",
-};
 
 const LoginPage = () => {
+    const roles = useMemo(() => getEnabledRoles(), []);
     const [form, setForm] = useState<FormState>({ email: "", password: "", role: "" });
     const navigate = useNavigate();
   

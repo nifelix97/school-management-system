@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { default as bg3, default as bk } from "../assets/bk.jpg";
 import bg1 from "../assets/bk1.jpg";
 import bg2 from "../assets/bk2.jpg";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const navigate = useNavigate();
 
   const slides = [
     {
@@ -87,10 +89,10 @@ const HeroSection = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button className="bg-primary-100 hover:bg-primary-100/90 text-primary-50 font-bold px-8 py-4 rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-base sm:text-lg">
+                <button onClick={() => navigate("/resources")} className="bg-primary-100 hover:bg-primary-100/90 text-primary-50 font-bold px-8 py-4 rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-base sm:text-lg">
                   Explore resources
                 </button>
-                <button className="bg-transparent border-2 border-white hover:bg-white/10 text-white font-bold px-8 py-4 rounded-xl transition-all transform hover:scale-105 text-base sm:text-lg">
+                <button onClick={() => navigate("/contact")} className="bg-transparent border-2 border-white hover:bg-white/10 text-white font-bold px-8 py-4 rounded-xl transition-all transform hover:scale-105 text-base sm:text-lg">
                   Contact Us
                 </button>
               </div>

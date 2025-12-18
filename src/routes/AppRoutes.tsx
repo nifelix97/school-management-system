@@ -4,6 +4,7 @@ import AdminLayout from "../components/AdminLayout";
 import HODLayout from "../components/HODLayout";
 import Layout from "../components/Layout";
 import LibrarianLayout from "../components/LibrarianLayout";
+import ParentLayout from "../components/ParentLayout";
 import PrincipalLayout from "../components/PrincipalLayout";
 import RegistrarLayout from "../components/RegistrarLayout";
 import StudentLayout from "../components/StudentLayout";
@@ -95,6 +96,7 @@ import RegistrarDashboard from "../pages/Registrar/RegistrarDashBoard";
 import RegistrarProfilePage from "../pages/Registrar/RegistrarProfilePage";
 import StudentRecords from "../pages/Registrar/StudentRecords";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
+import ResourcesPage from "../pages/ResourcesPage";
 import StudentDashBoard from "../pages/StudentDashBoard";
 import AcademicCalendar from "../pages/Teacher/AcademicCalendar";
 import CreateAssignment from "../pages/Teacher/CreateAssignment";
@@ -115,6 +117,7 @@ import AttendancePage from "../pages/student/AttendancePage";
 import CalendarPage from "../pages/student/Calendar";
 import ClassRoutine from "../pages/student/ClassRoutine";
 import ClearanceApplicationPage from "../pages/student/ClearanceApplication";
+import CoursePlayerPage from "../pages/student/CoursePlayerPage";
 import CoursesPage from "../pages/student/CoursesPage";
 import Dashboard from "../pages/student/Dashboard";
 import ExamRoutine from "../pages/student/ExamRoutine";
@@ -227,6 +230,16 @@ import ManagerProfile from "../pages/Manager/ManagerProfile";
 import Reports from "../pages/Manager/Reports";
 import StaffManagement from "../pages/Manager/StaffManagement";
 import StudentOverview from "../pages/Manager/StudentOverview";
+import Attendance from "../pages/Parent/Attendance";
+import MyChildren from "../pages/Parent/MyChildren";
+import ParentCalendar from "../pages/Parent/ParentCalendar";
+import ParentDashboard from "../pages/Parent/ParentDashboard";
+import ParentFees from "../pages/Parent/ParentFees";
+import ParentHelp from "../pages/Parent/ParentHelp";
+import ParentMessages from "../pages/Parent/ParentMessages";
+import ParentNotifications from "../pages/Parent/ParentNotifications";
+import ParentProfile from "../pages/Parent/ParentProfile";
+import ParentProgress from "../pages/Parent/ParentProgress";
 import Appointments from "../pages/Receptionist/Appointments";
 import CallLogs from "../pages/Receptionist/CallLogs";
 import Enquiries from "../pages/Receptionist/Enquiries";
@@ -274,6 +287,8 @@ export default function AppRoutes() {
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/blog" element={<BlogPage />} />
 
+        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/course-player/:id" element={<CoursePlayerPage />} />
         {/* add more layout-wrapped routes here */}
       </Route>
 
@@ -296,6 +311,21 @@ export default function AppRoutes() {
         <Route path="/marks-appeal" element={<MarksAppealPage />} />
         <Route path="/online-exam" element={<OnlineExamPage />} />
       </Route>
+
+      <Route element={<ParentLayout />}>
+        <Route path="/parent/dashboard" element={<ParentDashboard />} />
+        <Route path="/parent/profile" element={<ParentProfile />} />
+        <Route path="/parent/children" element={<MyChildren />} />
+        <Route path="/parent/progress" element={<ParentProgress />} />
+        <Route path="/parent/calendar" element={<ParentCalendar />} />
+        <Route path="/parent/help" element={<ParentHelp />} />
+        {/* Remaining placeholder routes */}
+        <Route path="/parent/attendance" element={<Attendance />} />
+        <Route path="/parent/finances" element={<ParentFees />} />
+        <Route path="/parent/messages" element={<ParentMessages />} />
+        <Route path="/parent/notifications" element={<ParentNotifications />} />
+      </Route>
+
       <Route element={<TeacherLayout />}>
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
         <Route path="/teacher/profile" element={<TeacherProfilePage />} />

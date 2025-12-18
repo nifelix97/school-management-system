@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import {
     IoBriefcaseOutline,
     IoCheckmarkCircleOutline,
-    IoChevronDownOutline,
+    IoChevronBackOutline,
+    IoChevronForwardOutline,
     IoFilterOutline,
     IoLocationOutline,
     IoLogoLinkedin,
@@ -11,8 +12,7 @@ import {
     IoPeopleOutline,
     IoSchoolOutline,
     IoSearchOutline,
-    IoStar,
-    IoStarOutline
+    IoStar
 } from "react-icons/io5";
 
 // Types
@@ -35,6 +35,217 @@ interface Mentor {
     isAvailable: boolean;
 }
 
+const MOCK_MENTORS: Mentor[] = [
+    {
+        id: "1",
+        firstName: "Sarah",
+        lastName: "Johnson",
+        profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2015,
+        major: "Computer Science",
+        currentCompany: "Tech Innovations Inc.",
+        currentPosition: "VP of Engineering",
+        industry: "Technology",
+        location: "San Francisco, CA",
+        expertise: ["Software Development", "Leadership", "Career Growth"],
+        bio: "Passionate about helping early-career engineers navigate the tech industry.",
+        linkedInUrl: "linkedin.com/in/sarahjohnson",
+        rating: 4.9,
+        menteeCount: 15,
+        isAvailable: true
+    },
+    {
+        id: "2",
+        firstName: "Michael",
+        lastName: "Chen",
+        profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2018,
+        major: "Business Administration",
+        currentCompany: "Global Consulting",
+        currentPosition: "Senior Consultant",
+        industry: "Consulting",
+        location: "New York, NY",
+        expertise: ["Strategy", "Consulting", "MBA Prep"],
+        bio: "Helping students and young professionals break into consulting.",
+        linkedInUrl: "linkedin.com/in/michaelchen",
+        rating: 4.8,
+        menteeCount: 12,
+        isAvailable: true
+    },
+    {
+        id: "3",
+        firstName: "Emma",
+        lastName: "Williams",
+        profileImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2017,
+        major: "Data Science",
+        currentCompany: "Analytics Pro",
+        currentPosition: "Lead Data Scientist",
+        industry: "Technology",
+        location: "Seattle, WA",
+        expertise: ["Machine Learning", "Python", "Data Analysis"],
+        bio: "Transitioned from academia to industry. Happy to guide aspiring data scientists.",
+        rating: 4.7,
+        menteeCount: 10,
+        isAvailable: false
+    },
+    {
+        id: "4",
+        firstName: "James",
+        lastName: "Rodriguez",
+        profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2016,
+        major: "Marketing",
+        currentCompany: "Creative Marketing",
+        currentPosition: "Marketing Director",
+        industry: "Marketing",
+        location: "Los Angeles, CA",
+        expertise: ["Digital Marketing", "Brand Strategy", "Content"],
+        bio: "15 years in marketing, specializing in digital transformation and brand building.",
+        linkedInUrl: "linkedin.com/in/jamesrodriguez",
+        rating: 4.9,
+        menteeCount: 18,
+        isAvailable: true
+    },
+    {
+        id: "5",
+        firstName: "David",
+        lastName: "Anderson",
+        profileImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2014,
+        major: "Finance",
+        currentCompany: "Investment Partners",
+        currentPosition: "Portfolio Manager",
+        industry: "Finance",
+        location: "Chicago, IL",
+        expertise: ["Investment Banking", "CFA Prep", "Finance"],
+        bio: "CFA charterholder with 12+ years in finance. Mentoring in asset management.",
+        linkedInUrl: "linkedin.com/in/davidanderson",
+        rating: 4.8,
+        menteeCount: 14,
+        isAvailable: true
+    },
+    {
+        id: "6",
+        firstName: "Sophia",
+        lastName: "Martinez",
+        profileImage: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2020,
+        major: "Biology",
+        currentCompany: "BioTech Research",
+        currentPosition: "Research Scientist",
+        industry: "Healthcare",
+        location: "San Diego, CA",
+        expertise: ["Biotechnology", "Research", "Lab Mgmt"],
+        bio: "PhD in molecular biology. Passionate about research and biotech careers.",
+        rating: 4.6,
+        menteeCount: 8,
+        isAvailable: true
+    },
+    {
+        id: "7",
+        firstName: "Robert",
+        lastName: "Kim",
+        profileImage: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2013,
+        major: "Mechanical Engineering",
+        currentCompany: "AutoDrive Systems",
+        currentPosition: "VP Construction",
+        industry: "Engineering",
+        location: "Detroit, MI",
+        expertise: ["Product Design", "Team Mgmt", "Robotics"],
+        bio: "Focused on bridging the gap between engineering theory and industrial practice.",
+        rating: 4.9,
+        menteeCount: 22,
+        isAvailable: true
+    },
+    {
+        id: "8",
+        firstName: "Lisa",
+        lastName: "Wang",
+        profileImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2019,
+        major: "Graphic Design",
+        currentCompany: "Studio Bloom",
+        currentPosition: "Creative Lead",
+        industry: "Design",
+        location: "Portland, OR",
+        expertise: ["UX Design", "Typography", "Branding"],
+        bio: "Passionate about visual storytelling and creating meaningful brand identities.",
+        rating: 4.7,
+        menteeCount: 9,
+        isAvailable: true
+    },
+    {
+        id: "9",
+        firstName: "Maria",
+        lastName: "Garcia",
+        profileImage: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2012,
+        major: "Political Science",
+        currentCompany: "Corporate Legal Hub",
+        currentPosition: "Principal Attorney",
+        industry: "Legal",
+        location: "Washington, DC",
+        expertise: ["Policy", "Corporate Law", "Negotiation"],
+        bio: "Guiding aspiring lawyers and policy makers through the complexities of law.",
+        rating: 5.0,
+        menteeCount: 25,
+        isAvailable: false
+    },
+    {
+        id: "10",
+        firstName: "Kevin",
+        lastName: "Smith",
+        profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2011,
+        major: "Education",
+        currentCompany: "National Academy",
+        currentPosition: "Program Director",
+        industry: "Education",
+        location: "Boston, MA",
+        expertise: ["Curriculum", "EdTech", "Administration"],
+        bio: "Improving educational outcomes through technology and innovative teaching.",
+        rating: 4.8,
+        menteeCount: 16,
+        isAvailable: true
+    },
+    {
+        id: "11",
+        firstName: "Rachel",
+        lastName: "Green",
+        profileImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2021,
+        major: "Fashion Merchandising",
+        currentCompany: "Style Collective",
+        currentPosition: "Trend Analyst",
+        industry: "Retail",
+        location: "New York, NY",
+        expertise: ["Retail Tech", "Trend Analysis", "Sourcing"],
+        bio: "Recent grad navigating the fast-paced world of fashion and retail analysis.",
+        rating: 4.5,
+        menteeCount: 5,
+        isAvailable: true
+    },
+    {
+        id: "12",
+        firstName: "Alex",
+        lastName: "Foster",
+        profileImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
+        graduationYear: 2010,
+        major: "Journalism",
+        currentCompany: "Global News Net",
+        currentPosition: "Senior Editor",
+        industry: "Media",
+        location: "London, UK",
+        expertise: ["Media Strategy", "Editing", "Public Relations"],
+        bio: "Specializing in digital media transformation and high-impact investigative reporting.",
+        rating: 4.9,
+        menteeCount: 20,
+        isAvailable: true
+    }
+];
+
 const Mentorship: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterIndustry, setFilterIndustry] = useState<string>("All");
@@ -43,6 +254,9 @@ const Mentorship: React.FC = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [selectedMentorId, setSelectedMentorId] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 6;
+
     const [requestForm, setRequestForm] = useState({
         fullName: "",
         email: "",
@@ -54,612 +268,359 @@ const Mentorship: React.FC = () => {
         preferredMeetingFrequency: "Bi-weekly"
     });
 
-    // Mock data
-    const mentors: Mentor[] = [
-        {
-            id: "1",
-            firstName: "Sarah",
-            lastName: "Johnson",
-            profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
-            graduationYear: 2015,
-            major: "Computer Science",
-            currentCompany: "Tech Innovations Inc.",
-            currentPosition: "VP of Engineering",
-            industry: "Technology",
-            location: "San Francisco, CA",
-            expertise: ["Software Development", "Leadership", "Career Growth", "Tech Startups"],
-            bio: "Passionate about helping early-career engineers navigate the tech industry. 10+ years of experience in software development and team leadership.",
-            linkedInUrl: "linkedin.com/in/sarahjohnson",
-            rating: 4.9,
-            menteeCount: 15,
-            isAvailable: true
-        },
-        {
-            id: "2",
-            firstName: "Michael",
-            lastName: "Chen",
-            profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
-            graduationYear: 2018,
-            major: "Business Administration",
-            currentCompany: "Global Consulting Group",
-            currentPosition: "Senior Consultant",
-            industry: "Consulting",
-            location: "New York, NY",
-            expertise: ["Business Strategy", "Consulting", "MBA Prep", "Networking"],
-            bio: "Helping students and young professionals break into consulting. Former McKinsey analyst with MBA from Harvard.",
-            linkedInUrl: "linkedin.com/in/michaelchen",
-            rating: 4.8,
-            menteeCount: 12,
-            isAvailable: true
-        },
-        {
-            id: "3",
-            firstName: "Emma",
-            lastName: "Williams",
-            profileImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
-            graduationYear: 2017,
-            major: "Data Science",
-            currentCompany: "Analytics Pro",
-            currentPosition: "Lead Data Scientist",
-            industry: "Technology",
-            location: "Seattle, WA",
-            expertise: ["Data Science", "Machine Learning", "Python", "Career Transition"],
-            bio: "Transitioned from academia to industry. Happy to guide aspiring data scientists through their career journey.",
-            rating: 4.7,
-            menteeCount: 10,
-            isAvailable: false
-        },
-        {
-            id: "4",
-            firstName: "James",
-            lastName: "Rodriguez",
-            profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
-            graduationYear: 2016,
-            major: "Marketing",
-            currentCompany: "Creative Marketing Solutions",
-            currentPosition: "Marketing Director",
-            industry: "Marketing",
-            location: "Los Angeles, CA",
-            expertise: ["Digital Marketing", "Brand Strategy", "Social Media", "Content Creation"],
-            bio: "15 years in marketing, specializing in digital transformation and brand building. Love mentoring creative minds.",
-            linkedInUrl: "linkedin.com/in/jamesrodriguez",
-            rating: 4.9,
-            menteeCount: 18,
-            isAvailable: true
-        },
-        {
-            id: "5",
-            firstName: "David",
-            lastName: "Anderson",
-            profileImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
-            graduationYear: 2014,
-            major: "Finance",
-            currentCompany: "Investment Partners LLC",
-            currentPosition: "Portfolio Manager",
-            industry: "Finance",
-            location: "Chicago, IL",
-            expertise: ["Investment Banking", "Finance", "CFA Prep", "Portfolio Management"],
-            bio: "CFA charterholder with 12+ years in finance. Mentoring students interested in investment banking and asset management.",
-            linkedInUrl: "linkedin.com/in/davidanderson",
-            rating: 4.8,
-            menteeCount: 14,
-            isAvailable: true
-        },
-        {
-            id: "6",
-            firstName: "Sophia",
-            lastName: "Martinez",
-            profileImage: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80",
-            graduationYear: 2020,
-            major: "Biology",
-            currentCompany: "BioTech Research",
-            currentPosition: "Research Scientist",
-            industry: "Healthcare",
-            location: "San Diego, CA",
-            expertise: ["Biotechnology", "Research", "PhD Guidance", "Lab Management"],
-            bio: "PhD in molecular biology. Passionate about mentoring students pursuing careers in biotech and research.",
-            rating: 4.6,
-            menteeCount: 8,
-            isAvailable: true
-        }
-    ];
+    // Statistics memo
+    const stats = React.useMemo(() => {
+        const totalMentors = MOCK_MENTORS.length;
+        const availableMentors = MOCK_MENTORS.filter(m => m.isAvailable).length;
+        const avgRating = (MOCK_MENTORS.reduce((sum, m) => sum + m.rating, 0) / MOCK_MENTORS.length).toFixed(1);
+        const totalMentees = MOCK_MENTORS.reduce((sum, m) => sum + m.menteeCount, 0);
 
-    // Statistics
-    const totalMentors = mentors.length;
-    const availableMentors = mentors.filter(m => m.isAvailable).length;
-    const avgRating = (mentors.reduce((sum, m) => sum + m.rating, 0) / mentors.length).toFixed(1);
-    const totalMentees = mentors.reduce((sum, m) => sum + m.menteeCount, 0);
+        return [
+            {
+                title: "Available",
+                value: availableMentors.toString(),
+                subtitle: `${totalMentors} Total`,
+                icon: <IoPeopleOutline className="w-5 h-5" />,
+                gradient: "from-blue-500 to-blue-600",
+            },
+            {
+                title: "Ongoing",
+                value: "156",
+                subtitle: "Connections",
+                icon: <IoCheckmarkCircleOutline className="w-5 h-5" />,
+                gradient: "from-emerald-500 to-emerald-600",
+            },
+            {
+                title: "Rating",
+                value: avgRating,
+                subtitle: "Satisfaction",
+                icon: <IoStar className="w-5 h-5" />,
+                gradient: "from-amber-500 to-amber-600",
+            },
+            {
+                title: "Help Given",
+                value: totalMentees.toString(),
+                subtitle: "Students",
+                icon: <IoSchoolOutline className="w-5 h-5" />,
+                gradient: "from-purple-500 to-purple-600",
+            },
+        ];
+    }, []);
 
-    const stats = [
-        {
-            title: "Available Mentors",
-            value: availableMentors.toString(),
-            subtitle: `${totalMentors} total`,
-            icon: <IoPeopleOutline className="w-6 h-6 sm:w-7 sm:h-7" />,
-            gradient: "from-blue-500 via-blue-600 to-blue-700",
-        },
-        {
-            title: "Active Mentorships",
-            value: "156",
-            subtitle: "ongoing connections",
-            icon: <IoCheckmarkCircleOutline className="w-6 h-6 sm:w-7 sm:h-7" />,
-            gradient: "from-emerald-500 via-emerald-600 to-emerald-700",
-        },
-        {
-            title: "Average Rating",
-            value: avgRating,
-            subtitle: "mentor satisfaction",
-            icon: <IoStar className="w-6 h-6 sm:w-7 sm:h-7" />,
-            gradient: "from-amber-500 via-amber-600 to-amber-700",
-        },
-        {
-            title: "Total Mentees",
-            value: totalMentees.toString(),
-            subtitle: "students helped",
-            icon: <IoSchoolOutline className="w-6 h-6 sm:w-7 sm:h-7" />,
-            gradient: "from-purple-500 via-purple-600 to-purple-700",
-        },
-    ];
+    // Filtered mentors memo
+    const filteredMentors = React.useMemo(() => {
+        return MOCK_MENTORS.filter(mentor => {
+            const matchesSearch = 
+                mentor.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                mentor.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                mentor.currentCompany.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                mentor.currentPosition.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                mentor.expertise.some(e => e.toLowerCase().includes(searchTerm.toLowerCase()));
+            
+            const matchesIndustry = filterIndustry === "All" || mentor.industry === filterIndustry;
+            const matchesExpertise = filterExpertise === "All" || mentor.expertise.includes(filterExpertise);
+            const matchesAvailability = !filterAvailability || mentor.isAvailable;
 
-    // Filter mentors
-    const filteredMentors = mentors.filter(mentor => {
-        const matchesSearch = 
-            mentor.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            mentor.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            mentor.currentCompany.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            mentor.currentPosition.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            mentor.expertise.some(e => e.toLowerCase().includes(searchTerm.toLowerCase()));
-        
-        const matchesIndustry = filterIndustry === "All" || mentor.industry === filterIndustry;
-        const matchesExpertise = filterExpertise === "All" || mentor.expertise.includes(filterExpertise);
-        const matchesAvailability = !filterAvailability || mentor.isAvailable;
+            return matchesSearch && matchesIndustry && matchesExpertise && matchesAvailability;
+        });
+    }, [searchTerm, filterIndustry, filterExpertise, filterAvailability]);
 
-        return matchesSearch && matchesIndustry && matchesExpertise && matchesAvailability;
-    });
+    // Pagination
+    const totalPages = Math.ceil(filteredMentors.length / itemsPerPage);
+    const paginatedMentors = filteredMentors.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    // Request handlers
+    // Reset page on search or filter change
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterIndustry, filterExpertise, filterAvailability]);
+
     const handleRequestMentorship = (mentorId: string) => {
         setSelectedMentorId(mentorId);
         setShowRequestModal(true);
     };
 
     const submitRequest = () => {
-        // Validate form
-        if (!requestForm.fullName || !requestForm.email || !requestForm.graduationYear || !requestForm.goals) {
-            alert("Please fill in all required fields.");
+        if (!requestForm.fullName || !requestForm.email || !requestForm.goals) {
+            alert("Required: Name, Email, Goals");
             return;
         }
-
-        // Email validation
-        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(requestForm.email)) {
-            alert("Please enter a valid email address.");
-            return;
-        }
-
-        if (selectedMentorId) {
-            const mentor = mentors.find(m => m.id === selectedMentorId);
-            alert(`✅ Request Sent Successfully!\n\nYour mentorship request has been sent to ${mentor?.firstName} ${mentor?.lastName}.\n\nThey will review your profile and goals. You'll receive an email notification at ${requestForm.email} once they respond.`);
-            
-            // Reset form and close modal
-            setRequestForm({
-                fullName: "",
-                email: "",
-                phone: "",
-                graduationYear: "",
-                currentStatus: "Student",
-                goals: "",
-                areasOfInterest: "",
-                preferredMeetingFrequency: "Bi-weekly"
-            });
-            setShowRequestModal(false);
-            setSelectedMentorId(null);
-        }
+        const mentor = MOCK_MENTORS.find(m => m.id === selectedMentorId);
+        alert(`Request sent to ${mentor?.firstName}! They will review your goals and respond via email.`);
+        setShowRequestModal(false);
+        setRequestForm({
+            fullName: "", email: "", phone: "", graduationYear: "",
+            currentStatus: "Student", goals: "", areasOfInterest: "", preferredMeetingFrequency: "Bi-weekly"
+        });
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 p-3 xs:p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-gray-50 p-2 sm:p-4 lg:p-6 space-y-6">
             {/* Header */}
-            <div className="mb-6 sm:mb-8">
-                <h1 className="text-3xl sm:text-4xl font-bold text-primary-50 mb-2">
-                    Mentorship Program
-                </h1>
-                <p className="text-sm sm:text-base text-primary-50/70">
-                    Connect with experienced alumni mentors to guide your career journey.
-                </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">Mentorship Program</h1>
+                    <p className="text-sm text-gray-500">Connect with alumni leaders to accelerate your career growth.</p>
+                </div>
             </div>
 
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-                {stats.map((stat, index) => (
-                    <div 
-                        key={index} 
-                        className="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 hover:-translate-y-1"
-                    >
-                        <div className="flex flex-col gap-3 sm:gap-4">
-                            <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br ${stat.gradient} text-white shadow-md w-fit group-hover:scale-110 transition-transform duration-300`}>
-                                {stat.icon}
-                            </div>
-                            <div>
-                                <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                                <div className="text-xs sm:text-sm text-gray-500 font-medium mb-1">{stat.title}</div>
-                                <div className="text-xs text-gray-400">{stat.subtitle}</div>
-                            </div>
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                {stats.map((stat, i) => (
+                    <div key={i} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 transition-all hover:shadow-md">
+                        <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.gradient} text-white shadow-sm`}>
+                            {stat.icon}
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">{stat.value}</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 truncate">{stat.title}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Search and Filters */}
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
-                    {/* Search */}
+            {/* Search & Filters Bar */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 sm:p-3 overflow-hidden">
+                <div className="flex flex-col lg:flex-row gap-2 lg:gap-4">
                     <div className="flex-1 relative">
-                        <IoSearchOutline className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search by name, company, or expertise..."
+                            placeholder="Find a mentor by name, skill, or industry..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent text-sm sm:text-base"
+                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-primary-100/20 text-sm transition-all font-medium"
                         />
                     </div>
-
-                    {/* Filter Toggle Button */}
-                    <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-50 text-white rounded-lg sm:rounded-xl hover:bg-primary-100 transition-colors font-medium text-sm sm:text-base shadow-sm"
-                    >
-                        <IoFilterOutline className="w-5 h-5" />
-                        <span className="hidden xs:inline">Filters</span>
-                        <IoChevronDownOutline className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-                    </button>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all ${showFilters ? 'bg-primary-50 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >
+                            <IoFilterOutline /> Filters
+                        </button>
+                        <div className="h-10 w-px bg-gray-100 hidden lg:block" />
+                        <div className="flex items-center gap-2 px-3">
+                            <input 
+                                type="checkbox" 
+                                id="avail"
+                                checked={filterAvailability} 
+                                onChange={(e) => setFilterAvailability(e.target.checked)}
+                                className="w-4 h-4 text-primary-50 rounded border-gray-300 focus:ring-primary-50"
+                            />
+                            <label htmlFor="avail" className="text-[10px] font-black uppercase tracking-widest text-gray-500 cursor-pointer">Available Only</label>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Filter Options */}
                 {showFilters && (
-                    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-gray-100">
-                        <div>
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Industry</label>
-                            <select
-                                value={filterIndustry}
+                    <div className="grid grid-cols-2 gap-3 pt-3 mt-3 border-t border-gray-100 animate-slide-down">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Industry</label>
+                            <select 
+                                value={filterIndustry} 
                                 onChange={(e) => setFilterIndustry(e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 text-sm sm:text-base"
+                                className="w-full bg-gray-50 border-none rounded-lg p-2 text-xs font-bold text-gray-600 focus:ring-1 focus:ring-primary-50/20"
                             >
                                 <option value="All">All Industries</option>
                                 <option value="Technology">Technology</option>
-                                <option value="Consulting">Consulting</option>
-                                <option value="Marketing">Marketing</option>
                                 <option value="Finance">Finance</option>
+                                <option value="Consulting">Consulting</option>
                                 <option value="Healthcare">Healthcare</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Engineering">Engineering</option>
                             </select>
                         </div>
-
-                        <div>
-                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Expertise</label>
-                            <select
-                                value={filterExpertise}
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Key Skill</label>
+                            <select 
+                                value={filterExpertise} 
                                 onChange={(e) => setFilterExpertise(e.target.value)}
-                                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 text-sm sm:text-base"
+                                className="w-full bg-gray-50 border-none rounded-lg p-2 text-xs font-bold text-gray-600 focus:ring-1 focus:ring-primary-50/20"
                             >
                                 <option value="All">All Expertise</option>
-                                <option value="Software Development">Software Development</option>
+                                <option value="Software Development">Software Dev</option>
                                 <option value="Leadership">Leadership</option>
-                                <option value="Business Strategy">Business Strategy</option>
-                                <option value="Data Science">Data Science</option>
-                                <option value="Digital Marketing">Digital Marketing</option>
+                                <option value="Strategy">Strategy</option>
+                                <option value="Data Analysis">Data Analysis</option>
+                                <option value="UX Design">UX Design</option>
                             </select>
-                        </div>
-
-                        <div className="flex items-end">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={filterAvailability}
-                                    onChange={(e) => setFilterAvailability(e.target.checked)}
-                                    className="w-4 h-4 text-primary-50 border-gray-300 rounded focus:ring-2 focus:ring-primary-100"
-                                />
-                                <span className="text-sm font-medium text-gray-700">Available only</span>
-                            </label>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Mentor Grid */}
-            {filteredMentors.length === 0 ? (
-                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-8 sm:p-12 text-center">
-                    <IoPeopleOutline className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No mentors found</h3>
-                    <p className="text-sm sm:text-base text-gray-500">Try adjusting your search or filter criteria.</p>
-                </div>
-            ) : (
-                <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {filteredMentors.map((mentor) => (
-                            <div
-                                key={mentor.id}
-                                className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-primary-100 transition-all duration-300 group"
-                            >
-                                {/* Header with gradient */}
-                                <div className="relative h-24 sm:h-32 bg-gradient-to-br from-primary-50 to-primary-100">
-                                    <img
-                                        src={mentor.profileImage}
-                                        alt={`${mentor.firstName} ${mentor.lastName}`}
-                                        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white shadow-lg object-cover"
-                                    />
-                                    {mentor.isAvailable && (
-                                        <div className="absolute top-3 right-3 bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-1">
-                                            <IoCheckmarkCircleOutline className="w-3 h-3" />
+            {/* Mentors Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {paginatedMentors.length > 0 ? (
+                    paginatedMentors.map((mentor) => (
+                        <div key={mentor.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl hover:border-primary-50/30 transition-all group flex flex-col">
+                            {/* Profile Header */}
+                            <div className="relative p-6 pt-10 text-center flex-1">
+                                <div className="absolute top-4 right-4">
+                                    {mentor.isAvailable ? (
+                                        <span className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 border border-emerald-100 shadow-sm">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                             Available
-                                        </div>
+                                        </span>
+                                    ) : (
+                                        <span className="px-2 py-1 bg-gray-50 text-gray-400 rounded-lg text-[9px] font-black uppercase tracking-wider border border-gray-100">
+                                            Busy
+                                        </span>
                                     )}
                                 </div>
-
-                                {/* Content */}
-                                <div className="pt-12 sm:pt-14 p-4 sm:p-5">
-                                    <h3 className="text-base sm:text-lg font-bold text-gray-900 text-center mb-1 group-hover:text-primary-100 transition-colors">
-                                        {mentor.firstName} {mentor.lastName}
-                                    </h3>
-                                    <p className="text-xs sm:text-sm text-gray-600 text-center mb-3">
-                                        Class of {mentor.graduationYear} • {mentor.major}
-                                    </p>
-
-                                    {/* Rating */}
-                                    <div className="flex items-center justify-center gap-1 mb-4">
-                                        {[...Array(5)].map((_, i) => (
-                                            i < Math.floor(mentor.rating) ? (
-                                                <IoStar key={i} className="w-4 h-4 text-amber-400" />
-                                            ) : (
-                                                <IoStarOutline key={i} className="w-4 h-4 text-gray-300" />
-                                            )
-                                        ))}
-                                        <span className="text-sm font-semibold text-gray-700 ml-1">{mentor.rating}</span>
-                                        <span className="text-xs text-gray-500">({mentor.menteeCount} mentees)</span>
+                                <div className="relative inline-block mb-4">
+                                    <div className="w-20 h-20 rounded-2xl overflow-hidden ring-4 ring-gray-50 shadow-inner">
+                                        <img src={mentor.profileImage} alt={mentor.firstName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                     </div>
-
-                                    <div className="space-y-2 mb-4">
-                                        <div className="flex items-start gap-2 text-xs sm:text-sm text-gray-700">
-                                            <IoBriefcaseOutline className="w-4 h-4 text-primary-50 flex-shrink-0 mt-0.5" />
-                                            <span className="line-clamp-2">{mentor.currentPosition} at {mentor.currentCompany}</span>
-                                        </div>
-                                        <div className="flex items-start gap-2 text-xs sm:text-sm text-gray-600">
-                                            <IoLocationOutline className="w-4 h-4 text-primary-50 flex-shrink-0 mt-0.5" />
-                                            <span className="line-clamp-1">{mentor.location}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Bio */}
-                                    <p className="text-xs sm:text-sm text-gray-600 mb-4 line-clamp-3">
-                                        {mentor.bio}
-                                    </p>
-
-                                    {/* Expertise Tags */}
-                                    <div className="mb-4">
-                                        <h4 className="text-xs font-semibold text-gray-900 mb-2">Expertise:</h4>
-                                        <div className="flex flex-wrap gap-1.5">
-                                            {mentor.expertise.slice(0, 3).map((exp, idx) => (
-                                                <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium">
-                                                    {exp}
-                                                </span>
-                                            ))}
-                                            {mentor.expertise.length > 3 && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-medium">
-                                                    +{mentor.expertise.length - 3} more
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
-                                        <button 
-                                            disabled={!mentor.isAvailable}
-                                            onClick={() => handleRequestMentorship(mentor.id)}
-                                            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                                mentor.isAvailable
-                                                    ? 'bg-primary-50 text-white hover:bg-primary-100'
-                                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            }`}
-                                        >
-                                            Request Mentorship
-                                        </button>
-                                        <button className="p-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
-                                            <IoMailOutline className="w-5 h-5" />
-                                        </button>
-                                        {mentor.linkedInUrl && (
-                                            <button className="p-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
-                                                <IoLogoLinkedin className="w-5 h-5" />
-                                            </button>
-                                        )}
+                                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-400 text-white rounded-xl flex items-center justify-center font-bold text-xs shadow-lg border-2 border-white">
+                                        {mentor.rating}
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                                
+                                <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-50 transition-colors">{mentor.firstName} {mentor.lastName}</h3>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+                                    Class of {mentor.graduationYear} • {mentor.major}
+                                </p>
 
-                    {/* Results Count */}
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-500">
-                            Showing <span className="font-semibold text-gray-900">{filteredMentors.length}</span> of <span className="font-semibold text-gray-900">{totalMentors}</span> mentors
-                        </p>
+                                <div className="bg-gray-50/50 rounded-2xl p-4 space-y-2 mb-4 text-left border border-gray-50">
+                                    <div className="flex items-center gap-3 text-xs font-bold text-gray-600">
+                                        <IoBriefcaseOutline className="text-primary-50" />
+                                        <span className="truncate">{mentor.currentPosition}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-xs font-bold text-gray-600">
+                                        <IoLocationOutline className="text-primary-50" />
+                                        <span className="truncate">{mentor.location}</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2 justify-center mb-4">
+                                    {mentor.expertise.slice(0, 3).map((skill, idx) => (
+                                        <span key={idx} className="px-2 py-0.5 bg-primary-50/5 text-primary-50 rounded-lg text-[9px] font-black uppercase tracking-tighter border border-primary-50/10">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <p className="text-xs text-gray-500 italic line-clamp-2 px-2">"{mentor.bio}"</p>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="p-4 pt-0">
+                                <button 
+                                    disabled={!mentor.isAvailable}
+                                    onClick={() => handleRequestMentorship(mentor.id)}
+                                    className="w-full py-3 bg-primary-50 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-primary-50/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    Request Mentorship
+                                </button>
+                                <div className="flex gap-2 mt-2">
+                                    <button className="flex-1 py-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-primary-50/10 hover:text-primary-50 transition-all flex items-center justify-center">
+                                        <IoMailOutline />
+                                    </button>
+                                    <button className="flex-1 py-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-primary-50/10 hover:text-primary-50 transition-all flex items-center justify-center">
+                                        <IoLogoLinkedin />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-full bg-white p-12 text-center rounded-3xl border-2 border-dashed border-gray-100">
+                        <IoPeopleOutline className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                        <p className="text-gray-400 font-bold uppercase tracking-widest">No mentors found matching your search</p>
                     </div>
-                </>
+                )}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-6">
+                    <button 
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        className="p-2 rounded-xl bg-white border border-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                    >
+                        <IoChevronBackOutline />
+                    </button>
+                    {Array.from({ length: totalPages }).map((_, i) => (
+                        <button 
+                            key={i}
+                            onClick={() => setCurrentPage(i + 1)}
+                            className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${currentPage === i + 1 ? 'bg-primary-50 text-white shadow-lg shadow-primary-50/20' : 'bg-white border border-gray-100 text-gray-400 hover:border-primary-50/50'}`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                    <button 
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        className="p-2 rounded-xl bg-white border border-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                    >
+                        <IoChevronForwardOutline />
+                    </button>
+                </div>
             )}
 
-            {/* Request Mentorship Modal */}
-            {showRequestModal && selectedMentorId && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => {
-                    setShowRequestModal(false);
-                    setSelectedMentorId(null);
-                }}>
-                    <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Mentorship</h2>
-                        <p className="text-gray-600 mb-6">
-                            Requesting mentorship from <span className="font-semibold text-primary-100">{mentors.find(m => m.id === selectedMentorId)?.firstName} {mentors.find(m => m.id === selectedMentorId)?.lastName}</span>
-                        </p>
-
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {/* Full Name */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Full Name <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={requestForm.fullName}
-                                        onChange={(e) => setRequestForm({ ...requestForm, fullName: e.target.value })}
-                                        placeholder="Your name"
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                        required
-                                    />
-                                </div>
-
-                                {/* Graduation Year */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Graduation Year <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="number"
-                                        value={requestForm.graduationYear}
-                                        onChange={(e) => setRequestForm({ ...requestForm, graduationYear: e.target.value })}
-                                        placeholder="YYYY"
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {/* Email */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Email Address <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={requestForm.email}
-                                        onChange={(e) => setRequestForm({ ...requestForm, email: e.target.value })}
-                                        placeholder="your.email@example.com"
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                        required
-                                    />
-                                </div>
-
-                                {/* Phone */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Phone Number (Optional)
-                                    </label>
-                                    <input
-                                        type="tel"
-                                        value={requestForm.phone}
-                                        onChange={(e) => setRequestForm({ ...requestForm, phone: e.target.value })}
-                                        placeholder="+250..."
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Current Status */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Current Status
-                                </label>
-                                <select
-                                    value={requestForm.currentStatus}
-                                    onChange={(e) => setRequestForm({ ...requestForm, currentStatus: e.target.value })}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                >
-                                    <option value="Student">Student</option>
-                                    <option value="Recent Graduate">Recent Graduate</option>
-                                    <option value="Working Professional">Working Professional</option>
-                                    <option value="Job Seeker">Job Seeker</option>
-                                </select>
-                            </div>
-
-                            {/* Mentorship Goals */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Mentorship Goals <span className="text-red-500">*</span>
-                                </label>
-                                <textarea
-                                    value={requestForm.goals}
-                                    onChange={(e) => setRequestForm({ ...requestForm, goals: e.target.value })}
-                                    placeholder="What do you hope to achieve from this mentorship? (e.g., career guidance, industry insights, resume review)"
-                                    rows={4}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent resize-none"
-                                    required
-                                />
-                            </div>
-
-                            {/* Areas of Interest */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Specific Areas of Interest
-                                </label>
-                                <input
-                                    type="text"
-                                    value={requestForm.areasOfInterest}
-                                    onChange={(e) => setRequestForm({ ...requestForm, areasOfInterest: e.target.value })}
-                                    placeholder="e.g., Artificial Intelligence, Project Management, Interview Prep"
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                />
-                            </div>
-
-                            {/* Preferred Frequency */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Preferred Meeting Frequency
-                                </label>
-                                <select
-                                    value={requestForm.preferredMeetingFrequency}
-                                    onChange={(e) => setRequestForm({ ...requestForm, preferredMeetingFrequency: e.target.value })}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-transparent"
-                                >
-                                    <option value="Weekly">Weekly</option>
-                                    <option value="Bi-weekly">Bi-weekly</option>
-                                    <option value="Monthly">Monthly</option>
-                                    <option value="One-time">One-time Meeting</option>
-                                </select>
-                            </div>
-
-                            {/* Info Box */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <p className="text-sm text-blue-800">
-                                    <strong>Note:</strong> Mentors serve on a voluntary basis. Please be respectful of their time and clear about your expectations.
+            {/* Mentorship Modal */}
+            {showRequestModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setShowRequestModal(false)} />
+                    <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative animate-slide-up overflow-hidden">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-primary-50/5">
+                            <div className="min-w-0">
+                                <h2 className="text-xl font-bold text-gray-900 truncate">Mentorship Request</h2>
+                                <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-0.5 truncate">
+                                    To {MOCK_MENTORS.find(m => m.id === selectedMentorId)?.firstName} {MOCK_MENTORS.find(m => m.id === selectedMentorId)?.lastName}
                                 </p>
                             </div>
                         </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex flex-col-reverse sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200">
-                            <button
-                                onClick={() => {
-                                    setShowRequestModal(false);
-                                    setSelectedMentorId(null);
-                                    setRequestForm({
-                                        fullName: "",
-                                        email: "",
-                                        phone: "",
-                                        graduationYear: "",
-                                        currentStatus: "Student",
-                                        goals: "",
-                                        areasOfInterest: "",
-                                        preferredMeetingFrequency: "Bi-weekly"
-                                    });
-                                }}
-                                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={submitRequest}
-                                className="flex-1 px-6 py-3 bg-primary-50 text-white rounded-xl hover:bg-primary-100 transition-colors font-medium shadow-md hover:shadow-lg"
-                            >
-                                Send Request
-                            </button>
+                        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">FullName</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Your Name" 
+                                    className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-1 focus:ring-primary-50/20 text-sm font-medium"
+                                    value={requestForm.fullName}
+                                    onChange={(e) => setRequestForm({...requestForm, fullName: e.target.value})}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Email</label>
+                                    <input 
+                                        type="email" 
+                                        placeholder="address@email.com" 
+                                        className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-1 focus:ring-primary-50/20 text-sm font-medium"
+                                        value={requestForm.email}
+                                        onChange={(e) => setRequestForm({...requestForm, email: e.target.value})}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Graduation Year</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="2024" 
+                                        className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-1 focus:ring-primary-50/20 text-sm font-medium"
+                                        value={requestForm.graduationYear}
+                                        onChange={(e) => setRequestForm({...requestForm, graduationYear: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Your Goals</label>
+                                <textarea 
+                                    placeholder="Tell the mentor what you'd like to achieve..." 
+                                    rows={4}
+                                    className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-1 focus:ring-primary-50/20 text-sm font-medium resize-none"
+                                    value={requestForm.goals}
+                                    onChange={(e) => setRequestForm({...requestForm, goals: e.target.value})}
+                                />
+                            </div>
+                        </div>
+                        <div className="p-6 bg-gray-50 flex gap-3">
+                            <button onClick={() => setShowRequestModal(false)} className="flex-1 py-3 text-sm font-bold text-gray-400 hover:text-gray-600">Cancel</button>
+                            <button onClick={submitRequest} className="flex-[2] py-3 bg-primary-50 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary-50/20 active:scale-95 transition-all">Send Request</button>
                         </div>
                     </div>
                 </div>

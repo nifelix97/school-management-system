@@ -1,18 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { getEnabledRoles } from "../utils/roles";
 
 type Props = { open: boolean; onClose: () => void; className?: string };
 
-const roles = [
-  "Student","Parent","Teacher",
-  "Librarian","Accountant","Registrar","Nurse",
-  "Alumni","Manager","Warden","Auditor",
-  "Vendors","Coaches","Receptionist","Admin",
-  "Vice Principal","HOD","Principal",
-  "Vice Chancellor","Chancellor"
-];
-
 const LoginDropdown: React.FC<Props> = ({ open, onClose, className = "" }) => {
+  const roles = getEnabledRoles();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

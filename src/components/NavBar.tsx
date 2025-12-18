@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { FaRegFileLines } from "react-icons/fa6";
 import { IoIosCheckmarkCircle, IoMdHome, IoMdPerson } from "react-icons/io";
-import { IoLogInOutline, IoStatsChartOutline } from "react-icons/io5";
+import { IoFileTrayFullOutline, IoLogInOutline, IoStatsChartOutline } from "react-icons/io5";
 import { MdEmail } from "react-icons/md";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import sanlogo from "../assets/sanverse.png";
+import { getEnabledRoles, ROLE_DASHBOARDS } from "../utils/roles";
 import FloatingLanguageSelector from "./FloatingLanguageSelector";
 import LoginDropdown from "./LoginPopUp";
 
@@ -139,6 +140,17 @@ const NavBar = () => {
               Blog
             </Link>
             <Link
+              to="/resources"
+              className={`no-underline font-medium hover:text-primary-100 flex align-items-center gap-1 ${
+                location.pathname === '/resources' ? 'text-primary-100' : 'text-primary-50'
+              }`}
+            >
+              <span>
+                <IoFileTrayFullOutline className="size-5" />
+              </span>
+              Resources
+            </Link>
+            <Link
               to="/about-us"
               className={`no-underline font-medium hover:text-primary-100 flex align-items-center gap-1 ${
                 location.pathname === '/about-us' ? 'text-primary-100' : 'text-primary-50'
@@ -200,21 +212,7 @@ const NavBar = () => {
                 to={(() => {
                   try {
                     const user = JSON.parse(localStorage.getItem('user') || '{}');
-                    const role = user.role;
-                    switch (role) {
-                      case "Student": return "/dashboard";
-                      case "Teacher": return "/teacher/dashboard";
-                      case "HOD": return "/hod/dashboard";
-                      case "Registrar": return "/registrar/dashboard";
-                      case "Accountant": return "/accountant/dashboard";
-                      case "Parent": return "/parent/dashboard";
-                      case "Admin": return "/admin/dashboard";
-                      case "Principal": return "/principal/dashboard";
-                      case "Vice Principal": return "/vice-principal/dashboard";
-                      case "Librarian": return "/librarian/dashboard";
-                      case "Vice Chancellor": return "/vice-chancellor/dashboard";
-                      default: return "/dashboard";
-                    }
+                    return ROLE_DASHBOARDS[user.role] || "/dashboard";
                   } catch (e) {
                     return "/dashboard";
                   }
@@ -267,27 +265,7 @@ const NavBar = () => {
 
             <div className="p-5">
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  "Student",
-                  "Parent",
-                  "Teacher",
-                  "Librarian",
-                  "Accountant",
-                  "Registrar",
-                  "Nurse",
-                  "Alumni",
-                  "Manager",
-                  "Warden",
-                  "Auditor",
-                  "Vendors",
-                  "Coaches",
-                  "Receptionist",
-                  "Admin",
-                  "Vice Principal",
-                  "HOD",
-                  "Vice Chancellor",
-                  "Chancellor",
-                ].map((role, idx) => (
+                {getEnabledRoles().map((role, idx) => (
                   <Link
                     key={`${role}-${idx}`}
                     to={`/login?role=${encodeURIComponent(role)}`}
@@ -381,6 +359,16 @@ const NavBar = () => {
                 <span className="font-medium">Blog</span>
               </Link>
               <Link
+                to="/resources"
+                onClick={() => setIsOpen(false)}
+                className={`no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 ${
+                  location.pathname === '/resources' ? 'bg-primary-100/20' : ''
+                }`}
+              >
+                <IoFileTrayFullOutline className="size-5 text-primary-100" />
+                <span className="font-medium">Resources</span>
+              </Link>
+              <Link
                 to="/about-us"
                 onClick={() => setIsOpen(false)}
                 className={`no-underline rounded-lg px-4 py-3 flex items-center gap-3 text-white hover:bg-white/10 ${
@@ -406,21 +394,7 @@ const NavBar = () => {
                   to={(() => {
                     try {
                       const user = JSON.parse(localStorage.getItem('user') || '{}');
-                      const role = user.role;
-                      switch (role) {
-                        case "Student": return "/dashboard";
-                        case "Teacher": return "/teacher/dashboard";
-                        case "HOD": return "/hod/dashboard";
-                        case "Registrar": return "/registrar/dashboard";
-                        case "Accountant": return "/accountant/dashboard";
-                        case "Parent": return "/parent/dashboard";
-                        case "Admin": return "/admin/dashboard";
-                        case "Principal": return "/principal/dashboard";
-                        case "Vice Principal": return "/vice-principal/dashboard";
-                        case "Librarian": return "/librarian/dashboard";
-                        case "Vice Chancellor": return "/vice-chancellor/dashboard";
-                        default: return "/dashboard";
-                      }
+                      return ROLE_DASHBOARDS[user.role] || "/dashboard";
                     } catch (e) {
                       return "/dashboard";
                     }
