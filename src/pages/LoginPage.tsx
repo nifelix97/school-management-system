@@ -4,6 +4,7 @@ import { IoMdLock, IoMdMail } from "react-icons/io";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Input from "../components/ui/Input";
+import { DUMMY_CREDENTIALS } from "../utils/damydatacredentials";
 import { getEnabledRoles, ROLE_DASHBOARDS } from "../utils/roles";
 
 type FormState = {
@@ -20,7 +21,7 @@ const emailRegex =
 
 
 const LoginPage = () => {
-    const roles = useMemo(() => getEnabledRoles(), []);
+    const roles = useMemo(() => getEnabledRoles().filter(r => r !== "Super Admin"), []);
     const [form, setForm] = useState<FormState>({ email: "", password: "", role: "" });
     const navigate = useNavigate();
   
@@ -50,8 +51,15 @@ const LoginPage = () => {
     if (!form.password) e.password = "Password is required.";
     else if (form.password.length < 6) e.password = "Password must be at least 6 characters.";
 
-    if (!role) e.role = "Please select your role.";
-    else if (!roles.includes(role)) e.role = "Invalid role.";
+    // Role is now optional if credentials match a known role
+    const credentialMatch = DUMMY_CREDENTIALS[form.email];
+    const isCredentialValid = credentialMatch && credentialMatch.password === form.password;
+
+    if (!role && !isCredentialValid) {
+      e.role = "Please select your role or use valid credentials.";
+    } else if (role && !roles.includes(role) && role !== "Super Admin") {
+      e.role = "Invalid role.";
+    }
 
     return e;
   }, [form,role]);
@@ -75,7 +83,17 @@ const LoginPage = () => {
 
     try {
         setSubmitting(true);
-        // TODO: replace with real auth call
+        // Credential-based role inference
+        const credentialMatch = DUMMY_CREDENTIALS[form.email];
+        let authenticatedRole = role;
+
+        if (credentialMatch && credentialMatch.password === form.password) {
+            authenticatedRole = credentialMatch.role;
+        } else if (!role) {
+            toast.error("Invalid credentials or role not selected.");
+            return;
+        }
+
         await new Promise((r) => setTimeout(r, 800));
         console.log("Login data:", form);
       
@@ -83,7 +101,7 @@ const LoginPage = () => {
         localStorage.setItem('token', 'demo-auth-token-' + Date.now());
         localStorage.setItem('user', JSON.stringify({
           email: form.email,
-          role: role,
+          role: authenticatedRole,
           name: form.email.split('@')[0]
         }));
       
@@ -91,7 +109,7 @@ const LoginPage = () => {
         toast.success("Welcome back!");
         
         // Role-based redirection
-        const targetPath = ROLE_DASHBOARDS[role];
+        const targetPath = ROLE_DASHBOARDS[authenticatedRole];
         if (targetPath) {
           navigate(targetPath);
         } else {

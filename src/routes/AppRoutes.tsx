@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import AccountantLayout from "../components/AccountantLayout";
 import AdminLayout from "../components/AdminLayout";
+import GuildPresidentLayout from "../components/GuildPresidentLayout";
 import HODLayout from "../components/HODLayout";
 import Layout from "../components/Layout";
 import LibrarianLayout from "../components/LibrarianLayout";
@@ -8,6 +9,7 @@ import ParentLayout from "../components/ParentLayout";
 import PrincipalLayout from "../components/PrincipalLayout";
 import RegistrarLayout from "../components/RegistrarLayout";
 import StudentLayout from "../components/StudentLayout";
+import SuperAdminLayout from "../components/SuperAdminLayout";
 import TeacherLayout from "../components/TeacherLayout";
 import ViceChancellorLayout from "../components/ViceChancellorLayout";
 import AboutUs from "../pages/AboutUs";
@@ -45,6 +47,15 @@ import ChancellorDashboard from "../pages/Chancellor/ChancellorDashboard";
 import ChancellorNotification from "../pages/Chancellor/ChancellorNotification";
 import ChancellorProfile from "../pages/Chancellor/ChancellorProfile";
 import ChancellorReportAnalytic from "../pages/Chancellor/Reports&Analytics";
+import AcademicAffairs from "../pages/Guild-president/AcademicAffairs";
+import ClubsAndAssociations from "../pages/Guild-president/ClubsAndAssociations";
+import GuildAnnouncements from "../pages/Guild-president/GuildAnnouncements";
+import GuildBudgetAndFunds from "../pages/Guild-president/GuildBudgetAndFunds";
+import GuildDashboard from "../pages/Guild-president/GuildDashboard";
+import GuildProfile from "../pages/Guild-president/GuildProfile";
+import SocialsAndEvents from "../pages/Guild-president/SocialsAndEvents";
+import StudentGrievances from "../pages/Guild-president/StudentGrievances";
+import StudentWelfare from "../pages/Guild-president/StudentWelfare";
 import ExamsQuestions from "../pages/HOD/ExamsQuestions";
 import GenerateReport from "../pages/HOD/GenerateReport";
 import HODProfilePage from "../pages/HOD/HODProfilePage";
@@ -98,6 +109,16 @@ import StudentRecords from "../pages/Registrar/StudentRecords";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import ResourcesPage from "../pages/ResourcesPage";
 import StudentDashBoard from "../pages/StudentDashBoard";
+import DatasRecovery from "../pages/SuperAdmin/DataRecovery";
+import GeneralSettings from "../pages/SuperAdmin/GeneralSettings";
+import Notifications from "../pages/SuperAdmin/Notifications";
+import SuperAdminReports from "../pages/SuperAdmin/ReportsAnalytics";
+import RolesPermissions from "../pages/SuperAdmin/RolesPermissions";
+import SecuritySettings from "../pages/SuperAdmin/SecuritySettings";
+import SuperAdminDashboard from "../pages/SuperAdmin/SuperAdminDashboard";
+import SuperAdminProfile from "../pages/SuperAdmin/SuperAdminProfile";
+import SystemConfiguration from "../pages/SuperAdmin/SystemConfiguration";
+import UserManagement from "../pages/SuperAdmin/UserManagement";
 import AcademicCalendar from "../pages/Teacher/AcademicCalendar";
 import CreateAssignment from "../pages/Teacher/CreateAssignment";
 import ExamAttendance from "../pages/Teacher/ExamAttendance";
@@ -130,7 +151,6 @@ import NotificationsPage from "../pages/student/NotificationsPage";
 import OnlineExamPage from "../pages/student/OnlineExam";
 import StudentMarks from "../pages/student/StudentMarks";
 import TeacherPage from "../pages/student/TeacherPage";
-import AcademicAffairs from "../pages/v-chancellor/AccademicAffairs";
 import Accreditation from "../pages/v-chancellor/Accreditation";
 import CurriculumReview from "../pages/v-chancellor/CurriculumReview";
 import EventsConferences from "../pages/v-chancellor/Events&Conferances";
@@ -588,6 +608,20 @@ export default function AppRoutes() {
         <Route path="/warden/notifications" element={<WardenNotifications />} />
       </Route>
 
+      {/* Guild President Routes */}
+      <Route element={<GuildPresidentLayout />}>
+        {/* Placeholder for now - each link in sidebar should have a page */}
+        <Route path="/guild/dashboard" element={<GuildDashboard />} />
+        <Route path="/guild/profile" element={<GuildProfile />} />
+        <Route path="/guild/welfare" element={<StudentWelfare />} />
+        <Route path="/guild/academics" element={<AcademicAffairs />} />
+        <Route path="/guild/financials" element={<GuildBudgetAndFunds />} />
+        <Route path="/guild/associations" element={<ClubsAndAssociations />} />
+        <Route path="/guild/events" element={<SocialsAndEvents />} />
+        <Route path="/guild/grievances" element={<StudentGrievances />} />
+        <Route path="/guild/announcements" element={<GuildAnnouncements />} />
+      </Route>
+
       {/* Manager Routes */}
       <Route path="/manager" element={<ManagerLayout />}>
         <Route path="dashboard" element={<ManagerDashboard />} />
@@ -646,6 +680,22 @@ export default function AppRoutes() {
         <Route path="/coach/report" element={<CoacheReport />} />
         <Route path="/coach/notifications" element={<CoacheNotifications />} />
       </Route>
+
+      {/* Super Admin Routes */}
+      <Route element={<SuperAdminLayout />}>
+        <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+        <Route path="/super-admin/profile" element={<SuperAdminProfile />} />
+        <Route path="/super-admin/users" element={<UserManagement />} />
+        <Route path="/super-admin/roles-permissions" element={<RolesPermissions />} />
+        <Route path="/super-admin/system-config" element={<SystemConfiguration />} />
+        <Route path="/super-admin/reports" element={<SuperAdminReports />} />
+        <Route path="/super-admin/notifications" element={<Notifications />} />
+        <Route path="/super-admin/security" element={<SecuritySettings />} />
+        <Route path="/super-admin/settings" element={<GeneralSettings />} />
+        <Route path="/super-admin/data-recovery" element={<DatasRecovery />} />
+        {/* Add more super admin specific pages here */}
+      </Route>
+
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
     </Routes>

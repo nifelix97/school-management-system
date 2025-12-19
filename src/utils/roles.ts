@@ -22,6 +22,8 @@ export const ALL_ROLES = [
   "Vendor",
   "Coaches",
   "Parent",
+  "Super Admin",
+  "Guild-president",
 ];
 export const ROLE_DASHBOARDS: Record<string, string> = {
   "Admin": "/admin/dashboard",
@@ -45,9 +47,12 @@ export const ROLE_DASHBOARDS: Record<string, string> = {
   "Vendor": "/vendor/dashboard",
   "Coaches": "/coach/dashboard",
   "Parent": "/parent/dashboard",
+  "Super Admin": "/super-admin/dashboard",
+  "Guild-president": "/guild/dashboard",
 };
 
 const ROLES_VISIBILITY_KEY = "system_enabled_roles";
+const SYSTEM_LOCK_KEY = "system_global_lock";
 
 /**
  * Gets the list of roles that are currently enabled for display
@@ -76,4 +81,18 @@ export const setEnabledRoles = (roles: string[]): void => {
 export const isRoleEnabled = (role: string): boolean => {
   const enabled = getEnabledRoles();
   return enabled.includes(role);
+};
+
+/**
+ * Checks if the system is globally locked
+ */
+export const isSystemLocked = (): boolean => {
+  return localStorage.getItem(SYSTEM_LOCK_KEY) === "true";
+};
+
+/**
+ * Sets the system lock status
+ */
+export const setSystemLock = (locked: boolean): void => {
+  localStorage.setItem(SYSTEM_LOCK_KEY, locked ? "true" : "false");
 };
