@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { IoMdLock, IoMdMail } from "react-icons/io";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useLoginMutation } from "../app/api/auth";
 import Input from "../components/ui/Input";
-import { DUMMY_CREDENTIALS } from "../utils/damydatacredentials";
 import { getEnabledRoles, ROLE_DASHBOARDS } from "../utils/roles";
 
 type FormState = {
@@ -40,7 +40,7 @@ const LoginPage = () => {
       role: false,
     });
  
-  const [submitting, setSubmitting] = useState(false);
+  const [login, { isLoading: submitting }] = useLoginMutation();
 
 
   const errors: FormErrors = useMemo(() => {
@@ -51,18 +51,12 @@ const LoginPage = () => {
     if (!form.password) e.password = "Password is required.";
     else if (form.password.length < 6) e.password = "Password must be at least 6 characters.";
 
-    // Role is now optional if credentials match a known role
-    const credentialMatch = DUMMY_CREDENTIALS[form.email];
-    const isCredentialValid = credentialMatch && credentialMatch.password === form.password;
-
-    if (!role && !isCredentialValid) {
-      e.role = "Please select your role or use valid credentials.";
-    } else if (role && !roles.includes(role) && role !== "Super Admin") {
+    if (role && !roles.includes(role) && role !== "Super Admin") {
       e.role = "Invalid role.";
     }
 
     return e;
-  }, [form,role]);
+  }, [form,role, roles]);
 
   const isValid = useMemo(() => Object.keys(errors).length === 0, [errors]);
 
@@ -82,42 +76,49 @@ const LoginPage = () => {
     if (!isValid) return;
 
     try {
-        setSubmitting(true);
-        // Credential-based role inference
-        const credentialMatch = DUMMY_CREDENTIALS[form.email];
-        let authenticatedRole = role;
-
-        if (credentialMatch && credentialMatch.password === form.password) {
-            authenticatedRole = credentialMatch.role;
-        } else if (!role) {
-            toast.error("Invalid credentials or role not selected.");
-            return;
-        }
-
-        await new Promise((r) => setTimeout(r, 800));
-        console.log("Login data:", form);
-      
-        // Save authentication data to localStorage
-        localStorage.setItem('token', 'demo-auth-token-' + Date.now());
-        localStorage.setItem('user', JSON.stringify({
-          email: form.email,
-          role: authenticatedRole,
-          name: form.email.split('@')[0]
-        }));
-      
-        // show toast and navigate based on role
-        toast.success("Welcome back!");
+        const response = await login({ email: form.email, password: form.password }).unwrap();
         
-        // Role-based redirection
-        const targetPath = ROLE_DASHBOARDS[authenticatedRole];
-        if (targetPath) {
+        if (response.success && response.data) {
+          const { user, token, refreshToken } = response.data;
+          
+          // Save authentication data to localStorage
+          localStorage.setItem('token', token);
+          localStorage.setItem('refreshToken', refreshToken);
+          localStorage.setItem('user', JSON.stringify(user));
+        
+          // show toast and navigate based on role
+          toast.success(response.message || "Welcome back!");
+          
+          // Role-based redirection - use a more robust matching logic
+          const getDashboardPath = (role: string) => {
+            // First try direct match
+            if (ROLE_DASHBOARDS[role]) return ROLE_DASHBOARDS[role];
+            
+            // Try normalized match (lowercase, remove spaces and hyphens)
+            const normalizedRole = role.toLowerCase().replace(/[\s-_]/g, '');
+            const dashboardEntries = Object.entries(ROLE_DASHBOARDS);
+            
+            for (const [key, path] of dashboardEntries) {
+              if (key.toLowerCase().replace(/[\s-_]/g, '') === normalizedRole) {
+                return path;
+              }
+            }
+            
+            // Special case for Super Admin variations if not caught
+            if (normalizedRole === 'superadmin') return ROLE_DASHBOARDS['Super Admin'];
+            
+            return "/dashboard"; // Fallback to student dashboard
+          };
+
+          const targetPath = getDashboardPath(user.role);
           navigate(targetPath);
         } else {
-          // Fallback for unexpected roles
-          navigate("/dashboard");
+          toast.error(response.error || "Login failed");
         }
-      } finally {
-        setSubmitting(false);
+      } catch (err: any) {
+        console.error("Login error:", err);
+        const errorMessage = err?.data?.error || err?.error || "Invalid email or password. Please try again.";
+        toast.error(errorMessage);
       }
   };
 

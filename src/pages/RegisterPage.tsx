@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { IoMdCall, IoMdLock, IoMdMail, IoMdPerson } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useRegisterMutation } from "../app/api/auth";
 import Input from "../components/ui/Input";
 import { getEnabledRoles } from "../utils/roles";
 
@@ -63,6 +64,7 @@ const ROLES_REQUIRING_CONTRACT = [
   "Vice Chancellor",
   "Chancellor",
   "Coaches",
+  "Guild President"
 ];
 
 // Role-specific field configurations
@@ -127,7 +129,7 @@ const RegisterPage = () => {
     role: false,
   });
 
-  const [submitting, setSubmitting] = useState(false);
+  const [register, { isLoading: submitting }] = useRegisterMutation();
 
   const errors: FormErrors = useMemo(() => {
     const e: FormErrors = {};
@@ -280,26 +282,56 @@ const RegisterPage = () => {
       confirmPassword: true,
       role: true,
     }));
-    if (!isValid) return;
+    
+    if (!isValid) {
+      toast.error("Please fix the errors in the form.");
+      return;
+    }
 
     try {
-      setSubmitting(true);
-      // TODO: replace with real registration API call
-      await new Promise((r) => setTimeout(r, 800));
-      console.log("Registration data:", form);
-
-      // show success toast with admin approval message
-      toast.success("Registration successful!", { autoClose: 3000 });
+      // Create FormData to handle file upload
+      const formData = new FormData();
       
-      // Show info toast about admin approval
-      setTimeout(() => {
-        toast.info("Your account will be activated after admin approval. You'll receive an email notification.", { autoClose: 5000 });
-      }, 500);
+      // Basic fields
+      formData.append("fullName", form.fullName);
+      formData.append("email", form.email);
+      formData.append("phone", form.phone);
+      formData.append("password", form.password);
+      formData.append("role", form.role);
 
-      // redirect to login page
-      navigate("/login");
-    } finally {
-      setSubmitting(false);
+      // Role-specific fields
+      const roleFields = ROLE_FIELDS[form.role] || [];
+      roleFields.forEach((field) => {
+        if (form[field]) {
+          formData.append(field, form[field] as string);
+        }
+      });
+
+      // Contract document
+      if (form.contractDocument) {
+        formData.append("contractDocument", form.contractDocument);
+      }
+
+      const response = await register(formData).unwrap();
+
+      if (response.success) {
+        // show success toast with admin approval message
+        toast.success(response.message || "Registration successful!", { autoClose: 3000 });
+        
+        // Show info toast about admin approval
+        setTimeout(() => {
+          toast.info("Your account will be activated after admin approval. You'll receive an email notification.", { autoClose: 5000 });
+        }, 500);
+
+        // redirect to login page
+        navigate("/login");
+      } else {
+        toast.error(response.error || "Registration failed");
+      }
+    } catch (err: any) {
+      console.error("Registration error:", err);
+      const errorMessage = err?.data?.error || err?.error || "Registration failed. Please try again.";
+      toast.error(errorMessage);
     }
   };
 

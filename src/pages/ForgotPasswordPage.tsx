@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { IoMdMail } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useForgotPasswordMutation } from "../app/api/auth";
 import Input from "../components/ui/Input";
 
 const emailRegex =
@@ -11,7 +12,7 @@ const emailRegex =
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [touched, setTouched] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [forgotPassword, { isLoading: submitting }] = useForgotPasswordMutation();
   const navigate = useNavigate();
 
   const error = useMemo(() => {
@@ -28,19 +29,19 @@ const ForgotPasswordPage = () => {
     if (!isValid) return;
 
     try {
-      setSubmitting(true);
-      // TODO: replace with real API call to send OTP
-      await new Promise((r) => setTimeout(r, 1000));
-      console.log("Send OTP to:", email);
-
-      toast.success("OTP sent to your email!");
+      const response = await forgotPassword({ email }).unwrap();
       
-      // Navigate to OTP verification page with email
-      navigate("/verify-otp", { state: { email } });
-    } catch (err) {
-      toast.error("Failed to send OTP. Please try again.");
-    } finally {
-      setSubmitting(false);
+      if (response.success) {
+        toast.success(response.message || "OTP sent to your email!");
+        // Navigate to OTP verification page with email
+        navigate("/verify-otp", { state: { email } });
+      } else {
+        toast.error(response.error || "Failed to send OTP. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Forgot password error:", err);
+      const errorMessage = err?.data?.error || err?.error || "Failed to send OTP. Please try again.";
+      toast.error(errorMessage);
     }
   };
 

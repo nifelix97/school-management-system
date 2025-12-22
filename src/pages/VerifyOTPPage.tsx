@@ -2,11 +2,12 @@ import { ChevronLeft } from "lucide-react";
 import { useRef, useState, type KeyboardEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useForgotPasswordMutation, useVerifyOTPMutation } from "../app/api/auth";
 
 const VerifyOTPPage = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [submitting, setSubmitting] = useState(false);
-  const [resending, setResending] = useState(false);
+  const [verifyOTP, { isLoading: submitting }] = useVerifyOTPMutation();
+  const [forgotPassword, { isLoading: resending }] = useForgotPasswordMutation();
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email || "";
@@ -58,36 +59,37 @@ const VerifyOTPPage = () => {
     if (!isValid) return;
 
     try {
-      setSubmitting(true);
-      // TODO: replace with real API call to verify OTP
-      await new Promise((r) => setTimeout(r, 1000));
-      console.log("Verify OTP:", otpValue, "for email:", email);
-
-      toast.success("OTP verified successfully!");
+      const response = await verifyOTP({ email, otp: otpValue }).unwrap();
       
-      // Navigate to reset password page
-      navigate("/reset-password", { state: { email, otp: otpValue } });
-    } catch (err) {
-      toast.error("Invalid OTP. Please try again.");
-    } finally {
-      setSubmitting(false);
+      if (response.success) {
+        toast.success(response.message || "OTP verified successfully!");
+        // Navigate to reset password page
+        navigate("/reset-password", { state: { email, otp: otpValue } });
+      } else {
+        toast.error(response.error || "Invalid OTP. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Verify OTP error:", err);
+      const errorMessage = err?.data?.error || err?.error || "Invalid OTP. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
   const handleResendOTP = async () => {
     try {
-      setResending(true);
-      // TODO: replace with real API call to resend OTP
-      await new Promise((r) => setTimeout(r, 1000));
-      console.log("Resend OTP to:", email);
-
-      toast.success("New OTP sent to your email!");
-      setOtp(["", "", "", "", "", ""]);
-      inputRefs.current[0]?.focus();
-    } catch (err) {
-      toast.error("Failed to resend OTP. Please try again.");
-    } finally {
-      setResending(false);
+      const response = await forgotPassword({ email }).unwrap();
+      
+      if (response.success) {
+        toast.success(response.message || "New OTP sent to your email!");
+        setOtp(["", "", "", "", "", ""]);
+        inputRefs.current[0]?.focus();
+      } else {
+        toast.error(response.error || "Failed to resend OTP. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Resend OTP error:", err);
+      const errorMessage = err?.data?.error || err?.error || "Failed to resend OTP. Please try again.";
+      toast.error(errorMessage);
     }
   };
 

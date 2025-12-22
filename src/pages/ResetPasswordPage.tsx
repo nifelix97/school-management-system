@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { IoMdLock } from "react-icons/io";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useResetPasswordMutation } from "../app/api/auth";
 import Input from "../components/ui/Input";
 
 const ResetPasswordPage = () => {
@@ -14,7 +15,7 @@ const ResetPasswordPage = () => {
     password: false,
     confirmPassword: false,
   });
-  const [submitting, setSubmitting] = useState(false);
+  const [resetPassword, { isLoading: submitting }] = useResetPasswordMutation();
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email || "";
@@ -62,19 +63,19 @@ const ResetPasswordPage = () => {
     if (!isValid) return;
 
     try {
-      setSubmitting(true);
-      // TODO: replace with real API call to reset password
-      await new Promise((r) => setTimeout(r, 1000));
-      console.log("Reset password for:", email, "with OTP:", otp);
-
-      toast.success("Password reset successfully!");
+      const response = await resetPassword({ email, newPassword: form.password }).unwrap();
       
-      // Navigate to login page
-      navigate("/login");
-    } catch (err) {
-      toast.error("Failed to reset password. Please try again.");
-    } finally {
-      setSubmitting(false);
+      if (response.success) {
+        toast.success(response.message || "Password reset successfully!");
+        // Navigate to login page
+        navigate("/login");
+      } else {
+        toast.error(response.error || "Failed to reset password. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Reset password error:", err);
+      const errorMessage = err?.data?.error || err?.error || "Failed to reset password. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
