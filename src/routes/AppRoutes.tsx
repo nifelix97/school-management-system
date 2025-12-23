@@ -216,6 +216,7 @@ import CoacheLayout from "../components/CoacheLayout";
 import CounselorLayout from "../components/CounselorLayout";
 import ManagerLayout from "../components/ManagerLayout";
 import ReceptionistLayout from "../components/ReceptionistLayout";
+import TransportManagerLayout from "../components/TransportManagerLayout";
 import VendorLayout from "../components/VendorLayout";
 import WardenLayout from "../components/wardenLayout";
 import Achievements from "../pages/Alumni/Achievements";
@@ -278,6 +279,13 @@ import ReceptionistNotifications from "../pages/Receptionist/ReceptionistNotific
 import ReceptionistProfile from "../pages/Receptionist/ReceptionistProfile";
 import StaffDirectory from "../pages/Receptionist/StaffDirectory";
 import VisitorLog from "../pages/Receptionist/VisitorLog";
+import AssignRoutes from "../pages/TransportManager/AssignRoutes";
+import DriverSchedules from "../pages/TransportManager/DriverSchedules";
+import Maintenance from "../pages/TransportManager/Maintenance";
+import TransportFees from "../pages/TransportManager/TransportFees";
+import TransportManagerDashboard from "../pages/TransportManager/TransportManagerDashboard";
+import TransportManagerProfile from "../pages/TransportManager/TransportManagerProfile";
+import VehicleFleet from "../pages/TransportManager/VehicleFleet";
 import VendorInvoices from "../pages/Vendor/Invoices";
 import Orders from "../pages/Vendor/Orders";
 import ProductsServices from "../pages/Vendor/ProductsServices";
@@ -292,13 +300,6 @@ import RoomAllocation from "../pages/warden/RoomAllocation";
 import WardenDashboard from "../pages/warden/WardenDashboard";
 import WardenNotifications from "../pages/warden/WardenNotifications";
 import WardenProfile from "../pages/warden/WardenProfile";
-import TransportManagerLayout from "../components/TransportManagerLayout";
-import TransportManagerDashboard from "../pages/TransportManager/TransportManagerDashboard";
-import TransportFees from "../pages/TransportManager/TransportFees";
-import Maintenance from "../pages/TransportManager/Maintenance";
-import VehicleFleet from "../pages/TransportManager/VehicleFleet";
-import DriverSchedules from "../pages/TransportManager/DriverSchedules";
-import AssignRoutes from "../pages/TransportManager/AssignRoutes";
 
 
 
@@ -729,6 +730,7 @@ export default function AppRoutes() {
         <Route path="/transport-manager/fleet" element={<VehicleFleet />} />
         <Route path="/transport-manager/schedule" element={<DriverSchedules />} />
         <Route path="/transport-manager/routes" element={<AssignRoutes />} />
+        <Route path="/transport-manager/profile" element={<TransportManagerProfile />} />
       </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />

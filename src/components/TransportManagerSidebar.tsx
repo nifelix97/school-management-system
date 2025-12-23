@@ -8,6 +8,7 @@ import {
     IoGridOutline,
     IoMapOutline,
     IoMenuOutline,
+    IoPersonCircleOutline,
 } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
 
@@ -45,6 +46,11 @@ const links = [
     to: "/transport-manager/routes",
     label: "Assign Routes",
     icon: <IoMapOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/transport-manager/profile",
+    label: "Profile",
+    icon: <IoPersonCircleOutline className="w-5 h-5" />,
   },
 ];
 
