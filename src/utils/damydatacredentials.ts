@@ -22,4 +22,6 @@ export const DUMMY_CREDENTIALS: Record<string, { role: string; password: string 
   "parent@sanverse.com": { role: "Parent", password: "password123" },
   "superadmin@sanverse.com": { role: "Super Admin", password: "password123" },
   "guild@sanverse.com": { role: "Guild-president", password: "password123" },
+  "counselor@sanverse.com": { role: "Counselor", password: "password123" },
+  "transport@sanverse.com": { role: "Transport Manager", password: "password123" },
 };

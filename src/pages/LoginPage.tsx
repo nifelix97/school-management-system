@@ -3,8 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { IoMdLock, IoMdMail } from "react-icons/io";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useLoginMutation } from "../app/api/auth";
+// import { useLoginMutation } from "../app/api/auth";
 import Input from "../components/ui/Input";
+import { DUMMY_CREDENTIALS } from "../utils/damydatacredentials";
 import { getEnabledRoles, ROLE_DASHBOARDS } from "../utils/roles";
 
 type FormState = {
@@ -40,7 +41,8 @@ const LoginPage = () => {
       role: false,
     });
  
-  const [login, { isLoading: submitting }] = useLoginMutation();
+  // const [login, { isLoading: submitting }] = useLoginMutation();
+  const [submitting, setSubmitting] = useState(false);
 
 
   const errors: FormErrors = useMemo(() => {
@@ -75,6 +77,55 @@ const LoginPage = () => {
     setTouched({ email: true, password: true, role: true });
     if (!isValid) return;
 
+    setSubmitting(true);
+    // Simulate API delay
+    setTimeout(() => {
+      const dummyUser = DUMMY_CREDENTIALS[form.email];
+
+      if (dummyUser && dummyUser.password === form.password) {
+        const mockData = {
+          user: {
+            email: form.email,
+            role: dummyUser.role,
+            name: form.email.split('@')[0]
+          },
+          token: "dummy-jwt-token",
+          refreshToken: "dummy-refresh-token",
+          success: true,
+          message: "Welcome back! (Dummy Login)"
+        };
+
+        // Save authentication data to localStorage
+        localStorage.setItem('token', mockData.token);
+        localStorage.setItem('refreshToken', mockData.refreshToken);
+        localStorage.setItem('user', JSON.stringify(mockData.user));
+
+        toast.success(mockData.message);
+
+        // Role-based redirection
+        const getDashboardPath = (role: string) => {
+          if (ROLE_DASHBOARDS[role]) return ROLE_DASHBOARDS[role];
+          const normalizedRole = role.toLowerCase().replace(/[\s-_]/g, '');
+          const dashboardEntries = Object.entries(ROLE_DASHBOARDS);
+          for (const [key, path] of dashboardEntries) {
+            if (key.toLowerCase().replace(/[\s-_]/g, '') === normalizedRole) {
+              return path;
+            }
+          }
+          if (normalizedRole === 'superadmin') return ROLE_DASHBOARDS['Super Admin'];
+          return "/dashboard";
+        };
+
+        const targetPath = getDashboardPath(mockData.user.role);
+        navigate(targetPath);
+      } else {
+        toast.error("Invalid email or password. (Dummy Login)");
+      }
+      setSubmitting(false);
+    }, 1000);
+
+    /* 
+    // BACKEND INTEGRATION (Commented for future use)
     try {
         const response = await login({ email: form.email, password: form.password }).unwrap();
         
@@ -120,6 +171,7 @@ const LoginPage = () => {
         const errorMessage = err?.data?.error || err?.error || "Invalid email or password. Please try again.";
         toast.error(errorMessage);
       }
+    */
   };
 
 

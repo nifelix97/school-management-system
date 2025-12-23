@@ -24,6 +24,8 @@ export const ALL_ROLES = [
   "Parent",
   "Super Admin",
   "Guild-president",
+  "Counselor",
+  "Transport Manager",
 ];
 export const ROLE_DASHBOARDS: Record<string, string> = {
   "Admin": "/admin/dashboard",
@@ -49,6 +51,8 @@ export const ROLE_DASHBOARDS: Record<string, string> = {
   "Parent": "/parent/dashboard",
   "Super Admin": "/super-admin/dashboard",
   "Guild-president": "/guild/dashboard",
+  "Counselor": "/counselor/dashboard",
+  "Transport Manager": "/transport-manager/dashboard",
 };
 
 const ROLES_VISIBILITY_KEY = "system_enabled_roles";

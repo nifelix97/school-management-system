@@ -213,6 +213,7 @@ import WellnessProgram from "../pages/Nurse/WellnessProgram";
 import AlumniLayout from "../components/AlumniLayout";
 import AuditorLayout from "../components/AuditorLayout";
 import CoacheLayout from "../components/CoacheLayout";
+import CounselorLayout from "../components/CounselorLayout";
 import ManagerLayout from "../components/ManagerLayout";
 import ReceptionistLayout from "../components/ReceptionistLayout";
 import VendorLayout from "../components/VendorLayout";
@@ -242,6 +243,13 @@ import MyTeams from "../pages/Coache/MyTeams";
 import CoachPerformance from "../pages/Coache/Performance";
 import Schedules from "../pages/Coache/Schedules";
 import TrainingPlans from "../pages/Coache/TrainingPlans";
+import CareerGuidance from "../pages/Counselor/CareerGuidance";
+import CounselingRecords from "../pages/Counselor/CounselingRecords";
+import CounselorDashboard from "../pages/Counselor/CounselorDashboard";
+import CounselorProfile from "../pages/Counselor/CounselorProfile";
+import GenerateReports from "../pages/Counselor/GenerateReports";
+import ScheduleSessions from "../pages/Counselor/ScheduleSessions";
+import StudentBehavior from "../pages/Counselor/StudentBehavior";
 import Events from "../pages/Manager/Events";
 import Financials from "../pages/Manager/Financials";
 import ManagerDashboard from "../pages/Manager/ManagerDashboard";
@@ -284,7 +292,13 @@ import RoomAllocation from "../pages/warden/RoomAllocation";
 import WardenDashboard from "../pages/warden/WardenDashboard";
 import WardenNotifications from "../pages/warden/WardenNotifications";
 import WardenProfile from "../pages/warden/WardenProfile";
-
+import TransportManagerLayout from "../components/TransportManagerLayout";
+import TransportManagerDashboard from "../pages/TransportManager/TransportManagerDashboard";
+import TransportFees from "../pages/TransportManager/TransportFees";
+import Maintenance from "../pages/TransportManager/Maintenance";
+import VehicleFleet from "../pages/TransportManager/VehicleFleet";
+import DriverSchedules from "../pages/TransportManager/DriverSchedules";
+import AssignRoutes from "../pages/TransportManager/AssignRoutes";
 
 
 
@@ -696,6 +710,26 @@ export default function AppRoutes() {
         {/* Add more super admin specific pages here */}
       </Route>
 
+      {/* Counselor Routes */}
+      <Route element={<CounselorLayout />}>
+        <Route path="/counselor/dashboard" element={<CounselorDashboard />} />
+        <Route path="/counselor/profile" element={<CounselorProfile />} />
+        <Route path="/counselor/behavior" element={<StudentBehavior />} />
+        <Route path="/counselor/sessions" element={<ScheduleSessions />} />
+        <Route path="/counselor/records" element={<CounselingRecords />} />
+        <Route path="/counselor/reports" element={<GenerateReports />} />
+      <Route path="/counselor/career" element={<CareerGuidance />} />
+      </Route>
+
+      {/* Transport Manager Routes */}
+      <Route element={<TransportManagerLayout />}>
+         <Route path="/transport-manager/dashboard" element={<TransportManagerDashboard />} />
+        <Route path="/transport-manager/fees" element={<TransportFees />} />
+        <Route path="/transport-manager/maintenance" element={<Maintenance />} />
+        <Route path="/transport-manager/fleet" element={<VehicleFleet />} />
+        <Route path="/transport-manager/schedule" element={<DriverSchedules />} />
+        <Route path="/transport-manager/routes" element={<AssignRoutes />} />
+      </Route>
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
     </Routes>
