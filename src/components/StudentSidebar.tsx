@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import {
-  IoPersonCircleOutline,
-  IoCalendarOutline,
-  IoTimeOutline,
-  IoPeopleOutline,
-  IoBookOutline,
-  IoAlertCircleOutline,
-  IoChatbubbleEllipsesOutline,
-  IoClipboardOutline,
-  IoTrophyOutline,
-  IoCheckmarkDoneOutline,
-  IoMenuOutline,
-  IoChevronBackOutline,
-  IoStatsChartOutline,
-  IoShieldCheckmarkSharp,
-  IoPlayOutline,
-} from "react-icons/io5";
 import { BsSendCheck } from "react-icons/bs";
+import {
+    IoAlertCircleOutline,
+    IoBookOutline,
+    IoCalendarOutline,
+    IoChatbubbleEllipsesOutline,
+    IoCheckmarkDoneOutline,
+    IoChevronBackOutline,
+    IoClipboardOutline,
+    IoMenuOutline,
+    IoPeopleOutline,
+    IoPersonCircleOutline,
+    IoPlayOutline,
+    IoShieldCheckmarkSharp,
+    IoStatsChartOutline,
+    IoTimeOutline,
+    IoTrophyOutline,
+} from "react-icons/io5";
+import { NavLink } from "react-router-dom";
 
 
 type SidebarProps = {
@@ -59,6 +59,7 @@ const links = [
     to: "/notifications",
     label: "Notifications",
     icon: <IoBookOutline className="w-5 h-5" />,
+    badge: 3, // Mock number of new notifications
   },
   {
     to: "/grading",
@@ -235,8 +236,15 @@ const StudentSidebar = ({ className = "" }: SidebarProps) => {
                   }
                   onClick={() => !isDesktop && setMobileOpen(false)}
                 >
-                  <span className="text-primary-100">{l.icon}</span>
-                  <span className={`whitespace-nowrap ${labelCls}`}>{l.label}</span>
+                  <div className="relative flex items-center">
+                    <span className="text-primary-100">{l.icon}</span>
+                    {"badge" in l && l.badge && (
+                      <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-primary-50 transition-all ${collapsed ? "scale-75" : "scale-100"}`}>
+                        {l.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className={`whitespace-nowrap transition-all duration-300 ${labelCls}`}>{l.label}</span>
                 </NavLink>
               </li>
             ))}

@@ -245,10 +245,10 @@ const ReceptionistDashboard: React.FC = () => {
            {[
              { label: "Add Visitor", icon: <IoPersonAddOutline className="w-6 h-6" />, color: "from-blue-500 to-blue-600", path: "/receptionist/visitors" },
              { label: "Log Call", icon: <IoCallOutline className="w-6 h-6" />, color: "from-emerald-500 to-emerald-600", path: "/receptionist/calls" },
-             { label: "New Inquiry", icon: <IoHelpCircleOutline className="w-6 h-6" />, color: "from-amber-500 to-amber-600", path: "/receptionist/inquiries" },
+             { label: "Contact Inquiry", icon: <IoHelpCircleOutline className="w-6 h-6" />, color: "from-amber-500 to-amber-600", path: "/receptionist/inquiries" },
              { label: "Book Appt", icon: <IoCalendarOutline className="w-6 h-6" />, color: "from-purple-500 to-purple-600", path: "/receptionist/appointments" },
-             { label: "Check Mail", icon: <IoMailOutline className="w-6 h-6" />, color: "from-rose-500 to-rose-600", path: "/receptionist/mail" },
-             { label: "Lookup Staff", icon: <IoSearchOutline className="w-6 h-6" />, color: "from-indigo-500 to-indigo-600", path: "/receptionist/directory" },
+             { label: "Check Correspondence", icon: <IoMailOutline className="w-6 h-6" />, color: "from-rose-500 to-rose-600", path: "/receptionist/mail" },
+             { label: "Lookup Contact", icon: <IoSearchOutline className="w-6 h-6" />, color: "from-indigo-500 to-indigo-600", path: "/receptionist/directory" },
            ].map((action, index) => (
              <button
                key={index}

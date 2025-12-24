@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import {
-    IoAlertCircleOutline,
-    IoCheckmarkCircleOutline,
-    IoCloseCircleOutline,
-    IoDocumentTextOutline,
-    IoListOutline,
-    IoPlayOutline,
-    IoStopwatchOutline,
-    IoTimeOutline
+  IoAlertCircleOutline,
+  IoCheckmarkCircleOutline,
+  IoCloseCircleOutline,
+  IoCloudDownloadOutline,
+  IoDocumentTextOutline,
+  IoListOutline,
+  IoPlayOutline,
+  IoStopwatchOutline,
+  IoTimeOutline
 } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
 interface Question {
   id: string;
@@ -39,6 +41,7 @@ interface Exam {
 }
 
 const OnlineExamPage: React.FC = () => {
+  const navigate = useNavigate();
   const [filterStatus, setFilterStatus] = useState("available");
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [isExamStarted, setIsExamStarted] = useState(false);
@@ -221,9 +224,11 @@ const OnlineExamPage: React.FC = () => {
   };
 
   const handleSubmitExam = () => {
+    if (!selectedExam) return;
+
     // Calculate score (for demo purposes)
     let score = 0;
-    if (selectedExam?.questions) {
+    if (selectedExam.questions) {
       selectedExam.questions.forEach((q) => {
         if (q.correctAnswer && answers[q.id] === q.correctAnswer) {
           score += q.points;
@@ -231,12 +236,32 @@ const OnlineExamPage: React.FC = () => {
       });
     }
 
-    alert(
-      `Exam submitted successfully!\nYour score: ${score}/${selectedExam?.totalPoints}`
-    );
+    const percentage = Math.round((score / selectedExam.totalPoints) * 100);
+    
+    const result = {
+      score,
+      total: selectedExam.totalPoints,
+      exam: selectedExam,
+      percentage,
+      date: new Date().toLocaleString(),
+    };
+
     setIsExamStarted(false);
-    setSelectedExam(null);
     setShowSubmitConfirm(false);
+    
+    // Navigate to dedicated result template page
+    navigate("/online-exam/result", { state: { examResult: result } });
+  };
+
+  const handleDownloadResult = (exam: Exam, score: number = 0) => {
+    const result = {
+      score,
+      total: exam.totalPoints,
+      exam: exam,
+      percentage: Math.round((score / exam.totalPoints) * 100),
+      date: exam.attemptedDate || new Date().toLocaleString(),
+    };
+    navigate("/online-exam/result", { state: { examResult: result } });
   };
 
   const getStatusColor = (status: string) => {
@@ -286,7 +311,7 @@ const OnlineExamPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         {/* Fixed Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 shadow-sm z-10">
+        <div className="sticky top-0 bg-white border-b border-gray-200 shadow-sm z-10 print:hidden">
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -596,16 +621,16 @@ const OnlineExamPage: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-primary-50/60 mb-1">
-                  {exam.status === "completed" ? "Score" : "Available Until"}
-                </p>
-                <p className="text-sm font-bold text-primary-50">
-                  {exam.status === "completed"
-                    ? `${exam.score}/${exam.totalPoints}`
-                    : new Date(exam.endDate).toLocaleDateString()}
-                </p>
-              </div>
+              <p className="text-xs text-primary-50/60 mb-1">
+                {exam.status === "completed" ? "Score" : "Available Until"}
+              </p>
+              <p className="text-sm font-bold text-primary-50">
+                {exam.status === "completed"
+                  ? `${exam.score}/${exam.totalPoints}`
+                  : new Date(exam.endDate).toLocaleDateString()}
+              </p>
             </div>
+          </div>
 
             {/* Instructions Preview */}
             {exam.instructions && (
@@ -626,17 +651,23 @@ const OnlineExamPage: React.FC = () => {
             )}
 
             {exam.status === "completed" && (
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex items-center gap-2">
                   <IoCheckmarkCircleOutline className="w-5 h-5 text-green-600" />
-                  <span className="text-sm font-medium text-green-700">
-                    Completed
-                  </span>
+                  <div>
+                    <span className="block text-sm font-bold text-green-700">
+                      Score: {exam.score}/{exam.totalPoints} ({Math.round(((exam.score || 0) / exam.totalPoints) * 100)}%)
+                    </span>
+                    <span className="text-xs text-green-600/70">Completed on {exam.attemptedDate ? new Date(exam.attemptedDate).toLocaleDateString() : 'N/A'}</span>
+                  </div>
                 </div>
-                <span className="text-sm font-bold text-green-700">
-                  Score: {exam.score}/{exam.totalPoints} (
-                  {Math.round(((exam.score || 0) / exam.totalPoints) * 100)}%)
-                </span>
+                <button
+                  onClick={() => handleDownloadResult(exam, exam.score)}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-white text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-all text-sm font-bold shadow-sm"
+                >
+                  <IoCloudDownloadOutline className="w-4 h-4" />
+                  Download Result
+                </button>
               </div>
             )}
 

@@ -154,15 +154,26 @@ const ResourcesPage: React.FC = () => {
               Search our curated library to find exactly what you need.
             </p>
 
-            <div className="relative group max-w-xl">
-              <IoSearchOutline className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-primary-50 transition-colors" />
-              <input 
-                type="text" 
-                placeholder="Search resources by title or keywords..."
-                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-5 pl-16 pr-6 focus:ring-4 focus:ring-primary-50/10 focus:border-primary-50 focus:bg-white transition-all text-slate-800 placeholder-slate-400 text-lg shadow-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch max-w-2xl">
+              <div className="relative group flex-1">
+                <IoSearchOutline className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-primary-50 transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="Search resources by title or keywords..."
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-5 pl-16 pr-6 focus:ring-4 focus:ring-primary-50/10 focus:border-primary-50 focus:bg-white transition-all text-slate-800 placeholder-slate-400 text-lg shadow-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <button 
+                onClick={() => navigate('/online-meeting')}
+                className="bg-primary-50 text-white px-8 py-5 rounded-2xl font-bold hover:bg-primary-100 transition-all shadow-xl shadow-primary-50/20 active:scale-95 flex items-center justify-center gap-3 whitespace-nowrap"
+              >
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                   <IoPlayCircleOutline className="w-6 h-6" />
+                </div>
+                <span>Start Virtual Meeting</span>
+              </button>
             </div>
           </div>
         </div>

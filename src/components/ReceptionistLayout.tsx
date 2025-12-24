@@ -5,7 +5,7 @@ import ReceptionistSidebar from "./ReceptionistSidebar";
 
 const ReceptionistLayout: React.FC = () => {
   return (
-    <div className="bg-primary-50/10"
+    <div className="bg-gradient-to-br from-gray-50 via-primary-50/5 to-primary-50/10"
       style={{
         minHeight: "100vh",
         display: "flex",
@@ -14,6 +14,7 @@ const ReceptionistLayout: React.FC = () => {
         zIndex: 0,
       }}
     >
+      <div className="absolute inset-0 bg-pattern opacity-5 pointer-events-none"></div>
       <NavBar />
 
       {/* Content area below fixed NavBar */}

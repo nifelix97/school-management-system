@@ -32,7 +32,7 @@ const links = [
   },
   {
     to: "/receptionist/visitors",
-    label: "Visitor Log",
+    label: "Visitor Logs",
     icon: <IoPeopleOutline className="w-5 h-5" />,
   },
   {
@@ -42,7 +42,7 @@ const links = [
   },
   {
     to: "/receptionist/inquiries",
-    label: "Enquiries",
+    label: "Inquiries",
     icon: <IoHelpCircleOutline className="w-5 h-5" />,
   },
   {
@@ -52,12 +52,12 @@ const links = [
   },
   {
     to: "/receptionist/mail",
-    label: "Mail & Packages",
+    label: "Correspondence",
     icon: <IoMailOutline className="w-5 h-5" />,
   },
   {
     to: "/receptionist/directory",
-    label: "Staff Directory",
+    label: "Contact List",
     icon: <IoSearchOutline className="w-5 h-5" />,
   },
   {

@@ -22,11 +22,51 @@ export const ALL_ROLES = [
   "Vendor",
   "Coaches",
   "Parent",
-  "Super Admin",
+  // "Super Admin",
   "Guild-president",
   "Counselor",
   "Transport Manager",
 ];
+
+export const ROLE_GROUPS = {
+  "Leadership & Governance": [
+    "Chancellor",
+    "Vice Chancellor",
+    "Principal",
+    "Vice Principal"
+  ],
+
+  "Academic & Learning": [
+    "Dean",
+    "HOD",
+    "Teacher",
+    "Student",
+    "Alumni",
+    "Guild President",
+    "Parent"
+  ],
+
+  "Administration & Operations": [
+    "Admin",
+    "Registrar",
+    "Accountant",
+    "Auditor",
+    "Receptionist",
+    "Manager"
+  ],
+
+  "Support & Welfare Services": [
+    "Librarian",
+    "Nurse",
+    "Counselor",
+    "Warden",
+    "Transport Manager",
+    "Coach",
+    "Vendor"
+  ]
+} as const;
+
+
 export const ROLE_DASHBOARDS: Record<string, string> = {
   "Admin": "/admin/dashboard",
   "Principal": "/principal/dashboard",

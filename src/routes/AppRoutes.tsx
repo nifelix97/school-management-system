@@ -83,6 +83,7 @@ import ReservationsPage from "../pages/Librarian/ReservationsPage";
 import TransactionHistory from "../pages/Librarian/TransactionHistory";
 import LoginPage from "../pages/LoginPage";
 import NotFound from "../pages/NotFound";
+import OnlineMeeting from "../pages/OnlineMeeting";
 import AcademicOversight from "../pages/Principal/AcademiOversight";
 import Announcements from "../pages/Principal/Announcements";
 import AssignTeachers from "../pages/Principal/AssignTeachers";
@@ -141,6 +142,7 @@ import ClearanceApplicationPage from "../pages/student/ClearanceApplication";
 import CoursePlayerPage from "../pages/student/CoursePlayerPage";
 import CoursesPage from "../pages/student/CoursesPage";
 import Dashboard from "../pages/student/Dashboard";
+import ExamResultTemplate from "../pages/student/ExamResultTemplate";
 import ExamRoutine from "../pages/student/ExamRoutine";
 import GradingPage from "../pages/student/GradingPage";
 import LeaveRequestsPage from "../pages/student/LeaveRequestsPage";
@@ -150,6 +152,7 @@ import MessagePage from "../pages/student/MessagePage";
 import NotificationsPage from "../pages/student/NotificationsPage";
 import OnlineExamPage from "../pages/student/OnlineExam";
 import StudentMarks from "../pages/student/StudentMarks";
+import StudentTranscript from "../pages/student/StudentTranscript";
 import TeacherPage from "../pages/student/TeacherPage";
 import Accreditation from "../pages/v-chancellor/Accreditation";
 import CurriculumReview from "../pages/v-chancellor/CurriculumReview";
@@ -313,6 +316,8 @@ export default function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/verify-otp" element={<VerifyOTPPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/transcript" element={<StudentTranscript />} />
+      <Route path="/online-exam/result" element={<ExamResultTemplate />} />
 
       {/* Routes WITH layout */}
       <Route element={<Layout />}>
@@ -323,6 +328,7 @@ export default function AppRoutes() {
         <Route path="/blog" element={<BlogPage />} />
 
         <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/online-meeting" element={<OnlineMeeting />} />
         <Route path="/course-player/:id" element={<CoursePlayerPage />} />
         {/* add more layout-wrapped routes here */}
       </Route>

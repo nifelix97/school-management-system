@@ -1,12 +1,13 @@
+import { Award, BookOpen, Calendar, ChevronLeft, FileText, TrendingUp } from "lucide-react";
 import { useState } from "react";
-import { ChevronLeft, BookOpen, TrendingUp, Award, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Grade {
   id: number;
   courseName: string;
   courseCode: string;
-  assignmentName: string;
-  assignmentType: string;
+  examName: string;
+  examType: string;
   score: number;
   maxScore: number;
   feedback?: string;
@@ -26,6 +27,7 @@ interface CourseStats {
 
 export default function StudentMarks() {
   const [selectedCourse, setSelectedCourse] = useState<string>("all");
+  const navigate = useNavigate();
 
   // Mock data matching the MarkSheet structure
   const grades: Grade[] = [
@@ -33,8 +35,8 @@ export default function StudentMarks() {
       id: 1,
       courseName: "Advanced Mathematics",
       courseCode: "MATH 301",
-      assignmentName: "Homework 1",
-      assignmentType: "assignment",
+      examName: "Homework 1",
+      examType: "assignment",
       score: 45,
       maxScore: 50,
       feedback: "Good work",
@@ -45,8 +47,8 @@ export default function StudentMarks() {
       id: 2,
       courseName: "Advanced Mathematics", 
       courseCode: "MATH 301",
-      assignmentName: "Quiz 1",
-      assignmentType: "quiz",
+      examName: "Quiz 1",
+      examType: "quiz",
       score: 18,
       maxScore: 20,
       gradedDate: "2024-01-20",
@@ -56,8 +58,8 @@ export default function StudentMarks() {
       id: 3,
       courseName: "Physics Laboratory",
       courseCode: "PHYS 201", 
-      assignmentName: "Lab Report 1",
-      assignmentType: "lab",
+      examName: "Lab Report 1",
+      examType: "lab",
       score: 42,
       maxScore: 50,
       feedback: "Excellent analysis",
@@ -132,13 +134,22 @@ export default function StudentMarks() {
           <span>Back</span>
         </button>
 
-        <div className="mb-4 xs:mb-6">
-          <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-primary-50 mb-2">
-            My Grades
-          </h1>
-          <p className="text-xs xs:text-sm text-primary-50/60">
-            View your academic performance and feedback
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 xs:mb-6">
+          <div>
+            <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-primary-50 mb-2">
+              My Grades
+            </h1>
+            <p className="text-xs xs:text-sm text-primary-50/60">
+              View your academic performance and feedback
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/transcript")}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-primary-50 text-white rounded-lg hover:bg-opacity-90 transition-all shadow-md group"
+          >
+            <FileText size={18} className="group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-semibold">View Transcript</span>
+          </button>
         </div>
 
         {/* Course Filter */}
@@ -205,9 +216,9 @@ export default function StudentMarks() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    {getTypeIcon(grade.assignmentType)}
+                    {getTypeIcon(grade.examType)}
                     <h3 className="font-semibold text-primary-50 text-sm xs:text-base">
-                      {grade.assignmentName}
+                      {grade.examName}
                     </h3>
                   </div>
                   <p className="text-xs xs:text-sm text-primary-50/60">
@@ -243,7 +254,7 @@ export default function StudentMarks() {
 
               <div className="flex justify-between items-center text-xs text-primary-50/60">
                 <span>Graded: {new Date(grade.gradedDate).toLocaleDateString()}</span>
-                <span className="capitalize">{grade.assignmentType}</span>
+                <span className="capitalize">{grade.examType}</span>
               </div>
             </div>
           ))}
@@ -254,7 +265,7 @@ export default function StudentMarks() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-primary-50">Assignment</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-primary-50">Exam Type</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-primary-50">Course</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-primary-50">Score</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-primary-50">Percentage</th>
@@ -268,10 +279,10 @@ export default function StudentMarks() {
                 <tr key={grade.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      {getTypeIcon(grade.assignmentType)}
+                      {getTypeIcon(grade.examType)}
                       <div>
-                        <div className="font-medium text-primary-50">{grade.assignmentName}</div>
-                        <div className="text-sm text-primary-50/60 capitalize">{grade.assignmentType}</div>
+                        <div className="font-medium text-primary-50">{grade.examName}</div>
+                        <div className="text-sm text-primary-50/60 capitalize">{grade.examType}</div>
                       </div>
                     </div>
                   </td>

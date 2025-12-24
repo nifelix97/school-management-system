@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 // import { useLoginMutation } from "../app/api/auth";
 import Input from "../components/ui/Input";
 import { DUMMY_CREDENTIALS } from "../utils/damydatacredentials";
-import { getEnabledRoles, ROLE_DASHBOARDS } from "../utils/roles";
+import { getEnabledRoles, ROLE_DASHBOARDS, ROLE_GROUPS } from "../utils/roles";
 
 type FormState = {
   email: string;
@@ -184,41 +184,55 @@ const LoginPage = () => {
             <h1 className="font-heading m-0 text-primary-100 font-extrabold text-5xl sm:text-6xl">
               SANVERSE
             </h1>
-            <p className="mt-4 text-white/90 text-base sm:text-lg max-w-2xl mb-16">
+            <p className="mt-2 text-white/90 text-sm sm:text-base max-w-2xl mb-8">
               Welcome to our School Management System. Access your educational
               journey with secure and modern technology.
             </p>
 
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {roles.map((r, idx) => {
-                const active = role === r;
-                const isBlocked = !ROLE_DASHBOARDS[r];
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-6">
+              {(Object.entries(ROLE_GROUPS) as [string, readonly string[]][]).map(([category, categoryRoles]) => {
+                const availableRoles = categoryRoles.filter((r: string) => roles.includes(r));
+                if (availableRoles.length === 0) return null;
 
                 return (
-                  <button
-                    key={`${r}-${idx}`}
-                    type="button"
-                    onClick={() => {
-                      if (isBlocked) {
-                        toast.info("This portal is currently under maintenance.");
-                        return;
-                      }
-                      setRole(r);
-                    }}
-                    aria-pressed={active}
-                    disabled={isBlocked}
-                    className={`relative rounded-xl px-2 py-2 text-white border transition-all text-xs sm:text-sm flex items-center justify-center gap-1.5
-          ${
-            active
-              ? "border-primary-100 bg-white/15"
-              : isBlocked
-              ? "border-white/10 bg-white/5 opacity-50 cursor-not-allowed"
-              : "border-white/20 bg-white/5 hover:bg-white/10"
-          }`}
-                  >
-                    {isBlocked && <IoMdLock className="w-3 h-3" />}
-                    {r}
-                  </button>
+                  <div key={category} className="space-y-2">
+                    <h3 className="text-primary-100/60 text-[10px] font-bold uppercase tracking-widest px-1">
+                      {category}
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                      {availableRoles.map((r: string, idx: number) => {
+                        const active = role === r;
+                        const isBlocked = !ROLE_DASHBOARDS[r];
+
+                        return (
+                          <button
+                            key={`${r}-${idx}`}
+                            type="button"
+                            onClick={() => {
+                              if (isBlocked) {
+                                toast.info("This portal is currently under maintenance.");
+                                return;
+                              }
+                              setRole(r);
+                            }}
+                            aria-pressed={active}
+                            disabled={isBlocked}
+                            className={`relative rounded-lg px-2 py-1.5 text-white border transition-all text-[11px] sm:text-xs flex items-center justify-center gap-1
+                              ${
+                                active
+                                  ? "border-primary-100 bg-white/20 shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+                                  : isBlocked
+                                  ? "border-white/5 bg-white/5 opacity-30 cursor-not-allowed"
+                                  : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30"
+                              }`}
+                          >
+                            {isBlocked && <IoMdLock className="w-3 h-3" />}
+                            {r}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 );
               })}
             </div>
