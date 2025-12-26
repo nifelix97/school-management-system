@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import {
-  IoArrowUndoOutline,
-  // IoCardOutline,
-  IoCashOutline,
-  IoCheckmarkCircleOutline,
-  IoChevronBackOutline,
-  IoCloudUploadOutline,
-  IoDocumentTextOutline,
-  IoMenuOutline,
-  IoPersonCircleOutline,
-  IoReceiptOutline,
-  IoStatsChartOutline,
-  IoWalletOutline,
+    IoCalendarOutline,
+    IoCashOutline,
+    IoChevronBackOutline,
+    // IoCloudUploadOutline,
+    IoExitOutline,
+    IoMenuOutline,
+    IoPeopleOutline,
+    IoPersonCircleOutline,
+    IoRibbonOutline,
+    IoSearchOutline,
+    IoStatsChartOutline,
 } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
 
@@ -21,63 +20,53 @@ type SidebarProps = {
 
 const links = [
   {
-    to: "/accountant/dashboard",
+    to: "/hr/dashboard",
     label: "Dashboard",
     icon: <IoStatsChartOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/profile",
+    to: "/hr/profile",
     label: "Profile",
     icon: <IoPersonCircleOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/student-payments",
-    label: "Student Payments",
-    icon: <IoWalletOutline className="w-5 h-5" />,
+    to: "/hr/staff-management",
+    label: "Staff Management",
+    icon: <IoPeopleOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/invoices",
-    label: "Invoices Management",
-    icon: <IoDocumentTextOutline className="w-5 h-5" />,
-  },
-  {
-    to: "/accountant/financial-clearance",
-    label: "Financial Clearance",
-    icon: <IoCheckmarkCircleOutline className="w-5 h-5" />,
-  },
-  // {
-  //   to: "/accountant/student-balances",
-  //   label: "Student Balances",
-  //   icon: <IoCardOutline className="w-5 h-5" />,
-  // },
-  {
-    to: "/accountant/income-records",
-    label: "Income Records",
+    to: "/hr/payroll",
+    label: "Payroll Management",
     icon: <IoCashOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/refunds",
-    label: "Refunds",
-    icon: <IoArrowUndoOutline className="w-5 h-5" />,
+    to: "/hr/attendance",
+    label: "Attendance",
+    icon: <IoCalendarOutline className="w-5 h-5" />,
   },
   {
-    to: "/accountant/financial-reports",
-    label: "Financial Reports",
-    icon: <IoReceiptOutline className="w-5 h-5" />,
+    to: "/hr/leave-management",
+    label: "Leave Management",
+    icon: <IoExitOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/hr/recruitment",
+    label: "Recruitment",
+    icon: <IoSearchOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/hr/performance",
+    label: "Performance",
+    icon: <IoRibbonOutline className="w-5 h-5" />,
   },
   // {
-  //   to: "/accountant/payment-proofs",
-  //   label: "Payment Proofs",
+  //   to: "/hr/online-meeting",
+  //   label: "Online Meeting",
   //   icon: <IoCloudUploadOutline className="w-5 h-5" />,
   // },
-  {
-    to: "/hr/dashboard",
-    label: "HR Management",
-    icon: <IoCloudUploadOutline className="w-5 h-5" />,
-  },
 ];
 
-const AccountantSidebar = ({ className = "" }: SidebarProps) => {
+const HRSidebar = ({ className = "" }: SidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
@@ -123,7 +112,7 @@ const AccountantSidebar = ({ className = "" }: SidebarProps) => {
             >
               <IoMenuOutline />
             </button>
-            <div className="font-heading text-white text-xl">Accountant</div>
+            <div className="font-heading text-white text-xl">HR Panel</div>
             <span className="w-6" />
           </div>
         </div>
@@ -148,12 +137,12 @@ const AccountantSidebar = ({ className = "" }: SidebarProps) => {
           !isDesktop ? "transition-transform duration-300" : "",
           className,
         ].join(" ")}
-        aria-label="Accountant sidebar"
+        aria-label="HR sidebar"
       >
         {/* Header + collapse/close */}
         <div className="flex items-center justify-between px-3 py-4 border-b border-gray-100">
           <span className={`font-heading text-white text-lg ${collapsed ? "opacity-0 w-0" : ""}`}>
-            Accountant Panel
+            HR Management
           </span>
 
           {isDesktop ? (
@@ -219,4 +208,4 @@ const AccountantSidebar = ({ className = "" }: SidebarProps) => {
   );
 };
 
-export default AccountantSidebar;
+export default HRSidebar;

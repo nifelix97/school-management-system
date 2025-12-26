@@ -3,6 +3,7 @@ import AccountantLayout from "../components/AccountantLayout";
 import AdminLayout from "../components/AdminLayout";
 import GuildPresidentLayout from "../components/GuildPresidentLayout";
 import HODLayout from "../components/HODLayout";
+import HRLayout from "../components/HRLayout";
 import Layout from "../components/Layout";
 import LibrarianLayout from "../components/LibrarianLayout";
 import ParentLayout from "../components/ParentLayout";
@@ -39,7 +40,16 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import Announcement from "../pages/HOD/Announcement";
 import AssignTeacher from "../pages/HOD/AssignTeacher";
 import CourseManagement from "../pages/HOD/CourseManagement";
+import AttendanceManagement from "../pages/HR/AttendanceManagement";
+import HRDashboard from "../pages/HR/HRDashboard";
+import HRProfile from "../pages/HR/HRProfile";
+import LeaveManagement from "../pages/HR/LeaveManagement";
+import PayrollManagement from "../pages/HR/PayrollManagement";
+import Performance from "../pages/HR/Performance";
+import Recruitment from "../pages/HR/Recruitment";
+import StaffManagement from "../pages/HR/StaffManagement";
 import RolesPermission from "../pages/Principal/Roles-Permission";
+
 
 import ChancellorLayout from "../components/ChancellorLayout";
 import VicePrincipalLayout from "../components/VicePLayout";
@@ -260,7 +270,6 @@ import ManagerDashboard from "../pages/Manager/ManagerDashboard";
 import ManagerNotifications from "../pages/Manager/ManagerNotifications";
 import ManagerProfile from "../pages/Manager/ManagerProfile";
 import Reports from "../pages/Manager/Reports";
-import StaffManagement from "../pages/Manager/StaffManagement";
 import StudentOverview from "../pages/Manager/StudentOverview";
 import Attendance from "../pages/Parent/Attendance";
 import MyChildren from "../pages/Parent/MyChildren";
@@ -738,6 +747,20 @@ export default function AppRoutes() {
         <Route path="/transport-manager/routes" element={<AssignRoutes />} />
         <Route path="/transport-manager/profile" element={<TransportManagerProfile />} />
       </Route>
+
+      {/* HR Routes */}
+      <Route element={<HRLayout />}>
+        <Route path="/hr/dashboard" element={<HRDashboard />} />
+        <Route path="/hr/profile" element={<HRProfile />} />
+        <Route path="/hr/staff-management" element={<StaffManagement />} />
+        <Route path="/hr/payroll" element={<PayrollManagement />} />
+        <Route path="/hr/attendance" element={<AttendanceManagement />} />
+        <Route path="/hr/leave-management" element={<LeaveManagement />} />
+        <Route path="/hr/recruitment" element={<Recruitment />} />
+        <Route path="/hr/performance" element={<Performance />} />
+        <Route path="/hr/online-meeting" element={<OnlineMeeting />} />
+      </Route>
+
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
     </Routes>

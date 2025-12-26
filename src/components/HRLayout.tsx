@@ -1,9 +1,9 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import AccountantSidebar from "./AccountantSidebar";
+import HRSidebar from "./HRSidebar";
 import NavBar from "./NavBar";
 
-const AccountantLayout: React.FC = () => {
+const HRLayout: React.FC = () => {
   return (
     <div className="bg-primary-50/10"
       style={{
@@ -20,7 +20,7 @@ const AccountantLayout: React.FC = () => {
       <div style={{ flex: 1, paddingTop: "64px" }}>
         <div className="flex">
           {/* Fixed/collapsible sidebar (handles its own spacers) */}
-          <AccountantSidebar />
+          <HRSidebar />
 
           {/* Page content */}
           <main className="flex-1 min-w-0">
@@ -32,4 +32,4 @@ const AccountantLayout: React.FC = () => {
   );
 };
 
-export default AccountantLayout;
+export default HRLayout;

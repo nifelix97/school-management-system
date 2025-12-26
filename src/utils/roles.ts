@@ -20,7 +20,7 @@ export const ALL_ROLES = [
   "Auditor",
   "Alumni",
   "Vendor",
-  "Coaches",
+  "Coach",
   "Parent",
   // "Super Admin",
   "Guild-president",
@@ -62,7 +62,8 @@ export const ROLE_GROUPS = {
     "Warden",
     "Transport Manager",
     "Coach",
-    "Vendor"
+    "Vendor",
+    "Guild-president"
   ]
 } as const;
 
@@ -87,7 +88,7 @@ export const ROLE_DASHBOARDS: Record<string, string> = {
   "Auditor": "/auditor/dashboard",
   "Alumni": "/alumni/dashboard",
   "Vendor": "/vendor/dashboard",
-  "Coaches": "/coach/dashboard",
+  "Coach": "/coach/dashboard",
   "Parent": "/parent/dashboard",
   "Super Admin": "/super-admin/dashboard",
   "Guild-president": "/guild/dashboard",
