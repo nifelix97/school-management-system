@@ -1,8 +1,10 @@
 import { CheckCircle, Clock, CreditCard, FileText, GraduationCap, Mail, MapPin, Phone, Upload, User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import { useSubmitApplicationMutation } from '../app/api/admissions';
 import Input from '../components/ui/Input';
 
-interface FormData {
+interface AdmissionFormData {
   // Personal Information
   firstName: string;
   lastName: string;
@@ -61,6 +63,9 @@ interface FormData {
   photoId: File | null;
   birthCertificate: File | null;
   recommendationLetter: File | null;
+
+  // New fields for API
+  paymentPhoneNumber: string;
 }
 
 const AdmissionPage: React.FC = () => {
@@ -69,9 +74,10 @@ const AdmissionPage: React.FC = () => {
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [applicationSubmitted, setApplicationSubmitted] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [studentCode, setStudentCode] = useState('');
+  const [applicationData, setApplicationData] = useState<{ registrationNumber: string; applicationId: string } | null>(null);
+  const [submitApplication] = useSubmitApplicationMutation();
   
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<AdmissionFormData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -114,26 +120,27 @@ const AdmissionPage: React.FC = () => {
     personalStatement: null,
     photoId: null,
     birthCertificate: null,
-    recommendationLetter: null
+    recommendationLetter: null,
+    paymentPhoneNumber: ''
   });
 
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [errors, setErrors] = useState<Partial<AdmissionFormData>>({});
 
   useEffect(() => {
-    if (countdown > 0) {
+    if (isProcessing && countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (countdown === 0 && isProcessing) {
+    } else if (isProcessing && countdown === 0) {
       setIsProcessing(false);
       setPaymentComplete(true);
-      const code = 'STU' + Date.now().toString().slice(-6);
-      setStudentCode(code);
+      // Automatically trigger submission after payment simulation
+      handleSubmitApplication();
     }
   }, [countdown, isProcessing]);
 
   const handleInputChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name as keyof FormData]) {
+    if (errors[name as keyof AdmissionFormData]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
@@ -143,7 +150,7 @@ const AdmissionPage: React.FC = () => {
   };
 
   const validateStep = (step: number): boolean => {
-    const newErrors: Partial<FormData> = {};
+    const newErrors: Partial<AdmissionFormData> = {};
     
     if (step === 1) {
       if (!formData.firstName) newErrors.firstName = 'First name is required';
@@ -155,22 +162,24 @@ const AdmissionPage: React.FC = () => {
       if (!formData.nationalId) newErrors.nationalId = 'National ID is required';
     } else if (step === 2) {
       if (!formData.guardianName) newErrors.guardianName = 'Guardian name is required';
+      if (!formData.guardianRelationship) newErrors.guardianRelationship = 'Guardian relationship is required';
       if (!formData.guardianPhone) newErrors.guardianPhone = 'Guardian phone is required';
       if (!formData.emergencyContactName) newErrors.emergencyContactName = 'Emergency contact name is required';
       if (!formData.emergencyContactPhone) newErrors.emergencyContactPhone = 'Emergency contact phone is required';
     } else if (step === 3) {
       if (!formData.address) newErrors.address = 'Address is required';
       if (!formData.city) newErrors.city = 'City is required';
+      if (!formData.state) newErrors.state = 'State/Province is required';
       if (!formData.country) newErrors.country = 'Country is required';
-    } else if (step === 5) {
+    } else if (step === 4) {
       if (!formData.program) newErrors.program = 'At least one program is required';
       if (!formData.previousEducation) newErrors.previousEducation = 'Previous education is required';
       if (!formData.previousSchool) newErrors.previousSchool = 'Previous school is required';
       if (!formData.graduationYear) newErrors.graduationYear = 'Graduation year is required';
-    } else if (step === 6) {
+    } else if (step === 5) {
       if (!formData.scholarshipInterest) newErrors.scholarshipInterest = 'Please indicate scholarship interest';
       if (!formData.financialAidNeeded) newErrors.financialAidNeeded = 'Please indicate if financial aid is needed';
-    } else if (step === 7) {
+    } else if (step === 6) {
       if (!formData.housingNeeded) newErrors.housingNeeded = 'Please indicate housing preference';
       if (!formData.startSemester) newErrors.startSemester = 'Start semester is required';
       if (!formData.studyMode) newErrors.studyMode = 'Study mode is required';
@@ -181,39 +190,117 @@ const AdmissionPage: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (currentStep === 4 && !paymentComplete) {
-      return; // Can't proceed to academic step without payment
-    }
     if (validateStep(currentStep)) {
       setCurrentStep(prev => prev + 1);
     }
   };
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
+    if (!formData.paymentPhoneNumber) {
+      setErrors(prev => ({ ...prev, paymentPhoneNumber: 'Phone number is required' }));
+      return;
+    }
     setIsProcessing(true);
-    setCountdown(180); // 3 minutes countdown
+    setCountdown(2); // Reduced to 2 seconds for quick feedback
   };
 
-  const handleSubmitApplication = () => {
-    setApplicationSubmitted(true);
+  const handleSubmitApplication = async () => {
+    try {
+      // Use FormData for multipart/form-data submission (required for files)
+      const formDataToSend = new FormData();
+
+      // Basic Information
+      formDataToSend.append("firstName", formData.firstName);
+      formDataToSend.append("lastName", formData.lastName);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("dateOfBirth", formData.dateOfBirth);
+      formDataToSend.append("gender", formData.gender);
+      formDataToSend.append("nationality", formData.nationality);
+      formDataToSend.append("nationalId", formData.nationalId || "");
+
+      // Guardian
+      formDataToSend.append("guardianFullName", formData.guardianName);
+      formDataToSend.append("guardianRelationship", formData.guardianRelationship);
+      formDataToSend.append("guardianPhone", formData.guardianPhone);
+      if (formData.guardianEmail) formDataToSend.append("guardianEmail", formData.guardianEmail);
+
+      // Emergency Contact
+      formDataToSend.append("emergencyContactName", formData.emergencyContactName);
+      formDataToSend.append("emergencyContactPhone", formData.emergencyContactPhone);
+      formDataToSend.append("emergencyContactRelationship", formData.emergencyContactRelationship);
+
+      // Location
+      formDataToSend.append("address", formData.address);
+      formDataToSend.append("city", formData.city);
+      formDataToSend.append("stateProvince", formData.state);
+      formDataToSend.append("country", formData.country);
+
+      // Academic
+      formDataToSend.append("firstChoiceProgram", formData.program);
+      if (formData.program2) formDataToSend.append("secondChoiceProgram", formData.program2);
+      if (formData.program3) formDataToSend.append("thirdChoiceProgram", formData.program3);
+      formDataToSend.append("previousEducation", formData.previousEducation);
+      formDataToSend.append("previousSchoolInstitution", formData.previousSchool);
+      formDataToSend.append("graduationYear", formData.graduationYear);
+      if (formData.gpa) formDataToSend.append("gpaGradeAverage", formData.gpa);
+      if (formData.testScores) formDataToSend.append("testScores", formData.testScores);
+
+      // Preferences
+      formDataToSend.append("needOnCampusHousing", formData.housingNeeded);
+      formDataToSend.append("preferredStartSemester", formData.startSemester);
+      formDataToSend.append("studyMode", formData.studyMode);
+
+      // Additional
+      if (formData.languagesSpoken) formDataToSend.append("languagesSpoken", formData.languagesSpoken);
+      if (formData.disabilities) formDataToSend.append("disabilitiesOrSpecialNeeds", formData.disabilities);
+      if (formData.extracurricular) formDataToSend.append("extracurricularActivities", formData.extracurricular);
+      if (formData.workExperience) formDataToSend.append("workExperience", formData.workExperience);
+      
+      formDataToSend.append("interestedInScholarships", formData.scholarshipInterest);
+      formDataToSend.append("needFinancialAid", formData.financialAidNeeded);
+      if (formData.paymentPlan) formDataToSend.append("preferredPaymentPlan", formData.paymentPlan);
+
+      // Payment
+      formDataToSend.append("paymentAmount", "50000"); // Standard application fee in RWF
+      formDataToSend.append("paymentPhoneNumber", formData.paymentPhoneNumber);
+
+      // Files
+      if (formData.transcript) formDataToSend.append("highSchoolTranscript", formData.transcript);
+      if (formData.personalStatement) formDataToSend.append("personalStatement", formData.personalStatement);
+      if (formData.photoId) formDataToSend.append("photoIdPassport", formData.photoId);
+      if (formData.birthCertificate) formDataToSend.append("birthCertificate", formData.birthCertificate);
+      if (formData.recommendationLetter) formDataToSend.append("recommendationLetter", formData.recommendationLetter);
+
+      const response = await submitApplication(formDataToSend).unwrap();
+
+      if (response.success) {
+        setApplicationData({
+          registrationNumber: response.data.registrationNumber,
+          applicationId: response.data.applicationId
+        });
+        setApplicationSubmitted(true);
+        toast.success(response.message || "Application submitted successfully!");
+      } else {
+        toast.error(response.error || "Failed to submit application");
+      }
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      toast.error(err?.data?.error || "An error occurred during submission");
+    }
   };
 
   const steps = [
     { number: 1, title: 'Personal Info', icon: User },
     { number: 2, title: 'Guardian', icon: User },
     { number: 3, title: 'Address', icon: MapPin },
-    { number: 4, title: 'Payment', icon: CreditCard },
-    { number: 5, title: 'Academic', icon: GraduationCap },
-    { number: 6, title: 'Financial', icon: CreditCard },
-    { number: 7, title: 'Preferences', icon: Clock },
-    { number: 8, title: 'Documents', icon: FileText }
+    { number: 4, title: 'Academic', icon: GraduationCap },
+    { number: 5, title: 'Financial', icon: CreditCard },
+    { number: 6, title: 'Preferences', icon: Clock },
+    { number: 7, title: 'Documents', icon: FileText },
+    { number: 8, title: 'Review & Pay', icon: CreditCard }
   ];
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   if (applicationSubmitted) {
     return (
@@ -224,9 +311,20 @@ const AdmissionPage: React.FC = () => {
           <p className="text-sm xs:text-base text-gray-600 mb-4">
             Your application has been successfully submitted. You will receive a confirmation email shortly.
           </p>
-          <p className="text-xs xs:text-sm text-gray-500">
-            Application ID: ADM-{Date.now().toString().slice(-6)}
-          </p>
+          <div className="space-y-2 mb-6 text-sm xs:text-base">
+            <p className="text-gray-700">
+              <span className="font-semibold">Registration Number:</span> {applicationData?.registrationNumber}
+            </p>
+            <p className="text-gray-700">
+              <span className="font-semibold">Application ID:</span> {applicationData?.applicationId}
+            </p>
+          </div>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="w-full bg-primary-50 text-white py-3 rounded-xl font-semibold hover:bg-primary-100 transition-all"
+          >
+            Go to Homepage
+          </button>
         </div>
       </div>
     );
@@ -392,7 +490,9 @@ const AdmissionPage: React.FC = () => {
                     <select
                       value={formData.guardianRelationship}
                       onChange={(e) => handleInputChange('guardianRelationship', e.target.value)}
-                      className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
+                      className={`w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 ${
+                        errors.guardianRelationship ? 'border-red-500' : 'border-gray-200'
+                      }`}
                     >
                       <option value="">Select Relationship</option>
                       <option value="parent">Parent</option>
@@ -400,6 +500,9 @@ const AdmissionPage: React.FC = () => {
                       <option value="spouse">Spouse</option>
                       <option value="other">Other</option>
                     </select>
+                    {errors.guardianRelationship && (
+                      <p className="mt-2 text-sm text-red-500">{errors.guardianRelationship}</p>
+                    )}
                   </div>
                   <Input
                     label="Guardian Phone"
@@ -494,6 +597,8 @@ const AdmissionPage: React.FC = () => {
                     name="state"
                     value={formData.state}
                     onChange={(e) => handleInputChange('state', e.target.value)}
+                    error={errors.state}
+                    required
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xs:gap-6">
@@ -516,11 +621,11 @@ const AdmissionPage: React.FC = () => {
             </div>
           )}
 
-          {/* Step 4: Payment */}
-          {currentStep === 4 && (
+          {/* Step 8: Review & Payment */}
+          {currentStep === 8 && (
             <div className="animate-[fadeIn_0.4s_ease-out]">
               <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
-                Application Fee Payment
+                Application Review & Fee Payment
               </h2>
               {!paymentComplete ? (
                 <div className="text-center">
@@ -529,28 +634,52 @@ const AdmissionPage: React.FC = () => {
                       <Clock className="w-16 h-16 text-primary-50 mx-auto mb-4" />
                       <h3 className="text-lg font-semibold text-primary-50 mb-2">Processing Payment...</h3>
                       <p className="text-gray-600 mb-4">Please wait while we process your payment</p>
-                      <div className="text-2xl font-bold text-primary-50 mb-4">
-                        {formatTime(countdown)}
-                      </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-primary-50 h-2 rounded-full transition-all duration-1000"
-                          style={{ width: `${((180 - countdown) / 180) * 100}%` }}
+                          className="bg-primary-50 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${((2 - countdown) / 2) * 100}%` }}
                         />
                       </div>
                     </div>
                   ) : (
                     <div>
+                      <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-6 text-left">
+                        <h3 className="font-semibold text-primary-50 mb-4">Summary of your application</h3>
+                        <div className="grid grid-cols-2 gap-y-2 text-sm">
+                          <p className="text-gray-500">Name:</p>
+                          <p className="text-gray-900 font-medium">{formData.firstName} {formData.lastName}</p>
+                          <p className="text-gray-500">Program:</p>
+                          <p className="text-gray-900 font-medium">{formData.program}</p>
+                          <p className="text-gray-500">Email:</p>
+                          <p className="text-gray-900 font-medium">{formData.email}</p>
+                        </div>
+                      </div>
+
                       <CreditCard className="w-16 h-16 text-primary-50 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-primary-50 mb-2">Application Fee: $50</h3>
+                      <h3 className="text-lg font-semibold text-primary-50 mb-2">Application Fee: 50,000 RWF</h3>
                       <p className="text-gray-600 mb-6">
-                        Payment is required before selecting your program of study.
+                        Please provide your mobile money number to complete the application.
                       </p>
+                      
+                      <div className="max-w-xs mx-auto mb-6 text-left">
+                        <Input
+                          label="Payment Phone Number"
+                          name="paymentPhoneNumber"
+                          value={formData.paymentPhoneNumber}
+                          onChange={(e) => handleInputChange('paymentPhoneNumber', e.target.value)}
+                          placeholder="e.g., 078xxxxxxx"
+                          error={errors.paymentPhoneNumber}
+                          required
+                          leftIcon={<Phone className="w-4 h-4" />}
+                        />
+                      </div>
+
                       <button
                         onClick={handlePayment}
-                        className="bg-primary-50 text-white px-6 py-3 rounded-xl hover:bg-primary-100 transition-colors"
+                        disabled={!formData.paymentPhoneNumber || isProcessing}
+                        className={`bg-green-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 ${(!formData.paymentPhoneNumber || isProcessing) ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
-                        Pay Now
+                        {isProcessing ? 'Processing...' : 'Pay & Submit Application'}
                       </button>
                     </div>
                   )}
@@ -558,26 +687,16 @@ const AdmissionPage: React.FC = () => {
               ) : (
                 <div className="text-center">
                   <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-green-600 mb-2">Payment Successful!</h3>
-                  <p className="text-gray-600 mb-4">Your payment has been processed successfully.</p>
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
-                    <h4 className="font-semibold text-blue-800 mb-2">Your Student Code</h4>
-                    <p className="text-2xl font-bold text-blue-600 mb-2">{studentCode}</p>
-                    <p className="text-sm text-blue-600">Save this code - you'll need it to continue your application</p>
-                  </div>
+                  <h3 className="text-lg font-semibold text-green-600 mb-2">Processing Complete!</h3>
+                  <p className="text-gray-600 mb-4">Your application is being finalized...</p>
                 </div>
               )}
             </div>
           )}
 
-          {/* Step 5: Academic Information */}
-          {currentStep === 5 && paymentComplete && (
+          {/* Step 4: Academic Information */}
+          {currentStep === 4 && (
             <div className="animate-[fadeIn_0.4s_ease-out]">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-                <p className="text-sm text-green-700">
-                  <span className="font-semibold">Student Code:</span> {studentCode}
-                </p>
-              </div>
               <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
                 Academic Information
               </h2>
@@ -693,8 +812,8 @@ const AdmissionPage: React.FC = () => {
 
 
 
-          {/* Step 6: Financial Information */}
-          {currentStep === 6 && paymentComplete && (
+          {/* Step 5: Financial Information */}
+          {currentStep === 5 && (
             <div className="animate-[fadeIn_0.4s_ease-out]">
               <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
                 Financial Information
@@ -752,8 +871,8 @@ const AdmissionPage: React.FC = () => {
             </div>
           )}
 
-          {/* Step 7: Preferences & Background */}
-          {currentStep === 7 && paymentComplete && (
+          {/* Step 6: Preferences & Background */}
+          {currentStep === 6 && (
             <div className="animate-[fadeIn_0.4s_ease-out]">
               <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
                 Preferences & Personal Background
@@ -857,8 +976,8 @@ const AdmissionPage: React.FC = () => {
             </div>
           )}
 
-          {/* Step 8: Documents */}
-          {currentStep === 8 && paymentComplete && (
+          {/* Step 7: Documents */}
+          {currentStep === 7 && (
             <div className="animate-[fadeIn_0.4s_ease-out]">
               <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-4 xs:mb-6">
                 Upload Documents
@@ -988,30 +1107,12 @@ const AdmissionPage: React.FC = () => {
               Previous
             </button>
             
-            {currentStep < 8 && currentStep !== 4 && (
+            {currentStep < 8 && (
               <button
                 onClick={handleNext}
-                className="px-4 xs:px-6 py-2 xs:py-3 bg-primary-50 text-white rounded-xl hover:bg-primary-100 text-sm xs:text-base"
+                className="px-4 xs:px-6 py-2 xs:py-3 bg-primary-50 text-white rounded-xl hover:bg-primary-100 text-sm xs:text-base font-semibold transition-all hover:shadow-md active:scale-95"
               >
                 Next
-              </button>
-            )}
-            
-            {currentStep === 4 && paymentComplete && (
-              <button
-                onClick={() => setCurrentStep(5)}
-                className="px-4 xs:px-6 py-2 xs:py-3 bg-primary-50 text-white rounded-xl hover:bg-primary-100 text-sm xs:text-base"
-              >
-                Continue to Academic Info
-              </button>
-            )}
-            
-            {currentStep === 8 && (
-              <button
-                onClick={handleSubmitApplication}
-                className="px-4 xs:px-6 py-2 xs:py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 text-sm xs:text-base"
-              >
-                Submit Application
               </button>
             )}
           </div>

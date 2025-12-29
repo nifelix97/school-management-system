@@ -1,5 +1,11 @@
-import React, { useState, useMemo } from "react";
-import { CheckCircle, XCircle, Eye, Search, User, Mail, Phone, Calendar } from "lucide-react";
+import { Calendar, CheckCircle, Eye, Loader2, Mail, Phone, Search, User, XCircle } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import {
+  useGetAllApplicationsQuery,
+  useGetPendingApplicationsQuery,
+  useUpdateApplicationStatusMutation
+} from "../../app/api/admissions";
 
 interface StudentApplication {
   id: string;
@@ -20,101 +26,88 @@ type Tab = (typeof tabs)[number];
 const PendingRegistration: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>("Pending Registrations");
   const [searchTerm, setSearchTerm] = useState("");
-  const [applications, setApplications] = useState<StudentApplication[]>([
-    {
-      id: "app001",
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@email.com",
-      phone: "+1234567890",
-      program: "Computer Science",
-      applicationDate: "2024-11-15",
-      status: "pending",
-      paymentStatus: "paid",
-    },
-    {
-      id: "app002",
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@email.com",
-      phone: "+1234567891",
-      program: "Business Administration",
-      applicationDate: "2024-11-14",
-      status: "approved",
-      studentCode: "STU24001",
-      paymentStatus: "paid",
-    },
-    {
-      id: "app003",
-      firstName: "Bob",
-      lastName: "Johnson",
-      email: "bob.johnson@email.com",
-      phone: "+1234567892",
-      program: "Engineering",
-      applicationDate: "2024-11-13",
-      status: "pending",
-      paymentStatus: "pending",
-    },
-    {
-      id: "app004",
-      firstName: "Alice",
-      lastName: "Williams",
-      email: "alice.williams@email.com",
-      phone: "+1234567893",
-      program: "Medicine",
-      applicationDate: "2024-11-12",
-      status: "approved",
-      studentCode: "STU24002",
-      paymentStatus: "paid",
-    },
-    {
-      id: "app005",
-      firstName: "Charlie",
-      lastName: "Brown",
-      email: "charlie.brown@email.com",
-      phone: "+1234567894",
-      program: "Law",
-      applicationDate: "2024-11-11",
-      status: "rejected",
-      paymentStatus: "paid",
-    },
-  ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<StudentApplication | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [modalPage, setModalPage] = useState(1);
+  const [listPage, setListPage] = useState(1);
+  const itemsPerPage = 7;
+
+  // API Hooks
+  const { data: pendingData, isLoading: isLoadingPending, isError: isErrorPending } = useGetPendingApplicationsQuery();
+  const { data: allData, isLoading: isLoadingAll, isError: isErrorAll } = useGetAllApplicationsQuery();
+  const [updateStatus] = useUpdateApplicationStatusMutation();
+
+  const applications = useMemo(() => {
+    const rawData = activeTab === "Pending Registrations" ? pendingData?.data : allData?.data;
+    if (!rawData) return [];
+
+    return rawData.map((app: any) => ({
+      id: app.applicationId || app.id,
+      firstName: app.firstName,
+      lastName: app.lastName,
+      email: app.email,
+      phone: app.phone,
+      program: app.firstChoiceProgram || app.program,
+      applicationDate: app.createdAt ? new Date(app.createdAt).toLocaleDateString() : (app.applicationDate || "N/A"),
+      status: app.status || "pending",
+      studentCode: app.registrationNumber || app.studentCode,
+      paymentStatus: app.paymentStatus || "paid", // API shows successful apps usually have payment
+    })) as StudentApplication[];
+  }, [activeTab, pendingData, allData]);
 
   const filteredApplications = useMemo(() => {
-    return applications.filter((app) => {
+    const filtered = applications.filter((app) => {
       const matchesSearch =
         app.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.program.toLowerCase().includes(searchTerm.toLowerCase());
 
-      if (activeTab === "Pending Registrations") {
-        return matchesSearch && app.status === "pending";
-      } else {
-        return matchesSearch && app.status === "approved";
-      }
+      return matchesSearch;
     });
-  }, [applications, searchTerm, activeTab]);
+    // Reset to first page when filtering
+    if (listPage !== 1 && searchTerm !== "") {
+        // We can't set state directly in useMemo, but we can detect change.
+        // However, it's better to handle searchTerm change in a separate effect or handler.
+    }
+    return filtered;
+  }, [applications, searchTerm]);
 
-  const handleApprove = (id: string) => {
-    setApplications(prev =>
-      prev.map(app =>
-        app.id === id
-          ? { ...app, status: "approved" as const, studentCode: 'STU' + Date.now().toString().slice(-6) }
-          : app
-      )
-    );
+  // Handle page resets
+  React.useEffect(() => {
+    setListPage(1);
+  }, [activeTab, searchTerm]);
+
+  const totalPages = Math.ceil(filteredApplications.length / itemsPerPage);
+  const paginatedApplications = useMemo(() => {
+    const start = (listPage - 1) * itemsPerPage;
+    return filteredApplications.slice(start, start + itemsPerPage);
+  }, [filteredApplications, listPage]);
+
+  const handleApprove = async (id: string) => {
+    try {
+      const res = await updateStatus({ id, status: "approved" }).unwrap();
+      if (res.success) {
+        toast.success(res.message || "Application approved successfully!");
+      } else {
+        toast.error(res.error || "Failed to approve application");
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.error || "An error occurred while approving");
+    }
   };
 
-  const handleReject = (id: string) => {
-    setApplications(prev =>
-      prev.map(app =>
-        app.id === id ? { ...app, status: "rejected" as const } : app
-      )
-    );
+  const handleReject = async (id: string) => {
+    try {
+      const res = await updateStatus({ id, status: "rejected" }).unwrap();
+      if (res.success) {
+        toast.success(res.message || "Application rejected successfully!");
+      } else {
+        toast.error(res.error || "Failed to reject application");
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.error || "An error occurred while rejecting");
+    }
   };
 
   const handleViewDetails = (id: string) => {
@@ -128,8 +121,11 @@ const PendingRegistration: React.FC = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedApplication(null);
-    setCurrentPage(1);
+    setModalPage(1);
   };
+
+  const isLoading = activeTab === "Pending Registrations" ? isLoadingPending : isLoadingAll;
+  const isError = activeTab === "Pending Registrations" ? isErrorPending : isErrorAll;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -184,7 +180,23 @@ const PendingRegistration: React.FC = () => {
 
         {/* Content */}
         <div className="bg-white rounded-lg xs:rounded-xl shadow-sm border border-gray-100 p-3 xs:p-4 sm:p-6">
-          {filteredApplications.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-20">
+              <Loader2 className="w-10 h-10 text-primary-100 animate-spin mx-auto mb-4" />
+              <p className="text-gray-500">Loading applications...</p>
+            </div>
+          ) : isError ? (
+            <div className="text-center py-20">
+              <XCircle className="w-10 h-10 text-red-500 mx-auto mb-4" />
+              <p className="text-red-500 font-medium">Failed to load applications</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-4 text-primary-100 underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : paginatedApplications.length === 0 ? (
             <div className="text-center py-8">
               <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500">
@@ -195,7 +207,7 @@ const PendingRegistration: React.FC = () => {
             <div className="space-y-4">
               {/* Mobile Cards */}
               <div className="sm:hidden space-y-4">
-                {filteredApplications.map((app) => (
+                {paginatedApplications.map((app) => (
                   <div
                     key={app.id}
                     className="border border-gray-200 rounded-lg p-4"
@@ -214,12 +226,6 @@ const PendingRegistration: React.FC = () => {
                             className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"
                           >
                             <CheckCircle size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleReject(app.id)}
-                            className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
-                          >
-                            <XCircle size={16} />
                           </button>
                         </div>
                       )}
@@ -288,7 +294,7 @@ const PendingRegistration: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredApplications.map((app) => (
+                    {paginatedApplications.map((app) => (
                       <tr
                         key={app.id}
                         className="border-b border-gray-100 hover:bg-gray-50"
@@ -347,6 +353,46 @@ const PendingRegistration: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination UI for List */}
+              {totalPages > 1 && (
+                <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
+                  <div className="text-sm text-gray-500">
+                    Showing <span className="font-medium">{(listPage - 1) * itemsPerPage + 1}</span> to{" "}
+                    <span className="font-medium">{Math.min(listPage * itemsPerPage, filteredApplications.length)}</span> of{" "}
+                    <span className="font-medium">{filteredApplications.length}</span> results
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setListPage(prev => Math.max(prev - 1, 1))}
+                      disabled={listPage === 1}
+                      className="px-3 py-1 border border-gray-200 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setListPage(p)}
+                        className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                          listPage === p
+                            ? "bg-primary-50 text-white"
+                            : "border border-gray-200 hover:bg-gray-50"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setListPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={listPage === totalPages}
+                      className="px-3 py-1 border border-gray-200 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -369,7 +415,7 @@ const PendingRegistration: React.FC = () => {
                 </button>
               </div>
               <div className="space-y-4">
-                {currentPage === 1 && (
+                {modalPage === 1 && (
                   <>
                     <div className="py-3 border-b border-gray-100">
                       <div className="text-xs uppercase tracking-wide text-primary-50/60 mb-2">
@@ -406,7 +452,7 @@ const PendingRegistration: React.FC = () => {
                     </div>
                   </>
                 )}
-                {currentPage === 2 && (
+                {modalPage === 2 && (
                   <>
                     <div className="py-3 border-b border-gray-100">
                       <div className="text-xs uppercase tracking-wide text-primary-50/60 mb-2">
@@ -446,21 +492,21 @@ const PendingRegistration: React.FC = () => {
                 )}
               </div>
 
-              {/* Pagination */}
+              {/* Pagination for Modal Pages */}
               <div className="mt-6 flex items-center justify-between">
                 <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
+                  onClick={() => setModalPage(prev => Math.max(prev - 1, 1))}
+                  disabled={modalPage === 1}
                   className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
                 >
                   Previous
                 </button>
                 <span className="text-sm text-primary-50/60">
-                  Page {currentPage} of 2
+                  Page {modalPage} of 2
                 </span>
                 <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, 2))}
-                  disabled={currentPage === 2}
+                  onClick={() => setModalPage(prev => Math.min(prev + 1, 2))}
+                  disabled={modalPage === 2}
                   className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
                 >
                   Next
