@@ -19,13 +19,14 @@ export const ALL_ROLES = [
   "Manager",
   "Auditor",
   "Alumni",
-  "Vendor",
-  "Coach",
+  "Procurement",
+  "Sport Activity",
   "Parent",
   // "Super Admin",
-  "Guild-president",
-  "Counselor",
+  "Student Association",
+  "Student Life",
   "Transport Manager",
+  "Human Resource"
 ];
 
 export const ROLE_GROUPS = {
@@ -52,18 +53,19 @@ export const ROLE_GROUPS = {
     "Accountant",
     "Auditor",
     "Receptionist",
-    "Manager"
+    "Manager",
+    "Human Resource"
   ],
 
   "Support & Welfare Services": [
     "Librarian",
     "Nurse",
-    "Counselor",
+    "Student Life",
     "Warden",
     "Transport Manager",
-    "Coach",
-    "Vendor",
-    "Guild-president"
+    "Sport Activity",
+    "Procurement",
+    "Student Association"
   ]
 } as const;
 
@@ -87,13 +89,14 @@ export const ROLE_DASHBOARDS: Record<string, string> = {
   "Manager": "/manager/dashboard",
   "Auditor": "/auditor/dashboard",
   "Alumni": "/alumni/dashboard",
-  "Vendor": "/vendor/dashboard",
-  "Coach": "/coach/dashboard",
+  "Procurement": "/vendor/dashboard",
+  "Sport Activity": "/coach/dashboard",
   "Parent": "/parent/dashboard",
   "Super Admin": "/super-admin/dashboard",
-  "Guild-president": "/guild/dashboard",
-  "Counselor": "/counselor/dashboard",
+  "Student Association": "/guild/dashboard",
+  "Student Life": "/counselor/dashboard",
   "Transport Manager": "/transport-manager/dashboard",
+  "Human Resource": "/hr/dashboard",
 };
 
 const ROLES_VISIBILITY_KEY = "system_enabled_roles";

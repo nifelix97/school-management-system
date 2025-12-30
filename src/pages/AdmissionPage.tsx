@@ -66,6 +66,7 @@ interface AdmissionFormData {
 
   // New fields for API
   paymentPhoneNumber: string;
+  paymentAmount: string;
 }
 
 const AdmissionPage: React.FC = () => {
@@ -74,7 +75,7 @@ const AdmissionPage: React.FC = () => {
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [applicationSubmitted, setApplicationSubmitted] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [applicationData, setApplicationData] = useState<{ registrationNumber: string; applicationId: string } | null>(null);
+  const [applicationData, setApplicationData] = useState<{ registrationNumber: string; email: string; password: string; paymentRef?: string } | null>(null);
   const [submitApplication] = useSubmitApplicationMutation();
   
   const [formData, setFormData] = useState<AdmissionFormData>({
@@ -121,7 +122,8 @@ const AdmissionPage: React.FC = () => {
     photoId: null,
     birthCertificate: null,
     recommendationLetter: null,
-    paymentPhoneNumber: ''
+    paymentPhoneNumber: '',
+    paymentAmount: '50000'
   });
 
   const [errors, setErrors] = useState<Partial<AdmissionFormData>>({});
@@ -230,10 +232,11 @@ const AdmissionPage: React.FC = () => {
       formDataToSend.append("emergencyContactPhone", formData.emergencyContactPhone);
       formDataToSend.append("emergencyContactRelationship", formData.emergencyContactRelationship);
 
-      // Location
+      // Location (Fix: backend expects zipPostalCode, not zipCode)
       formDataToSend.append("address", formData.address);
       formDataToSend.append("city", formData.city);
       formDataToSend.append("stateProvince", formData.state);
+      if (formData.zipCode) formDataToSend.append("zipPostalCode", formData.zipCode);
       formDataToSend.append("country", formData.country);
 
       // Academic
@@ -262,11 +265,11 @@ const AdmissionPage: React.FC = () => {
       if (formData.paymentPlan) formDataToSend.append("preferredPaymentPlan", formData.paymentPlan);
 
       // Payment
-      formDataToSend.append("paymentAmount", "50000"); // Standard application fee in RWF
+      formDataToSend.append("paymentAmount", formData.paymentAmount || "50000"); // Dynamic application fee
       formDataToSend.append("paymentPhoneNumber", formData.paymentPhoneNumber);
 
-      // Files
-      if (formData.transcript) formDataToSend.append("highSchoolTranscript", formData.transcript);
+      // Files (Fix: backend expects academicTranscript, not highSchoolTranscript)
+      if (formData.transcript) formDataToSend.append("academicTranscript", formData.transcript);
       if (formData.personalStatement) formDataToSend.append("personalStatement", formData.personalStatement);
       if (formData.photoId) formDataToSend.append("photoIdPassport", formData.photoId);
       if (formData.birthCertificate) formDataToSend.append("birthCertificate", formData.birthCertificate);
@@ -275,9 +278,12 @@ const AdmissionPage: React.FC = () => {
       const response = await submitApplication(formDataToSend).unwrap();
 
       if (response.success) {
+        // Backend returns: registrationNumber, email, password, and payment info
         setApplicationData({
           registrationNumber: response.data.registrationNumber,
-          applicationId: response.data.applicationId
+          email: response.data.email,
+          password: response.data.password,
+          paymentRef: response.data.payment?.ref
         });
         setApplicationSubmitted(true);
         toast.success(response.message || "Application submitted successfully!");
@@ -309,14 +315,30 @@ const AdmissionPage: React.FC = () => {
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4 animate-bounce" />
           <h2 className="text-xl xs:text-2xl font-bold text-primary-50 mb-2">Application Submitted!</h2>
           <p className="text-sm xs:text-base text-gray-600 mb-4">
-            Your application has been successfully submitted. You will receive a confirmation email shortly.
+            Your application has been successfully submitted. Payment is being processed.
           </p>
-          <div className="space-y-2 mb-6 text-sm xs:text-base">
-            <p className="text-gray-700">
-              <span className="font-semibold">Registration Number:</span> {applicationData?.registrationNumber}
-            </p>
-            <p className="text-gray-700">
-              <span className="font-semibold">Application ID:</span> {applicationData?.applicationId}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-left">
+            <h3 className="font-semibold text-primary-50 mb-3">Your Login Credentials</h3>
+            <div className="space-y-2 text-sm">
+              <p className="text-gray-700">
+                <span className="font-semibold">Registration Number:</span> {applicationData?.registrationNumber}
+              </p>
+              <p className="text-gray-700">
+                <span className="font-semibold">Email:</span> {applicationData?.email}
+              </p>
+              <p className="text-gray-700">
+                <span className="font-semibold">Password:</span> {applicationData?.password}
+              </p>
+              {applicationData?.paymentRef && (
+                <p className="text-gray-700">
+                  <span className="font-semibold">Payment Ref:</span> {applicationData?.paymentRef}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6">
+            <p className="text-xs text-yellow-800">
+              <strong>Important:</strong> Please save these credentials. You will use them to log in to the student portal.
             </p>
           </div>
           <button 
@@ -439,9 +461,9 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
                   {errors.gender && <p className="mt-2 text-sm text-red-500">{errors.gender}</p>}
                 </div>
@@ -495,10 +517,10 @@ const AdmissionPage: React.FC = () => {
                       }`}
                     >
                       <option value="">Select Relationship</option>
-                      <option value="parent">Parent</option>
-                      <option value="legal-guardian">Legal Guardian</option>
-                      <option value="spouse">Spouse</option>
-                      <option value="other">Other</option>
+                      <option value="Parent">Parent</option>
+                      <option value="Legal Guardian">Legal Guardian</option>
+                      <option value="Spouse">Spouse</option>
+                      <option value="Other">Other</option>
                     </select>
                     {errors.guardianRelationship && (
                       <p className="mt-2 text-sm text-red-500">{errors.guardianRelationship}</p>
@@ -555,11 +577,11 @@ const AdmissionPage: React.FC = () => {
                       className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                     >
                       <option value="">Select Relationship</option>
-                      <option value="parent">Parent</option>
-                      <option value="sibling">Sibling</option>
-                      <option value="spouse">Spouse</option>
-                      <option value="friend">Friend</option>
-                      <option value="other">Other</option>
+                      <option value="Parent">Parent</option>
+                      <option value="Sibling">Sibling</option>
+                      <option value="Spouse">Spouse</option>
+                      <option value="Friend">Friend</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
                 </div>
@@ -656,10 +678,24 @@ const AdmissionPage: React.FC = () => {
                       </div>
 
                       <CreditCard className="w-16 h-16 text-primary-50 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-primary-50 mb-2">Application Fee: 50,000 RWF</h3>
+                      <h3 className="text-lg font-semibold text-primary-50 mb-2">Application Fee</h3>
                       <p className="text-gray-600 mb-6">
-                        Please provide your mobile money number to complete the application.
+                        Please enter the amount and your mobile money number to complete the application.
                       </p>
+                      
+                      <div className="max-w-xs mx-auto mb-4 text-left">
+                        <Input
+                          label="Payment Amount (RWF)"
+                          name="paymentAmount"
+                          type="number"
+                          value={formData.paymentAmount}
+                          onChange={(e) => handleInputChange('paymentAmount', e.target.value)}
+                          placeholder="e.g., 50000"
+                          error={errors.paymentAmount}
+                          required
+                          leftIcon={<CreditCard className="w-4 h-4" />}
+                        />
+                      </div>
                       
                       <div className="max-w-xs mx-auto mb-6 text-left">
                         <Input
@@ -711,11 +747,11 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select First Choice</option>
-                    <option value="computer-science">Computer Science</option>
-                    <option value="business">Business Administration</option>
-                    <option value="engineering">Engineering</option>
-                    <option value="medicine">Medicine</option>
-                    <option value="law">Law</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Business Administration">Business Administration</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Medicine">Medicine</option>
+                    <option value="Law">Law</option>
                   </select>
                   {errors.program && <p className="mt-2 text-sm text-red-500">{errors.program}</p>}
                 </div>
@@ -729,11 +765,11 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Second Choice</option>
-                    <option value="computer-science">Computer Science</option>
-                    <option value="business">Business Administration</option>
-                    <option value="engineering">Engineering</option>
-                    <option value="medicine">Medicine</option>
-                    <option value="law">Law</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Business Administration">Business Administration</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Medicine">Medicine</option>
+                    <option value="Law">Law</option>
                   </select>
                 </div>
                 <div>
@@ -746,11 +782,11 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Third Choice</option>
-                    <option value="computer-science">Computer Science</option>
-                    <option value="business">Business Administration</option>
-                    <option value="engineering">Engineering</option>
-                    <option value="medicine">Medicine</option>
-                    <option value="law">Law</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Business Administration">Business Administration</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Medicine">Medicine</option>
+                    <option value="Law">Law</option>
                   </select>
                 </div>
                 <div>
@@ -763,10 +799,10 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Education Level</option>
-                    <option value="high-school">High School</option>
-                    <option value="associate">Associate Degree</option>
-                    <option value="bachelor">Bachelor's Degree</option>
-                    <option value="master">Master's Degree</option>
+                    <option value="High School">High School</option>
+                    <option value="Associate Degree">Associate Degree</option>
+                    <option value="Bachelor's Degree">Bachelor's Degree</option>
+                    <option value="Master's Degree">Master's Degree</option>
                   </select>
                   {errors.previousEducation && <p className="mt-2 text-sm text-red-500">{errors.previousEducation}</p>}
                 </div>
@@ -829,9 +865,9 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Option</option>
-                    <option value="yes">Yes, I'm interested</option>
-                    <option value="no">No, not interested</option>
-                    <option value="maybe">Maybe, need more information</option>
+                    <option value="Yes, I'm interested">Yes, I'm interested</option>
+                    <option value="No, not interested">No, not interested</option>
+                    <option value="Maybe, need more information">Maybe, need more information</option>
                   </select>
                   {errors.scholarshipInterest && <p className="mt-2 text-sm text-red-500">{errors.scholarshipInterest}</p>}
                 </div>
@@ -846,8 +882,8 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Option</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                   </select>
                   {errors.financialAidNeeded && <p className="mt-2 text-sm text-red-500">{errors.financialAidNeeded}</p>}
                 </div>
@@ -862,9 +898,9 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Payment Plan</option>
-                    <option value="full">Full Payment (Upfront)</option>
-                    <option value="semester">Per Semester</option>
-                    <option value="monthly">Monthly Installments</option>
+                    <option value="Full Payment (Upfront)">Full Payment (Upfront)</option>
+                    <option value="Per Semester">Per Semester</option>
+                    <option value="Monthly Installments">Monthly Installments</option>
                   </select>
                 </div>
               </div>
@@ -888,9 +924,9 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Option</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                    <option value="maybe">Maybe</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                    <option value="Maybe">Maybe</option>
                   </select>
                   {errors.housingNeeded && <p className="mt-2 text-sm text-red-500">{errors.housingNeeded}</p>}
                 </div>
@@ -905,10 +941,10 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Semester</option>
-                    <option value="fall-2025">Fall 2025</option>
-                    <option value="spring-2026">Spring 2026</option>
-                    <option value="summer-2026">Summer 2026</option>
-                    <option value="fall-2026">Fall 2026</option>
+                    <option value="Fall 2025">Fall 2025</option>
+                    <option value="Spring 2026">Spring 2026</option>
+                    <option value="Summer 2026">Summer 2026</option>
+                    <option value="Fall 2026">Fall 2026</option>
                   </select>
                   {errors.startSemester && <p className="mt-2 text-sm text-red-500">{errors.startSemester}</p>}
                 </div>
@@ -923,10 +959,10 @@ const AdmissionPage: React.FC = () => {
                     className="w-full rounded-xl border px-4 py-3 outline-none bg-gray-50 focus:ring-2 focus:ring-primary-100 border-gray-200"
                   >
                     <option value="">Select Study Mode</option>
-                    <option value="full-time">Full-Time</option>
-                    <option value="part-time">Part-Time</option>
-                    <option value="online">Online</option>
-                    <option value="hybrid">Hybrid</option>
+                    <option value="Full-Time">Full-Time</option>
+                    <option value="Part-Time">Part-Time</option>
+                    <option value="Online">Online</option>
+                    <option value="Hybrid">Hybrid</option>
                   </select>
                   {errors.studyMode && <p className="mt-2 text-sm text-red-500">{errors.studyMode}</p>}
                 </div>

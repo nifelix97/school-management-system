@@ -74,8 +74,16 @@ export interface ApiResponse<T> {
 
 export interface AdmissionResponse {
   registrationNumber: string;
-  applicationId: string;
-  transactionId: string;
+  email: string;
+  password: string;
+  payment?: {
+    ref: string;
+    amount: number;
+    status: string;
+    kind: string;
+    phoneNumber: string;
+  };
+  paymentError?: string;
 }
 
 export interface PaymentStatus {

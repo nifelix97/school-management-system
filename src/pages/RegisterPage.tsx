@@ -63,8 +63,9 @@ const ROLES_REQUIRING_CONTRACT = [
   "Receptionist",
   "Vice Chancellor",
   "Chancellor",
-  "Coaches",
-  "Guild President"
+  "Sport Activity",
+  "Student Association",
+  "Human Resource"
 ];
 
 // Role-specific field configurations
@@ -83,12 +84,13 @@ const ROLE_FIELDS: Record<string, Array<keyof FormState>> = {
   "Manager": [],
   "Warden": [],
   "Auditor": ["qualification"],
-  "Vendor": ["specialization"],
-  "Coaches": ["specialization", "yearsOfExperience"],
+  "Procurement": ["specialization"],
+  "Sport Activity": ["specialization", "yearsOfExperience"],
   "Receptionist": [],
   "Vice Chancellor": ["qualification", "yearsOfExperience"],
   "Chancellor": ["qualification", "yearsOfExperience"],
   "Alumni": ["program", "yearLevel"],
+  "Human Resource": ["specialization", "qualification"],
 };
 
 const RegisterPage = () => {
