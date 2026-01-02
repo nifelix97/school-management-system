@@ -312,6 +312,7 @@ import RoomAllocation from "../pages/warden/RoomAllocation";
 import WardenDashboard from "../pages/warden/WardenDashboard";
 import WardenNotifications from "../pages/warden/WardenNotifications";
 import WardenProfile from "../pages/warden/WardenProfile";
+import RolePermission from "../pages/Registrar/Roles&Permissions";
 
 
 
@@ -439,6 +440,7 @@ export default function AppRoutes() {
         />
         <Route path="/registrar/student-records" element={<StudentRecords />} />
         <Route path="/registrar/certificates" element={<CertificateGenerator />} />
+        <Route path="/registrar/roles-permissions" element={<RolePermission />} />
       </Route>
       <Route element={<AccountantLayout />}>
         <Route path="/accountant/dashboard" element={<AccountantDashBoard />} />

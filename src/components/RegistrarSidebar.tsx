@@ -15,7 +15,7 @@ import {
   IoMenuOutline,
   IoChevronBackOutline,
   // IoSchoolOutline,
-  // IoSettingsOutline,
+   IoSettingsOutline,
 //   IoEyeOutline,
   IoFolderOutline,
 } from "react-icons/io5";
@@ -64,6 +64,11 @@ const links = [
     to: "/registrar/certificates",
     label: "Generate Certificates",
     icon: <IoDocumentTextOutline className="w-5 h-5" />,
+  },
+  {
+    to: "/registrar/roles-permissions",
+    label: "Roles & Permissions",
+    icon: <IoSettingsOutline className="w-5 h-5" />,
   },
 ];
 

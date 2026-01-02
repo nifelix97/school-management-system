@@ -42,13 +42,13 @@ export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Profile Management
     getProfile: builder.query<ApiResponse<User>, void>({
-      query: () => '/users/profile',
+      query: () => '/user/profile',
       providesTags: ['Users'],
     }),
 
     updateProfile: builder.mutation<ApiResponse<User>, StudentProfileUpdateDto>({
       query: (data) => ({
-        url: '/users/profile',
+        url: '/user/profile',
         method: 'PATCH',
         body: data,
       }),
@@ -57,7 +57,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     changePassword: builder.mutation<ApiResponse<null>, any>({
       query: (data) => ({
-        url: '/users/change-password',
+        url: '/user/change-password',
         method: 'POST',
         body: data,
       }),
@@ -65,7 +65,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     uploadAvatar: builder.mutation<ApiResponse<{ profileImageUrl: string }>, FormData>({
       query: (formData) => ({
-        url: '/users/avatar',
+        url: '/user/avatar',
         method: 'POST',
         body: formData,
       }),
@@ -74,13 +74,13 @@ export const userApi = apiSlice.injectEndpoints({
 
     // Emergency Contacts
     getEmergencyContacts: builder.query<ApiResponse<EmergencyContact[]>, void>({
-      query: () => '/users/emergency-contacts',
+      query: () => '/user/emergency-contacts',
       providesTags: ['Users'],
     }),
 
     addEmergencyContact: builder.mutation<ApiResponse<EmergencyContact>, Partial<EmergencyContact>>({
       query: (data) => ({
-        url: '/users/emergency-contacts',
+        url: '/user/emergency-contacts',
         method: 'POST',
         body: data,
       }),
@@ -89,7 +89,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     updateEmergencyContact: builder.mutation<ApiResponse<EmergencyContact>, { contactId: number; data: Partial<EmergencyContact> }>({
       query: ({ contactId, data }) => ({
-        url: `/users/emergency-contacts/${contactId}`,
+        url: `/user/emergency-contacts/${contactId}`,
         method: 'PATCH',
         body: data,
       }),
@@ -98,7 +98,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     deleteEmergencyContact: builder.mutation<ApiResponse<null>, number>({
       query: (contactId) => ({
-        url: `/users/emergency-contacts/${contactId}`,
+        url: `/user/emergency-contacts/${contactId}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Users'],
@@ -107,47 +107,61 @@ export const userApi = apiSlice.injectEndpoints({
     // User Administration (Admin Only)
     getAllUsers: builder.query<ApiResponse<PaginatedUsers>, UserFilters>({
       query: (filters) => ({
-        url: '/users',
+        url: '/user/all',
         params: filters,
       }),
       providesTags: ['Users'],
     }),
 
     getPendingUsers: builder.query<ApiResponse<User[]>, void>({
-      query: () => '/users/pending',
+      query: () => '/user/pending',
       providesTags: ['Users'],
     }),
 
     activateUser: builder.mutation<ApiResponse<null>, number>({
       query: (userId) => ({
-        url: `/users/${userId}/activate`,
-        method: 'PATCH',
+        url: `/user/${userId}/activate`,
+        method: 'PUT',
       }),
       invalidatesTags: ['Users'],
     }),
 
     deactivateUser: builder.mutation<ApiResponse<null>, number>({
       query: (userId) => ({
-        url: `/users/${userId}/deactivate`,
-        method: 'PATCH',
+        url: `/user/${userId}/deactivate`,
+        method: 'PUT',
       }),
       invalidatesTags: ['Users'],
     }),
 
     approveUser: builder.mutation<ApiResponse<null>, number>({
       query: (userId) => ({
-        url: `/users/${userId}/approve`,
-        method: 'PATCH',
+        url: `/user/${userId}/approve`,
+        method: 'PUT',
       }),
       invalidatesTags: ['Users'],
     }),
 
     rejectUser: builder.mutation<ApiResponse<null>, number>({
       query: (userId) => ({
-        url: `/users/${userId}/reject`,
+        url: `/user/${userId}/reject`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Users'],
+    }),
+
+    changeRole: builder.mutation<ApiResponse<null>, { userId: number; role: string }>({
+      query: ({ userId, role }) => ({
+        url: `/user/${userId}/role`,
+        method: 'PUT',
+        body: { role },
+      }),
+      invalidatesTags: ['Users'],
+    }),
+
+    getRoles: builder.query<ApiResponse<string[]>, void>({
+      query: () => '/user/roles',
+      providesTags: ['Users'],
     }),
   }),
 });
@@ -167,4 +181,6 @@ export const {
   useDeactivateUserMutation,
   useApproveUserMutation,
   useRejectUserMutation,
+  useChangeRoleMutation,
+  useGetRolesQuery,
 } = userApi;

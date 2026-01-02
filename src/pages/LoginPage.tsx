@@ -90,7 +90,7 @@ const LoginPage = () => {
           localStorage.setItem('user', JSON.stringify(user));
         
           // show toast and navigate based on role
-          toast.success(response.message || "Welcome back!");
+          toast.success(response.message || "Welcome back!" + user.name);
           
           // Role-based redirection - use a more robust matching logic
           const getDashboardPath = (role: string) => {

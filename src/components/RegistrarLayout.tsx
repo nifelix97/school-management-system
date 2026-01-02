@@ -23,7 +23,7 @@ const RegistrarLayout: React.FC = () => {
           <RegistrarSidebar />
 
           {/* Page content */}
-          <main className="flex-1">
+          <main className="flex-1 min-w-0 overflow-hidden">
             <Outlet />
           </main>
         </div>

@@ -65,7 +65,8 @@ const ROLES_REQUIRING_CONTRACT = [
   "Chancellor",
   "Sport Activity",
   "Student Association",
-  "Human Resource"
+  "Human Resource",
+  "Dean"
 ];
 
 // Role-specific field configurations
@@ -91,6 +92,7 @@ const ROLE_FIELDS: Record<string, Array<keyof FormState>> = {
   "Chancellor": ["qualification", "yearsOfExperience"],
   "Alumni": ["program", "yearLevel"],
   "Human Resource": ["specialization", "qualification"],
+  "Dean": ["department", "qualification", "yearsOfExperience"],
 };
 
 const RegisterPage = () => {
