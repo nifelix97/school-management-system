@@ -1,40 +1,38 @@
-import { useState } from "react";
 import {
+  AlertCircle,
   BookOpen,
   Calendar,
-  Clock,
-  Users,
-  X,
   ChevronDown,
   ChevronLeft,
+  Clock,
+  Loader2,
+  Users,
+  X
 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useGetClassesQuery } from "../../app/api/classes";
+import {
+  useEnrollInCourseMutation,
+  useGetAvailableCoursesQuery,
+  useGetEnrolledCoursesQuery
+} from "../../app/api/courses";
+import { useGetDepartmentsQuery } from "../../app/api/departments";
+import type { Class } from "../../types/class";
+import type { Course, Enrollment } from "../../types/course";
 
-interface Course {
-  id: number;
-  title: string;
+interface EnrollableCourse extends Omit<Course, "status"> {
+  className: string;
+  classId: string;
+  instructorName: string;
+  image: string;
   status: string;
   progress: number;
 }
 
-interface ClassItem {
-  id: number;
-  name: string;
-  instructor: string;
-  students: number;
-  startDate: string;
-  schedule: string;
-  duration: string;
-  image: string;
-  badge?: string;
-  status: "current" | "retaking" | "suspended" | "ongoing" | "completed";
-  courses: Course[];
-}
-
-interface EnrollableCourse extends Course {
-  className: string;
-  classId: number;
-  instructor: string;
-  image: string;
+interface UIClassItem extends Class {
+  instructorName: string;
+  studentsCount: number;
+  courses: Partial<Course>[];
 }
 
 export default function CoursesPage() {
@@ -42,7 +40,7 @@ export default function CoursesPage() {
   const [filter, setFilter] = useState("all");
   const [classFilter, setClassFilter] = useState("all");
   const [selectedCourse, setSelectedCourse] = useState<EnrollableCourse | null>(null);
-  const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
+  const [selectedClass, setSelectedClass] = useState<UIClassItem | null>(null);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
  const [courseToEnroll, setCourseToEnroll] = useState<EnrollableCourse | null>(
    null
@@ -50,192 +48,61 @@ export default function CoursesPage() {
 
 
 
-  const classes = [
-    {
-      id: 1,
-      name: "Web Development Bootcamp 2025",
-      instructor: "Herman Wong",
-      students: 8216,
-      startDate: "Sep 18",
-      schedule: "Mon, Wed, Fri - 10:00 AM",
-      duration: "12 weeks",
-      status: "current" as const,
-      image:
-        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=250&fit=crop",
-      courses: [
-        {
-          id: 1,
-          title: "HTML & CSS Fundamentals",
-          status: "completed",
-          progress: 100,
-        },
-        { id: 2, title: "JavaScript Basics", status: "ongoing", progress: 45 },
-        { id: 3, title: "React Framework", status: "waiting", progress: 0 },
-        {
-          id: 4,
-          title: "Backend with Node.js",
-          status: "waiting",
-          progress: 0,
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: "UX/UI Design Masterclass",
-      instructor: "Herman Wong",
-      students: 10180,
-      startDate: "Dec 15",
-      schedule: "Tue, Thu - 2:00 PM",
-      duration: "8 weeks",
-      status: "ongoing" as const,
-      image:
-        "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=250&fit=crop",
-      courses: [
-        {
-          id: 5,
-          title: "Design Thinking Principles",
-          status: "ongoing",
-          progress: 78,
-        },
-        { id: 6, title: "Figma Mastery", status: "ongoing", progress: 60 },
-        {
-          id: 7,
-          title: "User Research Methods",
-          status: "waiting",
-          progress: 0,
-        },
-      ],
-    },
-    {
-      id: 3,
-      name: "Mobile App Development",
-      instructor: "Herman Wong",
-      students: 10192,
-      startDate: "Jan 10",
-      schedule: "Mon, Wed - 3:00 PM",
-      duration: "10 weeks",
-      status: "current" as const,
-      image:
-        "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=250&fit=crop",
-      badge: "popular",
-      courses: [
-        {
-          id: 8,
-          title: "iOS Development Swift",
-          status: "not_enrolled",
-          progress: 0,
-        },
-        {
-          id: 9,
-          title: "Android Development Kotlin",
-          status: "not_enrolled",
-          progress: 0,
-        },
-      ],
-    },
-    {
-      id: 4,
-      name: "Data Science Fundamentals (Retaking)",
-      instructor: "Herman Wong",
-      students: 9321,
-      startDate: "Sep 30",
-      schedule: "Tue, Thu - 11:00 AM",
-      duration: "14 weeks",
-      status: "retaking" as const,
-      image:
-        "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=250&fit=crop",
-      courses: [
-        {
-          id: 10,
-          title: "Python for Data Science",
-          status: "completed",
-          progress: 100,
-        },
-        {
-          id: 11,
-          title: "Statistics & Probability",
-          status: "completed",
-          progress: 100,
-        },
-        {
-          id: 12,
-          title: "Machine Learning Basics",
-          status: "retaking",
-          progress: 35,
-        },
-      ],
-    },
-    {
-      id: 5,
-      name: "Advanced Physics (Suspended)",
-      instructor: "Dr. Johnson",
-      students: 5432,
-      startDate: "Aug 15",
-      schedule: "Mon, Wed, Fri - 9:00 AM",
-      duration: "16 weeks",
-      status: "suspended" as const,
-      image:
-        "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=250&fit=crop",
-      courses: [
-        {
-          id: 13,
-          title: "Quantum Mechanics",
-          status: "ongoing",
-          progress: 25,
-        },
-        {
-          id: 14,
-          title: "Thermodynamics",
-          status: "waiting",
-          progress: 0,
-        },
-      ],
-    },
-    {
-      id: 6,
-      name: "Computer Science Fundamentals (Completed)",
-      instructor: "Prof. Smith",
-      students: 12000,
-      startDate: "Feb 1",
-      schedule: "Tue, Thu - 1:00 PM",
-      duration: "12 weeks",
-      status: "completed" as const,
-      image:
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop",
-      courses: [
-        {
-          id: 15,
-          title: "Programming Basics",
-          status: "completed",
-          progress: 100,
-        },
-        {
-          id: 16,
-          title: "Data Structures",
-          status: "completed",
-          progress: 100,
-        },
-      ],
-    },
-  ];
+  // API Queries
+  const { data: enrolledData, isLoading: enrolledLoading, error: enrolledError } = useGetEnrolledCoursesQuery();
+  const { data: availableData, isLoading: availableLoading, error: availableError } = useGetAvailableCoursesQuery();
+  const { data: classesData, isLoading: classesLoading, error: classesError } = useGetClassesQuery();
+  const { data: departmentsData } = useGetDepartmentsQuery();
 
-  const allCourses = classes.flatMap((classItem) =>
-    classItem.courses.map((course) => ({
-      ...course,
-      className: classItem.name,
-      classId: classItem.id,
-      instructor: classItem.instructor,
-      image: classItem.image,
-    }))
-  );
+  const [enrollInCourse, { isLoading: enrolling }] = useEnrollInCourseMutation();
+
+  // Data Transformation for Courses Tab
+  const processedCourses = useMemo(() => {
+    if (!enrolledData?.data || !availableData?.data || !classesData?.data) return [];
+
+    const enrolledCourses = (enrolledData.data || []).map((enrollment: Enrollment) => ({
+      ...enrollment.course,
+      status: enrollment.status,
+      progress: enrollment.progress,
+      className: classesData.data!.find((c: Class) => c.id === enrollment.course?.classCohortId)?.name || "Unknown Class",
+      classId: enrollment.course?.classCohortId || "",
+      instructorName: enrollment.course?.instructor?.name || "Multiple Instructors",
+      image: enrollment.course?.imageUrl || "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=250&fit=crop"
+    })) as EnrollableCourse[];
+
+    const availableCourses = availableData.data!
+      .filter((course: Course) => !(enrolledData.data || []).some((e: Enrollment) => e.courseId === course.id))
+      .map((course: Course) => ({
+        ...course,
+        status: "not_enrolled",
+        progress: 0,
+        className: classesData.data!.find((c: Class) => c.id === course.classCohortId)?.name || "Unknown Class",
+        classId: course.classCohortId || "",
+        instructorName: course.instructor?.name || "TBA",
+        image: course.imageUrl || "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=250&fit=crop"
+      })) as EnrollableCourse[];
+
+    return [...enrolledCourses, ...availableCourses];
+  }, [enrolledData, availableData, classesData]);
+
+  // Data Transformation for Classes Tab
+  const processedClasses = useMemo(() => {
+    if (!classesData?.data) return [];
+
+    return classesData.data.map((cls: Class) => ({
+      ...cls,
+      instructorName: "Lead Instructor",
+      studentsCount: 120,
+      courses: (enrolledData?.data || []).map(e => e.course!).filter((c: Course) => c && c.classCohortId === cls.id)
+    })) as UIClassItem[];
+  }, [classesData, enrolledData]);
 
   const getFilteredCourses = () => {
-    return allCourses.filter((course) => {
+    return processedCourses.filter((course) => {
       if (filter === "all") return course.status !== "not_enrolled";
-      if (filter === "ongoing")
-        return course.status === "ongoing" || course.status === "retaking";
+      if (filter === "ongoing") return course.status === "enrolled";
       if (filter === "completed") return course.status === "completed";
-      if (filter === "waiting") return course.status === "waiting";
+      if (filter === "catalog") return course.status === "not_enrolled";
       return true;
     });
   };
@@ -249,35 +116,48 @@ export default function CoursesPage() {
     }
   };
 
- const handleEnroll = () => {
-   // Simulate enrollment
-   const classItem = classes.find((c) => c.id === courseToEnroll?.classId);
-   const courseIndex = classItem?.courses.findIndex(
-     (c) => c.id === courseToEnroll?.id
-   );
-   if (
-     courseIndex !== undefined &&
-     classItem &&
-     classItem.courses[courseIndex]
-   ) {
-     classItem.courses[courseIndex].status = "waiting";
-     setShowEnrollModal(false);
-     setCourseToEnroll((prevCourseToEnroll) => {
-       if (prevCourseToEnroll && prevCourseToEnroll.id === courseToEnroll?.id) {
-         return courseToEnroll;
-       }
-       return null;
-     });
-     const enrolledCourse = {
-       ...classItem.courses[courseIndex],
-       className: classItem.name,
-       classId: classItem.id,
-       instructor: classItem.instructor,
-       image: classItem.image,
-     };
-     setSelectedCourse(enrolledCourse);
-   }
- };
+  const handleEnroll = async () => {
+    if (!courseToEnroll) return;
+    try {
+      await enrollInCourse(courseToEnroll.id).unwrap();
+      setShowEnrollModal(false);
+      setCourseToEnroll(null);
+    } catch (err) {
+      console.error("Failed to enroll:", err);
+    }
+  };
+
+  const isLoading = enrolledLoading || availableLoading || classesLoading;
+  const hasError = enrolledError || availableError || classesError;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 animate-spin text-primary-50 mx-auto mb-4" />
+          <p className="text-primary-50 font-medium">Loading your academic path...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-xl shadow-sm text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-primary-50 mb-2">Oops! Something went wrong</h2>
+          <p className="text-gray-600 mb-6">We couldn't load your courses. Please try again later.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-primary-50 text-white rounded-lg font-semibold hover:bg-opacity-90 transition-all"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
 
 
@@ -312,14 +192,9 @@ export default function CoursesPage() {
                     Part of: {selectedCourse.className}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
-                    Instructor: {selectedCourse.instructor}
+                    Instructor: {selectedCourse.instructorName}
                   </p>
                 </div>
-                {selectedCourse.status === "retaking" && (
-                  <span className="px-4 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
-                    🔄 Retaking
-                  </span>
-                )}
                 {selectedCourse.status === "completed" && (
                   <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
                     ✓ Completed
@@ -348,18 +223,18 @@ export default function CoursesPage() {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="text-2xl mb-2">📚</div>
                   <div className="text-sm text-primary-50">Lessons</div>
-                  <div className="font-semibold text-primary-50">24 Modules</div>
+                  <div className="font-semibold text-primary-50">{selectedCourse.credits} Credits</div>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="text-2xl mb-2">⏱️</div>
                   <div className="text-sm text-primary-50">Duration</div>
-                  <div className="font-semibold text-primary-50">8 Hours</div>
+                  <div className="font-semibold text-primary-50">{selectedCourse.duration}</div>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="text-2xl mb-2">🎯</div>
                   <div className="text-sm text-primary-50">Level</div>
                   <div className="font-semibold text-primary-50">
-                    Intermediate
+                    {selectedCourse.level}
                   </div>
                 </div>
               </div>
@@ -392,7 +267,7 @@ export default function CoursesPage() {
 
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <img
-              src={selectedClass.image}
+              src={selectedClass.imageUrl || "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=250&fit=crop"}
               alt={selectedClass.name}
               className="w-full h-64 object-cover"
             />
@@ -433,12 +308,12 @@ export default function CoursesPage() {
                 <div className="flex items-center gap-2 text-gray-600">
                   <Users size={18} />
                   <span className="text-sm">
-                    {selectedClass.students.toLocaleString()} students
+                    {selectedClass.studentsCount} students
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Calendar size={18} />
-                  <span className="text-sm">{selectedClass.schedule}</span>
+                  <span className="text-sm">Starts: {new Date(selectedClass.startDate || Date.now()).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Clock size={18} />
@@ -450,54 +325,31 @@ export default function CoursesPage() {
                 <h2 className="text-lg font-bold text-primary-50 mb-4">
                   Courses in this Class
                 </h2>
-                <div className="space-y-3">
-                  {selectedClass.courses.map((course) => (
-                    <div
-                      key={course.id}
-                      className="p-4 border border-gray-200 rounded-lg hover:border-primary-50 transition-all cursor-pointer"
-                      onClick={() =>
-                        handleCourseClick({
-                          ...course,
-                          className: selectedClass.name,
-                          classId: selectedClass.id,
-                          instructor: selectedClass.instructor,
-                          image: selectedClass.image,
-                        })
-                      }
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-primary-50 mb-1">
-                            {course.title}
-                          </h3>
-                          {course.status === "retaking" && (
-                            <span className="inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold">
-                              🔄 Retaking Course
-                            </span>
-                          )}
-                          {course.status === "completed" && (
-                            <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                              ✓ Completed
-                            </span>
-                          )}
-                          {course.status === "ongoing" && (
-                            <div className="mt-2">
-                              <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div
-                                  className="bg-primary-50 h-2 rounded-full"
-                                  style={{ width: `${course.progress}%` }}
-                                />
-                              </div>
-                              <span className="text-xs text-gray-500 mt-1">
-                                {course.progress}% complete
-                              </span>
+                  {selectedClass.courses.length > 0 ? (
+                    <div className="space-y-3">
+                      {selectedClass.courses.map((course) => (
+                        <div
+                          key={course?.id}
+                          className="p-4 border border-gray-200 rounded-lg hover:border-primary-50 transition-all cursor-pointer"
+                          onClick={() => {
+                            const fullCourse = processedCourses.find(pc => pc.id === course?.id);
+                            if (fullCourse) handleCourseClick(fullCourse);
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-primary-50 mb-1">
+                                {course?.title}
+                              </h3>
+                              <p className="text-xs text-gray-500">ID: {course?.code}</p>
                             </div>
-                          )}
+                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">No enrolled courses in this class cohort yet.</p>
+                  )}
               </div>
             </div>
           </div>
@@ -582,14 +434,17 @@ export default function CoursesPage() {
                   Completed
                 </button>
                 <button
-                  onClick={() => setFilter("waiting")}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                    filter === "waiting"
+                   onClick={() => setFilter("catalog")}
+                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
+                    filter === "catalog"
                       ? "bg-primary-50 text-white"
                       : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  Waiting Enrollment
+                   Explore Catalog
+                   <span className="bg-primary-50/10 text-primary-50 text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                    {processedCourses.filter(c => c.status === "not_enrolled").length}
+                  </span>
                 </button>
               </div>
               <div className="sm:ml-auto flex items-center gap-2 text-sm text-primary-50 whitespace-nowrap">
@@ -633,11 +488,11 @@ export default function CoursesPage() {
                       Class: {course.className}
                     </p>
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">
-                        👤
+                      <div className="w-6 h-6 rounded-full bg-primary-10/10 flex items-center justify-center text-[10px] text-primary-50 font-bold border border-primary-50/20">
+                        {course.instructorName.split(' ').map(n => n[0]).join('')}
                       </div>
                       <span className="text-xs text-primary-50">
-                        {course.instructor}
+                        {course.instructorName}
                       </span>
                     </div>
                   </div>
@@ -659,61 +514,24 @@ export default function CoursesPage() {
                 >
                   All Classes
                 </button>
-                <button
-                  onClick={() => setClassFilter("current")}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                    classFilter === "current"
-                      ? "bg-primary-50 text-white"
-                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  Current Classes
-                </button>
-                <button
-                  onClick={() => setClassFilter("retaking")}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                    classFilter === "retaking"
-                      ? "bg-primary-50 text-white"
-                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  Retaking
-                </button>
-                <button
-                  onClick={() => setClassFilter("suspended")}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                    classFilter === "suspended"
-                      ? "bg-primary-50 text-white"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  Suspended
-                </button>
-                <button
-                  onClick={() => setClassFilter("ongoing")}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                    classFilter === "ongoing"
-                      ? "bg-primary-50 text-white"
-                      : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  Ongoing
-                </button>
-                <button
-                  onClick={() => setClassFilter("completed")}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                    classFilter === "completed"
-                      ? "bg-primary-50 text-white"
-                      : "bg-white text-prrimary-50 border border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  Completed
-                </button>
+                {departmentsData?.data?.map(dept => (
+                   <button
+                    key={dept.id}
+                    onClick={() => setClassFilter(dept.id)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                      classFilter === dept.id
+                        ? "bg-primary-50 text-white"
+                        : "bg-white text-primary-50 border border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {dept.name}
+                  </button>
+                ))}
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {classes.filter(classItem => classFilter === "all" || classItem.status === classFilter).map((classItem) => (
+            {processedClasses.filter(c => classFilter === "all" || c.departmentId === classFilter).map((classItem) => (
                 <div
                   key={classItem.id}
                   className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
@@ -721,52 +539,30 @@ export default function CoursesPage() {
                 >
                   <div className="relative">
                     <img
-                      src={classItem.image}
+                      src={classItem.imageUrl || "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=250&fit=crop"}
                       alt={classItem.name}
                       className="w-full h-40 object-cover"
                     />
-                    {classItem.badge && (
-                      <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-400 text-yellow-900">
-                        🔥
-                      </div>
-                    )}
-                    {classItem.status === "retaking" && (
-                      <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-orange-400 text-orange-900">
-                        🔄 Retaking
-                      </div>
-                    )}
-                    {classItem.status === "suspended" && (
-                      <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-red-400 text-red-900">
-                        ⏸️ Suspended
-                      </div>
-                    )}
-                    {classItem.status === "completed" && (
-                      <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-green-400 text-green-900">
-                        ✓ Completed
-                      </div>
-                    )}
-                    {classItem.status === "ongoing" && (
-                      <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-blue-400 text-blue-900">
-                        ▶️ Ongoing
-                      </div>
-                    )}
+                    <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-primary-50 text-white shadow-lg capitalize">
+                      {classItem.status}
+                    </div>
                   </div>
                   <div className="p-4">
                     <h3 className="font-semibold text-primary-50 text-sm mb-3 line-clamp-2 min-h-[2.5rem]">
                       {classItem.name}
                     </h3>
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs">
-                        👤
+                      <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px]">
+                        🎓
                       </div>
                       <span className="text-xs text-gray-600">
-                        {classItem.instructor}
+                        {classItem.instructorName}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <div className="flex items-center gap-1">
                         <Users size={14} />
-                        <span>{classItem.students.toLocaleString()}</span>
+                        <span>{classItem.studentsCount} students</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <BookOpen size={14} />
@@ -812,9 +608,11 @@ export default function CoursesPage() {
               </button>
               <button
                 onClick={handleEnroll}
-                className="flex-1 py-2 bg-primary-50 text-white rounded-lg font-semibold hover:bg-opacity-90 transition-all"
+                disabled={enrolling}
+                className="flex-1 py-2 bg-primary-50 text-white rounded-lg font-semibold hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Enroll Now
+                {enrolling && <Loader2 className="w-4 h-4 animate-spin" />}
+                {enrolling ? "Enrolling..." : "Enroll Now"}
               </button>
             </div>
           </div>
