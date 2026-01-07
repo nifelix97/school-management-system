@@ -17,6 +17,11 @@ import {
   useGetEnrolledCoursesQuery
 } from "../../app/api/courses";
 import { useGetDepartmentsQuery } from "../../app/api/departments";
+import CourseAssignmentsTab from "../../components/student/CourseAssignmentsTab";
+import CourseCertificateTab from "../../components/student/CourseCertificateTab";
+import CourseContentTab from "../../components/student/CourseContentTab";
+import CourseDiscussionsTab from "../../components/student/CourseDiscussionsTab";
+import CourseQuizzesTab from "../../components/student/CourseQuizzesTab";
 import type { Class } from "../../types/class";
 import type { Course, Enrollment } from "../../types/course";
 
@@ -45,6 +50,8 @@ export default function CoursesPage() {
  const [courseToEnroll, setCourseToEnroll] = useState<EnrollableCourse | null>(
    null
  );
+  const [courseTab, setCourseTab] = useState("content");
+
 
 
 
@@ -131,15 +138,56 @@ export default function CoursesPage() {
   const hasError = enrolledError || availableError || classesError;
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin text-primary-50 mx-auto mb-4" />
-          <p className="text-primary-50 font-medium">Loading your academic path...</p>
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#fcfdfe] relative overflow-hidden">
+          {/* Advanced Background Ambient Glows */}
+          <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary-50/5 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-50/5 rounded-full blur-[120px] animate-pulse [animation-delay:2s]" />
+  
+          <div className="z-10 flex flex-col items-center max-w-sm w-full px-6 text-center">
+            {/* Custom Orbital Loader */}
+            <div className="relative w-32 h-32 mb-12">
+              {/* Outer Pulsing Ring */}
+              <div className="absolute inset-0 rounded-full border border-primary-50/10 animate-[ping_3s_linear_infinite]" />
+              
+              {/* Middle Rotating Ring */}
+              <div className="absolute inset-2 rounded-full border-2 border-dashed border-primary-50/20 animate-[spin_10s_linear_infinite]" />
+              
+              {/* Main Content Container */}
+              <div className="absolute inset-4 bg-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.06)] border border-primary-50/5 flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-primary-50/5 to-transparent animate-pulse" />
+                <BookOpen className="w-8 h-8 text-primary-50 relative z-10 animate-bounce" />
+              </div>
+  
+              {/* Orbiting Particles */}
+              <div className="absolute inset-0 animate-spin-slow">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-primary-50 rounded-full shadow-[0_0_12px_rgba(30,41,59,0.4)]" />
+              </div>
+            </div>
+  
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              <h2 className="text-3xl font-extrabold text-primary-50 tracking-tight leading-tight">
+                Loading Courses
+              </h2>
+              <div className="flex items-center justify-center gap-3 py-2">
+                <div className="h-1 w-12 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-primary-50 animate-[shimmer_1.5s_infinite] w-full origin-left" />
+                </div>
+                <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-primary-50/30">
+                  Wait shortly
+                </span>
+                <div className="h-1 w-12 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-primary-50 animate-[shimmer_1.5s_infinite] w-full origin-left [animation-delay:0.2s]" />
+                </div>
+              </div>
+              <p className="text-sm text-primary-50/50 font-medium">
+                We&apos;re preparing your available Courses list wait a moment please.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
   if (hasError) {
     return (
@@ -163,6 +211,7 @@ export default function CoursesPage() {
 
 
 
+
   if (selectedCourse) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -175,11 +224,12 @@ export default function CoursesPage() {
             <span>Back to Courses</span>
           </button>
 
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          {/* Course Header */}
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
             <img
               src={selectedCourse.image}
               alt={selectedCourse.title}
-              className="w-full h-64 object-cover"
+              className="w-full h-48 object-cover"
             />
 
             <div className="p-6">
@@ -203,7 +253,7 @@ export default function CoursesPage() {
               </div>
 
               {selectedCourse.progress > 0 && selectedCourse.progress < 100 && (
-                <div className="mb-6">
+                <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-primary-50">Progress</span>
                     <span className="font-semibold text-primary-50">
@@ -219,34 +269,97 @@ export default function CoursesPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl mb-2">📚</div>
-                  <div className="text-sm text-primary-50">Lessons</div>
-                  <div className="font-semibold text-primary-50">{selectedCourse.credits} Credits</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl mb-2">⏱️</div>
-                  <div className="text-sm text-primary-50">Duration</div>
-                  <div className="font-semibold text-primary-50">{selectedCourse.duration}</div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="text-2xl mb-2">🎯</div>
-                  <div className="text-sm text-primary-50">Level</div>
-                  <div className="font-semibold text-primary-50">
-                    {selectedCourse.level}
-                  </div>
-                </div>
+              {/* Tab Navigation */}
+              <div className="flex items-center gap-2 sm:gap-4 border-b border-gray-200 overflow-x-auto">
+                <button
+                  onClick={() => setCourseTab("content")}
+                  className={`pb-3 px-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
+                    courseTab === "content"
+                      ? "text-primary-50"
+                      : "text-primary-50/40 hover:text-primary-100"
+                  }`}
+                >
+                  Content
+                  {courseTab === "content" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-50" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setCourseTab("assignments")}
+                  className={`pb-3 px-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
+                    courseTab === "assignments"
+                      ? "text-primary-50"
+                      : "text-primary-50/40 hover:text-primary-100"
+                  }`}
+                >
+                  Assignments
+                  {courseTab === "assignments" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-50" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setCourseTab("quizzes")}
+                  className={`pb-3 px-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
+                    courseTab === "quizzes"
+                      ? "text-primary-50"
+                      : "text-primary-50/40 hover:text-primary-100"
+                  }`}
+                >
+                  Quizzes
+                  {courseTab === "quizzes" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-50" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setCourseTab("discussions")}
+                  className={`pb-3 px-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
+                    courseTab === "discussions"
+                      ? "text-primary-50"
+                      : "text-primary-50/40 hover:text-primary-100"
+                  }`}
+                >
+                  Discussions
+                  {courseTab === "discussions" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-50" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setCourseTab("certificate")}
+                  className={`pb-3 px-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
+                    courseTab === "certificate"
+                      ? "text-primary-50"
+                      : "text-primary-50/40 hover:text-primary-100"
+                  }`}
+                >
+                  Certificate
+                  {courseTab === "certificate" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-50" />
+                  )}
+                </button>
               </div>
-
-              <button className="w-full py-3 bg-primary-50 text-white rounded-lg font-semibold hover:bg-opacity-90 transition-all">
-                {selectedCourse.status === "completed"
-                  ? "Review Course"
-                  : selectedCourse.status === "retaking"
-                  ? "Continue Retaking"
-                  : "Continue Learning"}
-              </button>
             </div>
+          </div>
+
+          {/* Tab Content */}
+          <div>
+            {courseTab === "content" && <CourseContentTab courseId={selectedCourse.id} />}
+            {courseTab === "assignments" && (
+              <CourseAssignmentsTab courseId={selectedCourse.id} assignments={[]} />
+            )}
+            {courseTab === "quizzes" && (
+              <CourseQuizzesTab courseId={selectedCourse.id} quizzes={[]} />
+            )}
+            {courseTab === "discussions" && (
+              <CourseDiscussionsTab courseId={selectedCourse.id} />
+            )}
+            {courseTab === "certificate" && (
+              <CourseCertificateTab
+                courseId={selectedCourse.id}
+                courseName={selectedCourse.title}
+                isCompleted={selectedCourse.status === "completed"}
+                progress={selectedCourse.progress}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -73,6 +73,26 @@ export const coursesApi = apiSlice.injectEndpoints({
     // Instructor Management
     getTeachers: builder.query<ApiResponse<Teacher[]>, void>({
       query: () => '/courses/teachers',
+      transformResponse: (response: ApiResponse<any[]>) => ({
+        ...response,
+        data: response.data?.map(teacher => ({
+          id: teacher.id,
+          name: `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim(),
+          email: teacher.email,
+          departmentId: teacher.department_id || teacher.department,
+          qualification: teacher.qualification,
+          specialization: teacher.specialization,
+          yearsOfExperience: teacher.years_of_experience,
+          phone: teacher.phone,
+          office: teacher.office,
+          bio: teacher.bio,
+          rating: teacher.rating,
+          image: teacher.avatar || teacher.image_url,
+          education: Array.isArray(teacher.education) ? teacher.education : [],
+          officeHours: teacher.office_hours,
+          nextClass: teacher.next_class
+        })) as Teacher[]
+      }),
     }),
 
     assignInstructor: builder.mutation<ApiResponse<Course>, { courseId: string; instructorId: string }>({

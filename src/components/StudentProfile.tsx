@@ -1,21 +1,21 @@
 import React, { useMemo, useState } from "react";
-import type {
-  StudentProfile as TStudentProfile,
-  EmergencyContact,
-  StudentProfileUpdate,
-} from "../types/StudentProfile";
 import {
-  IoCreateOutline,
-  IoPencilOutline,
-  IoTrashOutline,
+    IoCreateOutline,
+    IoPencilOutline,
+    IoTrashOutline,
 } from "react-icons/io5";
+import type {
+    EmergencyContact,
+    StudentProfileUpdate,
+    StudentProfile as TStudentProfile,
+} from "../types/StudentProfile";
 import Input from "./ui/Input";
 
 type Props = {
   profile: TStudentProfile;
   onCreateEmergencyContact?: () => void;
-  onEditEmergencyContact?: (id: string) => void;
-  onDeleteEmergencyContact?: (id: string) => void;
+  onEditEmergencyContact?: (id: string | number) => void;
+  onDeleteEmergencyContact?: (id: string | number) => void;
   onUpdatePersonal?: (data: StudentProfileUpdate) => Promise<void> | void;
 };
 
@@ -40,8 +40,8 @@ const EmergencyCard = ({
   onDelete,
 }: {
   contact: EmergencyContact;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onEdit?: (id: string | number) => void;
+  onDelete?: (id: string | number) => void;
 }) => (
   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
     <div className="flex items-center gap-2 text-primary-50 font-semibold">
@@ -88,7 +88,7 @@ const StudentProfile: React.FC<Props> = ({
   onDeleteEmergencyContact,
   onUpdatePersonal,
 }) => {
-  const [active, setActive] = useState<Tab>("Emergency contacts");
+  const [active, setActive] = useState<Tab>("Personal details");
   const fullName = `${profile.firstName} ${profile.lastName}`;
 
   // edit personal info

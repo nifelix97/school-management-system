@@ -1,27 +1,69 @@
+import type {
+  EmergencyContact,
+  StudentProfile,
+  StudentProfileUpdate
+} from '../../../types/StudentProfile';
 import { apiSlice } from '../apiEntry';
 import type { ApiResponse, User } from '../auth';
 
-// Additional Types for User API
-export interface EmergencyContact {
-  id: number;
-  student_id: number;
-  name: string;
-  priority: number;
-  email: string;
-  phone: string;
-  mobile_phone?: string;
-  work_phone?: string;
-  relation: string;
-}
+// --- Mapping Helpers ---
 
-export interface StudentProfileUpdateDto {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  currentYear?: string;
-  program?: string;
-}
+const mapBackendToProfile = (data: any): StudentProfile => ({
+  id: data.id,
+  profileImageUrl: data.profile_image_url || data.avatar || data.profileImageUrl,
+  firstName: data.first_name || data.firstName || '',
+  lastName: data.last_name || data.lastName || '',
+  email: data.email || '',
+  telephoneNumber: data.phone || data.telephoneNumber || '',
+  registrationNumber: data.registration_number || data.registrationNumber || '',
+  currentYear: data.current_year || data.currentYear || '',
+  title: data.title,
+  role: data.role,
+  program: data.program,
+  department: data.department,
+  emergencyContacts: data.emergency_contacts?.map(mapBackendToEmergencyContact) || []
+});
+
+const mapBackendToEmergencyContact = (contact: any): EmergencyContact => ({
+  id: contact.id,
+  name: contact.name || '',
+  priority: contact.priority === 1 ? 'Primary' : contact.priority === 2 ? 'Secondary' : contact.priority || 'Other',
+  email: contact.email || '',
+  phone: contact.phone || '',
+  mobilePhone: contact.mobile_phone || contact.mobilePhone,
+  workPhone: contact.work_phone || contact.workPhone,
+  relation: contact.relation || '',
+});
+
+const mapProfileUpdateToBackend = (update: StudentProfileUpdate) => {
+  const mapped: any = {};
+  if (update.firstName !== undefined) mapped.first_name = update.firstName;
+  if (update.lastName !== undefined) mapped.last_name = update.lastName;
+  if (update.email !== undefined) mapped.email = update.email;
+  if (update.telephoneNumber !== undefined) mapped.phone = update.telephoneNumber;
+  if (update.registrationNumber !== undefined) mapped.registration_number = update.registrationNumber;
+  if (update.currentYear !== undefined) mapped.current_year = update.currentYear;
+  if (update.program !== undefined) mapped.program = update.program;
+  if (update.department !== undefined) mapped.department = update.department;
+  if (update.newPassword !== undefined) mapped.password = update.newPassword;
+  return mapped;
+};
+
+const mapEmergencyContactToBackend = (contact: Partial<EmergencyContact>) => {
+  const mapped: any = {};
+  if (contact.name !== undefined) mapped.name = contact.name;
+  if (contact.priority !== undefined) {
+    mapped.priority = contact.priority === 'Primary' ? 1 : contact.priority === 'Secondary' ? 2 : contact.priority;
+  }
+  if (contact.email !== undefined) mapped.email = contact.email;
+  if (contact.phone !== undefined) mapped.phone = contact.phone;
+  if (contact.mobilePhone !== undefined) mapped.mobile_phone = contact.mobilePhone;
+  if (contact.workPhone !== undefined) mapped.work_phone = contact.workPhone;
+  if (contact.relation !== undefined) mapped.relation = contact.relation;
+  return mapped;
+};
+
+// --- API Definition ---
 
 export interface UserFilters {
   page?: number;
@@ -41,16 +83,24 @@ export interface PaginatedUsers {
 export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Profile Management
-    getProfile: builder.query<ApiResponse<User>, void>({
+    getProfile: builder.query<ApiResponse<StudentProfile>, void>({
       query: () => '/user/profile',
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data ? mapBackendToProfile(response.data) : undefined
+      }),
       providesTags: ['Users'],
     }),
 
-    updateProfile: builder.mutation<ApiResponse<User>, StudentProfileUpdateDto>({
+    updateProfile: builder.mutation<ApiResponse<StudentProfile>, StudentProfileUpdate>({
       query: (data) => ({
         url: '/user/profile',
         method: 'PATCH',
-        body: data,
+        body: mapProfileUpdateToBackend(data),
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data ? mapBackendToProfile(response.data) : undefined
       }),
       invalidatesTags: ['Users'],
     }),
@@ -75,6 +125,10 @@ export const userApi = apiSlice.injectEndpoints({
     // Emergency Contacts
     getEmergencyContacts: builder.query<ApiResponse<EmergencyContact[]>, void>({
       query: () => '/user/emergency-contacts',
+      transformResponse: (response: ApiResponse<any[]>) => ({
+        ...response,
+        data: response.data?.map(mapBackendToEmergencyContact)
+      }),
       providesTags: ['Users'],
     }),
 
@@ -82,21 +136,29 @@ export const userApi = apiSlice.injectEndpoints({
       query: (data) => ({
         url: '/user/emergency-contacts',
         method: 'POST',
-        body: data,
+        body: mapEmergencyContactToBackend(data),
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data ? mapBackendToEmergencyContact(response.data) : undefined
       }),
       invalidatesTags: ['Users'],
     }),
 
-    updateEmergencyContact: builder.mutation<ApiResponse<EmergencyContact>, { contactId: number; data: Partial<EmergencyContact> }>({
+    updateEmergencyContact: builder.mutation<ApiResponse<EmergencyContact>, { contactId: string | number; data: Partial<EmergencyContact> }>({
       query: ({ contactId, data }) => ({
         url: `/user/emergency-contacts/${contactId}`,
         method: 'PATCH',
-        body: data,
+        body: mapEmergencyContactToBackend(data),
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data ? mapBackendToEmergencyContact(response.data) : undefined
       }),
       invalidatesTags: ['Users'],
     }),
 
-    deleteEmergencyContact: builder.mutation<ApiResponse<null>, number>({
+    deleteEmergencyContact: builder.mutation<ApiResponse<null>, string | number>({
       query: (contactId) => ({
         url: `/user/emergency-contacts/${contactId}`,
         method: 'DELETE',

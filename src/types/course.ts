@@ -28,6 +28,14 @@ export interface Teacher {
   qualification?: string;
   specialization?: string;
   yearsOfExperience?: string;
+  phone?: string;
+  office?: string;
+  bio?: string;
+  rating?: number;
+  image?: string;
+  education?: string[];
+  officeHours?: string;
+  nextClass?: string;
 }
 
 export interface Course {

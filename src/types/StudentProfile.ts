@@ -1,9 +1,9 @@
 export type AcademicYear = number | `${number}/${number}`;
 
 export interface EmergencyContact {
-  id: string;
+  id: string | number;
   name: string;
-  priority: "Primary" | "Secondary" | "Other";
+  priority: "Primary" | "Secondary" | "Other" | string | number;
   email: string;
   phone?: string;
   mobilePhone?: string;
@@ -12,6 +12,7 @@ export interface EmergencyContact {
 }
 
 export interface StudentProfile {
+  id?: string | number;
   profileImageUrl?: string;
   firstName: string;
   lastName: string;
@@ -37,5 +38,7 @@ export interface StudentProfileUpdate {
   telephoneNumber?: string;
   registrationNumber?: string;
   currentYear?: AcademicYear;
+  program?: string;
+  department?: string;
   newPassword?: string;
 }
