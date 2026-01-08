@@ -36,6 +36,8 @@ export interface Teacher {
   education?: string[];
   officeHours?: string;
   nextClass?: string;
+  status?: string;
+  courseCount?: number;
 }
 
 export interface Course {
@@ -123,4 +125,22 @@ export interface AddResourceDto {
   name: string;
   type: string;
   file: File;
+}
+
+export interface EnrolledStudent {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  department?: string;
+  year_level?: string;
+  enrollment_id: string;
+  enrollment_status: EnrollmentStatus;
+  progress: number;
+  enrollment_date: string;
+  last_accessed_at?: string;
+  completed_lessons: number;
+  total_lessons: number;
 }

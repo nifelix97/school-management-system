@@ -36,10 +36,34 @@ export const departmentsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: 'Departments', id: 'LIST' }],
     }),
+
+    // Update an existing department
+    updateDepartment: builder.mutation<ApiResponse<Department>, { id: string; data: UpdateDepartmentDto }>({
+      query: ({ id, data }) => ({
+        url: `/departments/${id}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_, __, { id }) => [
+        { type: 'Departments', id },
+        { type: 'Departments', id: 'LIST' },
+      ],
+    }),
+
+    // Delete a department
+    deleteDepartment: builder.mutation<ApiResponse<void>, string>({
+      query: (id) => ({
+        url: `/departments/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Departments', id: 'LIST' }],
+    }),
   }),
 });
 
 export const {
   useGetDepartmentsQuery,
   useCreateDepartmentMutation,
+  useUpdateDepartmentMutation,
+  useDeleteDepartmentMutation,
 } = departmentsApi;

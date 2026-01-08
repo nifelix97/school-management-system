@@ -26,6 +26,14 @@ export interface StudentProfile {
   role?: string;               // e.g., "Student"
   program?: string;            // e.g., "BSc Computer Science"
   department?: string;
+  bio?: string;
+  office?: string;
+  specialization?: string;
+  qualifications?: string;
+  officeHours?: string;
+  position?: string;
+  yearsOfExperience?: number;
+  managedDepartments?: string[];
 
   emergencyContacts?: EmergencyContact[];
 }
@@ -41,4 +49,12 @@ export interface StudentProfileUpdate {
   program?: string;
   department?: string;
   newPassword?: string;
+  bio?: string;
+  office?: string;
+  specialization?: string;
+  qualifications?: string;
+  officeHours?: string;
+  position?: string;
+  yearsOfExperience?: number;
+  managedDepartments?: string[];
 }

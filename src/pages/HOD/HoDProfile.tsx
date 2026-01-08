@@ -1,50 +1,22 @@
 import React, { useMemo, useState } from "react";
-import type {
-  EmergencyContact,
-} from "../../types/StudentProfile";
 import {
+  IoCameraOutline,
   IoPencilOutline,
+  IoPersonOutline,
 } from "react-icons/io5";
 import Input from "../../components/ui/Input";
-
-interface HODProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  telephoneNumber?: string;
-  profileImageUrl?: string;
-  employeeId: string;
-  department: string;
-  position: string;
-  specialization?: string;
-  yearsOfExperience?: number;
-  qualifications?: string;
-  officeLocation?: string;
-  officeHours?: string;
-  managedDepartments?: string[];
-  emergencyContacts?: EmergencyContact[];
-}
-
-interface HODProfileUpdate {
-  firstName: string;
-  lastName: string;
-  email: string;
-  telephoneNumber?: string;
-  profileImageFile: File | null;
-  newPassword: string;
-  specialization?: string;
-  qualifications?: string;
-  officeLocation?: string;
-  officeHours?: string;
-}
+import type {
+  StudentProfile,
+  StudentProfileUpdate
+} from "../../types/StudentProfile";
 
 type Props = {
-  profile: HODProfile;
+  profile: StudentProfile;
   onCreateEmergencyContact?: () => void;
   onEditEmergencyContact?: (id: string) => void;
   onDeleteEmergencyContact?: (id: string) => void;
-  onUpdatePersonal?: (data: HODProfileUpdate) => Promise<void> | void;
+  onUpdatePersonal?: (data: StudentProfileUpdate) => Promise<void> | void;
+  onUploadAvatar?: (file: File) => Promise<void> | void;
 };
 
 const tabs = ["Personal details", "Professional details"] as const;
@@ -65,6 +37,7 @@ const Field = ({ label, value }: { label: string; value?: React.ReactNode }) => 
 const HODProfile: React.FC<Props> = ({
   profile,
   onUpdatePersonal,
+  onUploadAvatar,
 }) => {
   const [active, setActive] = useState<Tab>("Personal details");
   const fullName = `${profile.firstName} ${profile.lastName}`;
@@ -72,17 +45,18 @@ const HODProfile: React.FC<Props> = ({
   // edit personal info
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<HODProfileUpdate>({
+  const [uploading, setUploading] = useState(false);
+  const [form, setForm] = useState<StudentProfileUpdate>({
     firstName: profile.firstName,
     lastName: profile.lastName,
     email: profile.email,
     telephoneNumber: profile.telephoneNumber,
-    profileImageFile: null,
     newPassword: "",
     specialization: profile.specialization,
     qualifications: profile.qualifications,
-    officeLocation: profile.officeLocation,
+    office: profile.office,
     officeHours: profile.officeHours,
+    position: profile.position,
   });
 
   const errors = useMemo(() => {
@@ -101,9 +75,16 @@ const HODProfile: React.FC<Props> = ({
 
   const isValid = Object.keys(errors).length === 0;
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] || null;
-    setForm((p) => ({ ...p, profileImageFile: f }));
+  const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onUploadAvatar) {
+      try {
+        setUploading(true);
+        await onUploadAvatar(file);
+      } finally {
+        setUploading(false);
+      }
+    }
   };
 
   const handleSave = async () => {
@@ -117,37 +98,41 @@ const HODProfile: React.FC<Props> = ({
     }
   };
 
-  // Mock data for demonstration
-  const mockProfile: HODProfile = {
-    id: "hod001",
-    firstName: "Dr. Sarah",
-    lastName: "Johnson",
-    email: "sarah.johnson@university.edu",
-    telephoneNumber: "+1-555-0123",
-    profileImageUrl: "https://via.placeholder.com/150",
-    employeeId: "HOD001",
-    department: "Computer Science",
-    position: "Head of Department",
-    specialization: "Artificial Intelligence & Machine Learning",
-    yearsOfExperience: 15,
-    qualifications: "Ph.D. in Computer Science, M.S. in Software Engineering",
-    officeLocation: "Building A, Room 301",
-    officeHours: "Monday-Friday: 9:00 AM - 5:00 PM",
-    managedDepartments: ["Computer Science", "Information Technology", "Data Science"],
-  };
-
-  const displayProfile = profile.id ? profile : mockProfile;
+  const displayProfile = profile;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-3 xs:px-4 sm:px-6 py-3 xs:py-4 sm:py-8">
         {/* Header */}
         <div className="flex items-start gap-3 sm:gap-4 md:gap-6">
-          <img
-            src={displayProfile.profileImageUrl || "https://via.placeholder.com/64"}
-            alt={fullName}
-            className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full object-cover"
-          />
+          <div className="relative group">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full bg-gray-200 border-4 border-white shadow-md overflow-hidden flex items-center justify-center">
+              {displayProfile.profileImageUrl ? (
+                <img
+                  src={displayProfile.profileImageUrl}
+                  alt={fullName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <IoPersonOutline className="w-1/2 h-1/2 text-gray-400" />
+              )}
+              {uploading && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+            </div>
+            <label className="absolute bottom-0 right-0 p-1.5 sm:p-2 bg-primary-100 text-white rounded-full shadow-lg hover:bg-primary-50 transition-all cursor-pointer hover:scale-110">
+              <IoCameraOutline className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleImageFileUpload} 
+                disabled={uploading} 
+              />
+            </label>
+          </div>
           <div className="min-w-0 flex-1">
             <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-primary-50 truncate">
               {`${displayProfile.firstName} ${displayProfile.lastName}`}
@@ -190,12 +175,12 @@ const HODProfile: React.FC<Props> = ({
             {!editing ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-                  <Field label="Employee ID" value={displayProfile.employeeId} />
+                  <Field label="Employee ID" value={displayProfile.registrationNumber} />
                   <Field label="Email" value={displayProfile.email} />
                   <Field label="Telephone" value={displayProfile.telephoneNumber} />
                   <Field label="Department" value={displayProfile.department} />
                   <Field label="Position" value={displayProfile.position} />
-                  <Field label="Office Location" value={displayProfile.officeLocation} />
+                  <Field label="Office Location" value={displayProfile.office} />
                 </div>
                 <div className="pt-4 sm:pt-5">
                   <button
@@ -209,18 +194,6 @@ const HODProfile: React.FC<Props> = ({
               </>
             ) : (
               <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-primary-50 mb-2">
-                    Profile image
-                  </label>
-                  <input type="file" accept="image/*" onChange={handleFile} />
-                  {form.profileImageFile && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {form.profileImageFile.name}
-                    </p>
-                  )}
-                </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     label="First name"
@@ -271,11 +244,11 @@ const HODProfile: React.FC<Props> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     label="Office Location"
-                    name="officeLocation"
-                    value={form.officeLocation || ""}
+                    name="office"
+                    value={form.office || ""}
                     onChange={(e) => {
                       const v = (e.currentTarget as HTMLInputElement).value;
-                      setForm((p) => ({ ...p, officeLocation: v }));
+                      setForm((p) => ({ ...p, office: v }));
                     }}
                   />
                   <Input
@@ -329,7 +302,7 @@ const HODProfile: React.FC<Props> = ({
                         newPassword: "",
                         specialization: displayProfile.specialization,
                         qualifications: displayProfile.qualifications,
-                        officeLocation: displayProfile.officeLocation,
+                        office: displayProfile.office,
                         officeHours: displayProfile.officeHours,
                       });
                     }}
@@ -350,7 +323,7 @@ const HODProfile: React.FC<Props> = ({
               <Field label="Specialization" value={displayProfile.specialization} />
               <Field label="Years of Experience" value={displayProfile.yearsOfExperience} />
               <Field label="Office Hours" value={displayProfile.officeHours} />
-              <Field label="Office Location" value={displayProfile.officeLocation} />
+              <Field label="Office Location" value={displayProfile.office} />
             </div>
             <div className="mt-4">
               <Field label="Qualifications" value={displayProfile.qualifications} />

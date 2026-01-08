@@ -21,6 +21,14 @@ const mapBackendToProfile = (data: any): StudentProfile => ({
   role: data.role,
   program: data.program,
   department: data.department,
+  bio: data.bio,
+  office: data.office,
+  specialization: data.specialization,
+  qualifications: data.qualifications,
+  officeHours: data.office_hours || data.officeHours,
+  position: data.position,
+  yearsOfExperience: data.years_of_experience || data.yearsOfExperience,
+  managedDepartments: data.managed_departments || data.managedDepartments || [],
   emergencyContacts: data.emergency_contacts?.map(mapBackendToEmergencyContact) || []
 });
 
@@ -45,6 +53,14 @@ const mapProfileUpdateToBackend = (update: StudentProfileUpdate) => {
   if (update.currentYear !== undefined) mapped.current_year = update.currentYear;
   if (update.program !== undefined) mapped.program = update.program;
   if (update.department !== undefined) mapped.department = update.department;
+  if (update.bio !== undefined) mapped.bio = update.bio;
+  if (update.office !== undefined) mapped.office = update.office;
+  if (update.specialization !== undefined) mapped.specialization = update.specialization;
+  if (update.qualifications !== undefined) mapped.qualifications = update.qualifications;
+  if (update.officeHours !== undefined) mapped.office_hours = update.officeHours;
+  if (update.position !== undefined) mapped.position = update.position;
+  if (update.yearsOfExperience !== undefined) mapped.years_of_experience = update.yearsOfExperience;
+  if (update.managedDepartments !== undefined) mapped.managed_departments = update.managedDepartments;
   if (update.newPassword !== undefined) mapped.password = update.newPassword;
   return mapped;
 };
@@ -115,7 +131,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     uploadAvatar: builder.mutation<ApiResponse<{ profileImageUrl: string }>, FormData>({
       query: (formData) => ({
-        url: '/user/avatar',
+        url: '/user/upload-avatar',
         method: 'POST',
         body: formData,
       }),

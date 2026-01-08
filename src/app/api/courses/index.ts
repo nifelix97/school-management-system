@@ -5,16 +5,17 @@ import type {
   CourseResource,
   CourseStatus,
   CreateCourseDto,
+  EnrolledStudent,
   Enrollment,
   Teacher,
-  UpdateCourseDto,
+  UpdateCourseDto
 } from '../../../types/course';
 import { apiSlice } from '../apiEntry';
 import type { ApiResponse } from '../auth';
 
 // Re-export types for convenience
 export type {
-  Course, CourseFilters, CourseLevel, CourseResource, CourseStatus, CreateCourseDto, Enrollment, Teacher, UpdateCourseDto
+  Course, CourseFilters, CourseLevel, CourseResource, CourseStatus, CreateCourseDto, EnrolledStudent, Enrollment, Teacher, UpdateCourseDto
 };
 
 // --- API Slice Injection ---
@@ -210,6 +211,60 @@ export const coursesApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Courses'],
     }),
+
+    // HOD & Teacher specific endpoints
+    getCoursesByDepartment: builder.query<ApiResponse<Course[]>, void>({
+      query: () => '/courses/my-department',
+      transformResponse: (response: ApiResponse<any[]>) => ({
+        ...response,
+        data: response.data?.map(course => ({
+          id: course.id,
+          code: course.code,
+          title: course.title,
+          description: course.description,
+          category: course.category,
+          departmentId: course.department_id,
+          classCohortId: course.class_cohort_id,
+          instructorId: course.instructor_id,
+          duration: course.duration,
+          level: course.level,
+          credits: course.credits,
+          isPublished: course.is_published === 1,
+          imageUrl: course.image_url,
+          status: course.status as CourseStatus || 'Active',
+          instructor: course.instructor,
+          enrolledStudents: course.enrollment_count,
+          createdAt: course.created_at,
+          updatedAt: course.updated_at
+        })) as Course[]
+      }),
+      providesTags: ['Courses'],
+    }),
+
+    getEnrolledStudents: builder.query<ApiResponse<EnrolledStudent[]>, string>({
+      query: (courseId) => `/courses/${courseId}/students`,
+    }),
+
+    getTeachersByDepartment: builder.query<ApiResponse<Teacher[]>, void>({
+      query: () => '/courses/my-department-teachers',
+      transformResponse: (response: ApiResponse<any[]>) => ({
+        ...response,
+        data: response.data?.map(teacher => ({
+          id: teacher.id,
+          name: `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim(),
+          email: teacher.email,
+          phone: teacher.phone,
+          image: teacher.avatar,
+          departmentId: teacher.department,
+          specialization: teacher.specialization,
+          qualification: teacher.qualification,
+          yearsOfExperience: teacher.years_of_experience,
+          status: teacher.status,
+          courseCount: teacher.course_count,
+          createdAt: teacher.created_at
+        })) as Teacher[]
+      }),
+    }),
   }),
 });
 
@@ -227,4 +282,7 @@ export const {
   useGetEnrolledCoursesQuery,
   useEnrollInCourseMutation,
   useUpdateCourseProgressMutation,
+  useGetCoursesByDepartmentQuery,
+  useGetEnrolledStudentsQuery,
+  useGetTeachersByDepartmentQuery,
 } = coursesApi;

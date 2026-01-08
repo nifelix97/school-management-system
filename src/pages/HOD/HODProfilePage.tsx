@@ -1,23 +1,49 @@
+import { toast } from "react-toastify";
+import {
+    useGetProfileQuery,
+    useUpdateProfileMutation,
+    useUploadAvatarMutation
+} from "../../app/api/user";
+import type { StudentProfileUpdate } from "../../types/StudentProfile";
 import HODProfile from "./HoDProfile";
 
-const mockProfile = {
-  id: "hod001",
-  firstName: "Dr. Sarah",
-  lastName: "Johnson",
-  email: "sarah.johnson@university.edu",
-  telephoneNumber: "+1-555-0123",
-  profileImageUrl: "https://via.placeholder.com/150",
-  employeeId: "HOD001",
-  department: "Computer Science",
-  position: "Head of Department",
-  specialization: "Artificial Intelligence & Machine Learning",
-  yearsOfExperience: 15,
-  qualifications: "Ph.D. in Computer Science, M.S. in Software Engineering",
-  officeLocation: "Building A, Room 301",
-  officeHours: "Monday-Friday: 9:00 AM - 5:00 PM",
-  managedDepartments: ["Computer Science", "Information Technology", "Data Science"],
-};
-
 export default function HODProfilePage() {
-  return <HODProfile profile={mockProfile} />;
+  const { data: profileResponse, isLoading, error } = useGetProfileQuery();
+  const [updateProfile] = useUpdateProfileMutation();
+  const [uploadAvatar] = useUploadAvatarMutation();
+
+  const handleUpdateProfile = async (data: StudentProfileUpdate) => {
+    try {
+      await updateProfile(data).unwrap();
+      toast.success("Profile updated successfully");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Something went wrong while updating profile");
+    }
+  };
+
+  const handleUploadAvatar = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      await uploadAvatar(formData).unwrap();
+      toast.success("Profile picture updated");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to upload image");
+    }
+  };
+
+  if (isLoading) return <div className="p-8 text-center text-primary-50">Loading profile...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">Error loading profile</div>;
+
+  const profile = profileResponse?.data;
+
+  if (!profile) return <div className="p-8 text-center text-gray-500">No profile data found</div>;
+
+  return (
+    <HODProfile 
+      profile={profile as any} 
+      onUpdatePersonal={handleUpdateProfile}
+      onUploadAvatar={handleUploadAvatar}
+    />
+  );
 }
