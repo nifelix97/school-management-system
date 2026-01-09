@@ -1,46 +1,38 @@
 import {
-  AlertTriangle,
-  Archive,
-  Award,
-  BarChart3,
-  BookOpen,
-  Calendar,
-  CheckCircle,
-  Clock,
-  Edit,
-  Eye,
-  FileText,
-  MessageSquare,
-  Search,
-  Settings,
-  Trash2,
-  Upload,
-  UserCheck,
-  Users,
-  XCircle
+    AlertTriangle,
+    Archive,
+    Award,
+    BarChart3,
+    BookOpen,
+    Calendar,
+    CheckCircle,
+    Clock,
+    Edit,
+    Eye,
+    FileText,
+    MessageSquare,
+    Search,
+    Settings,
+    Trash2,
+    Upload,
+    UserCheck,
+    Users,
+    XCircle
 } from "lucide-react";
 import { useState } from "react";
-
-interface Course {
-  id: string;
-  code: string;
-  name: string;
-  description: string;
-  syllabus: string;
-  teacher: string;
-  status: "Pending" | "Approved" | "Rejected" | "Needs Revision" | "Active" | "Inactive" | "Archived";
-  enrolledStudents: number;
-  maxCapacity: number;
-  passRate: number;
-  materials: number;
-  pendingMaterials: number;
-  examsStatus: "Pending" | "Approved" | "Rejected";
-  lastActivity: string;
-  issues: number;
-  units: number;
-  level: string;
-  semester: string;
-}
+import { toast } from "react-toastify";
+import type {
+    Course,
+    Teacher
+} from "../../app/api/courses";
+import {
+    useAssignInstructorMutation,
+    useCreateCourseMutation,
+    useDeleteCourseMutation,
+    useGetCoursesByDepartmentQuery,
+    useGetTeachersByDepartmentQuery,
+    useUpdateCourseMutation,
+} from "../../app/api/courses";
 
 export default function CourseManagement() {
   const [activeTab, setActiveTab] = useState<"manage" | "catalog">("manage");
@@ -56,108 +48,41 @@ export default function CourseManagement() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCourse, setNewCourse] = useState({
     code: "",
-    name: "",
-    teacher: "",
+    title: "",
+    description: "",
+    instructorId: "",
     units: 3,
-    level: "Undergraduate",
+    level: "Undergraduate" as any,
     semester: "Fall 2024",
-    maxCapacity: 30
+    maxCapacity: 30,
+    credits: 3
   });
 
-  const courses: Course[] = [
-    {
-      id: "1",
-      code: "CS101",
-      name: "Introduction to Programming",
-      description: "Basic programming concepts using Python. Covers variables, loops, functions, and object-oriented programming.",
-      syllabus: "Week 1-2: Variables and Data Types, Week 3-4: Control Structures, Week 5-6: Functions, Week 7-8: OOP Concepts",
-      teacher: "Dr. Smith",
-      status: "Pending",
-      enrolledStudents: 45,
-      maxCapacity: 50,
-      passRate: 85,
-      materials: 12,
-      pendingMaterials: 3,
-      examsStatus: "Pending",
-      lastActivity: "2 hours ago",
-      issues: 1,
-      units: 3,
-      level: "Undergraduate",
-      semester: "Fall 2024"
-    },
-    {
-      id: "2",
-      code: "CS201",
-      name: "Data Structures",
-      description: "Advanced data structures and algorithms. Arrays, linked lists, trees, graphs, and their applications.",
-      syllabus: "Week 1-2: Arrays and Lists, Week 3-4: Stacks and Queues, Week 5-6: Trees, Week 7-8: Graphs and Algorithms",
-      teacher: "Dr. Johnson",
-      status: "Active",
-      enrolledStudents: 38,
-      maxCapacity: 40,
-      passRate: 78,
-      materials: 15,
-      pendingMaterials: 0,
-      examsStatus: "Approved",
-      lastActivity: "1 day ago",
-      issues: 0,
-      units: 4,
-      level: "Undergraduate",
-      semester: "Spring 2024"
-    },
-    {
-      id: "3",
-      code: "CS301",
-      name: "Machine Learning",
-      description: "Introduction to machine learning algorithms and applications. Supervised and unsupervised learning.",
-      syllabus: "Week 1-2: ML Fundamentals, Week 3-4: Supervised Learning, Week 5-6: Unsupervised Learning, Week 7-8: Neural Networks",
-      teacher: "Dr. Brown",
-      status: "Needs Revision",
-      enrolledStudents: 25,
-      maxCapacity: 30,
-      passRate: 92,
-      materials: 8,
-      pendingMaterials: 2,
-      examsStatus: "Rejected",
-      lastActivity: "3 hours ago",
-      issues: 2,
-      units: 3,
-      level: "Graduate",
-      semester: "Fall 2024"
-    },
-    {
-      id: "4",
-      code: "CS401",
-      name: "Advanced Algorithms",
-      description: "Complex algorithmic techniques and analysis. Dynamic programming, graph algorithms, and optimization.",
-      syllabus: "Week 1-2: Algorithm Analysis, Week 3-4: Dynamic Programming, Week 5-6: Graph Algorithms, Week 7-8: Optimization",
-      teacher: "Dr. Davis",
-      status: "Inactive",
-      enrolledStudents: 15,
-      maxCapacity: 25,
-      passRate: 88,
-      materials: 10,
-      pendingMaterials: 1,
-      examsStatus: "Approved",
-      lastActivity: "5 days ago",
-      issues: 0,
-      units: 4,
-      level: "Graduate",
-      semester: "Spring 2024"
-    }
-  ];
+  // API Hooks
+  const { data: coursesData, isLoading: isLoadingCourses, isError: isErrorCourses } = useGetCoursesByDepartmentQuery();
+  const { data: teachersData } = useGetTeachersByDepartmentQuery();
+  
+  const [createCourse] = useCreateCourseMutation();
+  const [updateCourse] = useUpdateCourseMutation();
+  const [deleteCourse] = useDeleteCourseMutation();
+  const [assignInstructor] = useAssignInstructorMutation();
 
-  const teachers = [...new Set(courses.map(c => c.teacher))];
-  const semesters = [...new Set(courses.map(c => c.semester))];
-  const levels = [...new Set(courses.map(c => c.level))];
+  const courses: Course[] = coursesData?.data || [];
+  const teachers: Teacher[] = teachersData?.data || [];
+  
+  const semesters = [...new Set(courses.map(c => c.semester).filter(Boolean))];
+  const levels = [...new Set(courses.map(c => c.level).filter(Boolean))];
+  const courseTeachers = [...new Set(courses.map(c => c.instructor?.name).filter(Boolean))];
 
   const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const courseTitle = course.title || course.name || "";
+    const instructorName = course.instructor?.name || "";
+    const matchesSearch = courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.teacher.toLowerCase().includes(searchTerm.toLowerCase());
+                         instructorName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || course.status === statusFilter;
     const matchesSemester = selectedSemester === "all" || course.semester === selectedSemester;
-    const matchesTeacher = selectedTeacher === "all" || course.teacher === selectedTeacher;
+    const matchesTeacher = selectedTeacher === "all" || instructorName === selectedTeacher;
     const matchesLevel = selectedLevel === "all" || course.level === selectedLevel;
     
     return matchesSearch && matchesStatus && matchesSemester && matchesTeacher && matchesLevel;
@@ -184,12 +109,64 @@ export default function CourseManagement() {
     }
   };
 
-  const handleAction = (action: string, courseId: string) => {
-    console.log(`${action} course ${courseId}`);
-    setActionModal(null);
-    setRejectReason("");
-    setAnnouncement("");
+  const handleAction = async (action: string, courseId: string) => {
+    try {
+      if (action === "approve") {
+        await updateCourse({ id: courseId, data: { status: "Approved" } }).unwrap();
+        toast.success("Course approved successfully");
+      } else if (action === "reject") {
+        await updateCourse({ id: courseId, data: { status: "Rejected" } }).unwrap();
+        toast.success("Course rejected");
+      } else if (action === "revision") {
+        await updateCourse({ id: courseId, data: { status: "Needs Revision" } }).unwrap();
+        toast.success("Course marked for revision");
+      } else if (action === "archive") {
+        await updateCourse({ id: courseId, data: { status: "Archived" } }).unwrap();
+        toast.success("Course archived");
+      } else if (action === "delete") {
+        await deleteCourse(courseId).unwrap();
+        toast.success("Course deleted successfully");
+        if (selectedCourse?.id === courseId) setSelectedCourse(null);
+      } else if (action === "assign") {
+        const instructorId = (document.getElementById("teacher-select") as HTMLSelectElement)?.value;
+        if (instructorId) {
+          await assignInstructor({ courseId, instructorId }).unwrap();
+          toast.success("Instructor assigned successfully");
+        }
+      }
+      setActionModal(null);
+      setRejectReason("");
+      setAnnouncement("");
+    } catch (error: any) {
+      toast.error(error?.data?.message || `Failed to ${action} course`);
+    }
   };
+
+  if (isLoadingCourses) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-50"></div>
+      </div>
+    );
+  }
+
+  if (isErrorCourses) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-xl shadow-sm text-center max-w-md">
+          <AlertTriangle className="mx-auto text-red-500 mb-4" size={48} />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Error Loading Courses</h2>
+          <p className="text-gray-600 mb-6">We couldn't load the courses for your department. Please try again later.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-primary-50 text-white rounded-lg hover:bg-opacity-90 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -281,9 +258,9 @@ export default function CourseManagement() {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-semibold text-primary-50 text-sm xs:text-base">
-                        {course.code} - {course.name}
+                        {course.code} - {course.title || course.name}
                       </h3>
-                      <p className="text-xs xs:text-sm text-primary-50/60">{course.teacher}</p>
+                      <p className="text-xs xs:text-sm text-primary-50/60">{course.instructor?.name || "No teacher assigned"}</p>
                     </div>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(course.status)}`}>
                       {course.status}
@@ -293,19 +270,19 @@ export default function CourseManagement() {
                   <div className="grid grid-cols-2 gap-3 mb-3 text-xs xs:text-sm">
                     <div className="flex items-center gap-2 text-primary-50/70">
                       <Users size={14} />
-                      <span>{course.enrolledStudents} students</span>
+                      <span>{course.enrolledStudents || 0} students</span>
                     </div>
                     <div className="flex items-center gap-2 text-primary-50/70">
                       <BarChart3 size={14} />
-                      <span>{course.passRate}% pass rate</span>
+                      <span>{course.passRate || 0}% pass rate</span>
                     </div>
                     <div className="flex items-center gap-2 text-primary-50/70">
                       <FileText size={14} />
-                      <span>{course.materials} materials</span>
+                      <span>Resources available</span>
                     </div>
                     <div className="flex items-center gap-2 text-primary-50/70">
                       <AlertTriangle size={14} />
-                      <span>{course.issues} issues</span>
+                      <span>{course.issues || 0} issues</span>
                     </div>
                   </div>
 
@@ -340,25 +317,22 @@ export default function CourseManagement() {
                       <td className="px-4 py-3">
                         <div>
                           <div className="font-medium text-primary-50">{course.code}</div>
-                          <div className="text-sm text-primary-50/60">{course.name}</div>
+                          <div className="text-sm text-primary-50/60">{course.title || course.name}</div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-primary-50">{course.teacher}</td>
+                      <td className="px-4 py-3 text-primary-50">{course.instructor?.name || "N/A"}</td>
                       <td className="px-4 py-3 text-center">
                         <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(course.status)}`}>
                           {course.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center text-primary-50">{course.enrolledStudents}</td>
-                      <td className="px-4 py-3 text-center text-primary-50">{course.passRate}%</td>
+                      <td className="px-4 py-3 text-center text-primary-50">{course.enrolledStudents || 0}</td>
+                      <td className="px-4 py-3 text-center text-primary-50">{course.passRate || 0}%</td>
                       <td className="px-4 py-3 text-center">
-                        <div className="text-primary-50">{course.materials}</div>
-                        {course.pendingMaterials > 0 && (
-                          <div className="text-xs text-orange-600">+{course.pendingMaterials} pending</div>
-                        )}
+                        <div className="text-primary-50">{course.resources?.length || 0}</div>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        {course.issues > 0 ? (
+                        {(course.issues || 0) > 0 ? (
                           <span className="text-red-600 font-medium">{course.issues}</span>
                         ) : (
                           <span className="text-green-600">0</span>
@@ -415,7 +389,7 @@ export default function CourseManagement() {
                     className="px-2 xs:px-3 py-2 border border-primary-50 rounded-lg text-xs xs:text-sm"
                   >
                     <option value="all">All Teachers</option>
-                    {teachers.map(teacher => (
+                    {courseTeachers.map(teacher => (
                       <option key={teacher} value={teacher}>{teacher}</option>
                     ))}
                   </select>
@@ -455,7 +429,7 @@ export default function CourseManagement() {
                         {course.code}
                       </h3>
                       <p className="text-xs xs:text-sm text-primary-50/60 line-clamp-2">
-                        {course.name}
+                        {course.title || course.name}
                       </p>
                     </div>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(course.status)}`}>
@@ -466,15 +440,15 @@ export default function CourseManagement() {
                   <div className="space-y-2 mb-3">
                     <div className="flex items-center gap-2 text-xs xs:text-sm text-primary-50/70">
                       <Users size={14} />
-                      <span>{course.enrolledStudents}/{course.maxCapacity}</span>
+                      <span>{course.enrolledStudents || 0}/{course.maxCapacity || "-"}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs xs:text-sm text-primary-50/70">
                       <Clock size={14} />
-                      <span>{course.units} units</span>
+                      <span>{course.units || course.credits || 0} units</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs xs:text-sm text-primary-50/70">
                       <Award size={14} />
-                      <span>{course.teacher}</span>
+                      <span>{course.instructor?.name || "N/A"}</span>
                     </div>
                   </div>
 
@@ -514,19 +488,19 @@ export default function CourseManagement() {
                       <td className="px-4 py-3">
                         <div>
                           <div className="font-medium text-primary-50">{course.code}</div>
-                          <div className="text-sm text-primary-50/60">{course.name}</div>
+                          <div className="text-sm text-primary-50/60">{course.title || course.name}</div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-primary-50">{course.teacher}</td>
-                      <td className="px-4 py-3 text-center text-primary-50">{course.units}</td>
+                      <td className="px-4 py-3 text-primary-50">{course.instructor?.name || "N/A"}</td>
+                      <td className="px-4 py-3 text-center text-primary-50">{course.units || course.credits || 0}</td>
                       <td className="px-4 py-3 text-center">
                         <div className="text-primary-50">
-                          {course.enrolledStudents}/{course.maxCapacity}
+                          {course.enrolledStudents || 0}/{course.maxCapacity || "-"}
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                           <div 
                             className="bg-primary-50 h-2 rounded-full" 
-                            style={{ width: `${(course.enrolledStudents / course.maxCapacity) * 100}%` }}
+                            style={{ width: `${((course.enrolledStudents || 0) / (course.maxCapacity || 1)) * 100}%` }}
                           ></div>
                         </div>
                       </td>
@@ -576,10 +550,10 @@ export default function CourseManagement() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-1">
-                      {selectedCourse.code} - {selectedCourse.name}
+                      {selectedCourse.code} - {selectedCourse.title || selectedCourse.name}
                     </h2>
                     <p className="text-sm text-primary-50/60">
-                      {selectedCourse.teacher} • {selectedCourse.enrolledStudents} students
+                      {selectedCourse.instructor?.name || "No teacher assigned"} • {selectedCourse.enrolledStudents || 0} students
                     </p>
                   </div>
                   <button
@@ -631,19 +605,19 @@ export default function CourseManagement() {
                     <h3 className="font-semibold text-primary-50">Course Overview</h3>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 bg-gray-50 rounded-lg text-center">
-                        <div className="text-lg font-bold text-primary-50">{selectedCourse.enrolledStudents}</div>
+                        <div className="text-lg font-bold text-primary-50">{selectedCourse.enrolledStudents || 0}</div>
                         <div className="text-xs text-primary-50/60">Students</div>
                       </div>
                       <div className="p-3 bg-gray-50 rounded-lg text-center">
-                        <div className="text-lg font-bold text-primary-50">{selectedCourse.passRate}%</div>
+                        <div className="text-lg font-bold text-primary-50">{selectedCourse.passRate || 0}%</div>
                         <div className="text-xs text-primary-50/60">Pass Rate</div>
                       </div>
                       <div className="p-3 bg-gray-50 rounded-lg text-center">
-                        <div className="text-lg font-bold text-primary-50">{selectedCourse.materials}</div>
+                        <div className="text-lg font-bold text-primary-50">{selectedCourse.resources?.length || 0}</div>
                         <div className="text-xs text-primary-50/60">Materials</div>
                       </div>
                       <div className="p-3 bg-gray-50 rounded-lg text-center">
-                        <div className="text-lg font-bold text-primary-50">{selectedCourse.issues}</div>
+                        <div className="text-lg font-bold text-primary-50">{selectedCourse.issues || 0}</div>
                         <div className="text-xs text-primary-50/60">Issues</div>
                       </div>
                     </div>
@@ -660,7 +634,7 @@ export default function CourseManagement() {
                         <Upload size={16} className="text-primary-50" />
                         <div>
                           <div className="text-sm font-medium text-primary-50">Review Materials</div>
-                          <div className="text-xs text-primary-50/60">{selectedCourse.pendingMaterials} pending review</div>
+                          <div className="text-xs text-primary-50/60">{selectedCourse.resources?.length || 0} total</div>
                         </div>
                       </button>
                       <button
@@ -670,7 +644,7 @@ export default function CourseManagement() {
                         <Calendar size={16} className="text-primary-50" />
                         <div>
                           <div className="text-sm font-medium text-primary-50">Manage Exams</div>
-                          <div className="text-xs text-primary-50/60">Status: {selectedCourse.examsStatus}</div>
+                          <div className="text-xs text-primary-50/60">Status: {selectedCourse.status}</div>
                         </div>
                       </button>
                       <button
@@ -740,10 +714,10 @@ export default function CourseManagement() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h2 className="text-lg xs:text-xl font-bold text-primary-50 mb-1">
-                      {selectedCourse.code} - {selectedCourse.name}
+                      {selectedCourse.code} - {selectedCourse.title || selectedCourse.name}
                     </h2>
                     <p className="text-sm text-primary-50/60">
-                      {selectedCourse.teacher} • {selectedCourse.semester}
+                      {selectedCourse.instructor?.name || "No teacher assigned"} • {selectedCourse.semester || "N/A"}
                     </p>
                   </div>
                   <button
@@ -773,19 +747,19 @@ export default function CourseManagement() {
                 <div className="grid grid-cols-2 xs:grid-cols-4 gap-3 xs:gap-4">
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <div className="text-lg xs:text-xl font-bold text-primary-50">
-                      {selectedCourse.units}
+                      {selectedCourse.units || selectedCourse.credits || 0}
                     </div>
                     <div className="text-xs xs:text-sm text-primary-50/60">Units</div>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <div className="text-lg xs:text-xl font-bold text-primary-50">
-                      {selectedCourse.enrolledStudents}
+                      {selectedCourse.enrolledStudents || 0}
                     </div>
                     <div className="text-xs xs:text-sm text-primary-50/60">Enrolled</div>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <div className="text-lg xs:text-xl font-bold text-primary-50">
-                      {selectedCourse.maxCapacity}
+                      {selectedCourse.maxCapacity || "-"}
                     </div>
                     <div className="text-xs xs:text-sm text-primary-50/60">Capacity</div>
                   </div>
@@ -820,12 +794,14 @@ export default function CourseManagement() {
                       setShowCreateModal(false);
                       setNewCourse({
                         code: "",
-                        name: "",
-                        teacher: "",
+                        title: "",
+                        description: "",
+                        instructorId: "",
                         units: 3,
-                        level: "Undergraduate",
+                        level: "Undergraduate" as any,
                         semester: "Fall 2024",
-                        maxCapacity: 30
+                        maxCapacity: 30,
+                        credits: 3
                       });
                     }}
                     className="text-gray-400 hover:text-gray-600 text-xl"
@@ -859,12 +835,26 @@ export default function CourseManagement() {
                       <input
                         type="text"
                         placeholder="e.g., Introduction to Programming"
-                        value={newCourse.name}
-                        onChange={(e) => setNewCourse({...newCourse, name: e.target.value})}
+                        value={newCourse.title}
+                        onChange={(e) => setNewCourse({...newCourse, title: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-50"
                         required
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-primary-50 mb-2">
+                      Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      placeholder="Course description..."
+                      value={newCourse.description}
+                      onChange={(e) => setNewCourse({...newCourse, description: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-50"
+                      rows={3}
+                      required
+                    />
                   </div>
 
 
@@ -921,13 +911,13 @@ export default function CourseManagement() {
                         Assign Teacher (Optional)
                       </label>
                       <select
-                        value={newCourse.teacher}
-                        onChange={(e) => setNewCourse({...newCourse, teacher: e.target.value})}
+                        value={newCourse.instructorId}
+                        onChange={(e) => setNewCourse({...newCourse, instructorId: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-50"
                       >
                         <option value="">-- Select Teacher --</option>
                         {teachers.map(teacher => (
-                          <option key={teacher} value={teacher}>{teacher}</option>
+                          <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
                         ))}
                       </select>
                     </div>
@@ -951,19 +941,31 @@ export default function CourseManagement() {
 
               <div className="p-4 xs:p-6 border-t border-gray-200 flex gap-3">
                 <button
-                  onClick={() => {
-                    console.log("Creating course:", newCourse);
-                    // Here you would typically send the data to your backend
-                    setShowCreateModal(false);
-                    setNewCourse({
-                      code: "",
-                      name: "",
-                      teacher: "",
-                      units: 3,
-                      level: "Undergraduate",
-                      semester: "Fall 2024",
-                      maxCapacity: 30
-                    });
+                  onClick={async () => {
+                    try {
+                      await createCourse({
+                        ...newCourse,
+                        category: "General", // Default category
+                        departmentId: (courses[0]?.departmentId) || "", // Try to get dept ID from existing courses
+                        classCohortId: "default", // Default cohort
+                        credits: newCourse.units
+                      }).unwrap();
+                      toast.success("Course created successfully");
+                      setShowCreateModal(false);
+                      setNewCourse({
+                        code: "",
+                        title: "",
+                        description: "",
+                        instructorId: "",
+                        units: 3,
+                        level: "Undergraduate" as any,
+                        semester: "Fall 2024",
+                        maxCapacity: 30,
+                        credits: 3
+                      });
+                    } catch (error: any) {
+                      toast.error(error?.data?.message || "Failed to create course");
+                    }
                   }}
                   className="flex-1 px-4 py-2 bg-primary-50 text-white rounded-lg hover:bg-opacity-80"
                 >
@@ -974,12 +976,14 @@ export default function CourseManagement() {
                     setShowCreateModal(false);
                     setNewCourse({
                       code: "",
-                      name: "",
-                      teacher: "",
+                      title: "",
+                      description: "",
+                      instructorId: "",
                       units: 3,
-                      level: "Undergraduate",
+                      level: "Undergraduate" as any,
                       semester: "Fall 2024",
-                      maxCapacity: 30
+                      maxCapacity: 30,
+                      credits: 3
                     });
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -1025,9 +1029,9 @@ export default function CourseManagement() {
               {actionModal === "assign" && (
                 <>
                   <h3 className="text-lg font-semibold text-primary-50 mb-4">Assign Teacher</h3>
-                  <select className="w-full p-3 border border-gray-300 rounded-lg mb-4">
+                  <select id="teacher-select" className="w-full p-3 border border-gray-300 rounded-lg mb-4">
                     {teachers.map(teacher => (
-                      <option key={teacher} value={teacher}>{teacher}</option>
+                      <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
                     ))}
                   </select>
                   <div className="flex gap-3">

@@ -8,6 +8,7 @@ import type {
   EnrolledStudent,
   Enrollment,
   Teacher,
+  TeacherWithCourses,
   UpdateCourseDto
 } from '../../../types/course';
 import { apiSlice } from '../apiEntry';
@@ -15,7 +16,7 @@ import type { ApiResponse } from '../auth';
 
 // Re-export types for convenience
 export type {
-  Course, CourseFilters, CourseLevel, CourseResource, CourseStatus, CreateCourseDto, EnrolledStudent, Enrollment, Teacher, UpdateCourseDto
+  Course, CourseFilters, CourseLevel, CourseResource, CourseStatus, CreateCourseDto, EnrolledStudent, Enrollment, Teacher, TeacherWithCourses, UpdateCourseDto
 };
 
 // --- API Slice Injection ---
@@ -232,7 +233,11 @@ export const coursesApi = apiSlice.injectEndpoints({
           isPublished: course.is_published === 1,
           imageUrl: course.image_url,
           status: course.status as CourseStatus || 'Active',
-          instructor: course.instructor,
+          instructor: course.instructor ? {
+            id: course.instructor.id,
+            name: `${course.instructor.firstName || ''} ${course.instructor.lastName || ''}`.trim(),
+            email: course.instructor.email
+          } : undefined,
           enrolledStudents: course.enrollment_count,
           createdAt: course.created_at,
           updatedAt: course.updated_at
@@ -265,6 +270,67 @@ export const coursesApi = apiSlice.injectEndpoints({
         })) as Teacher[]
       }),
     }),
+
+    getMyAssignedCourses: builder.query<ApiResponse<Course[]>, void>({
+      query: () => '/courses/my-assigned',
+      transformResponse: (response: ApiResponse<any[]>) => ({
+        ...response,
+        data: response.data?.map(course => ({
+          id: course.id,
+          code: course.code,
+          title: course.title,
+          description: course.description,
+          category: course.category,
+          departmentId: course.department_id,
+          classCohortId: course.class_cohort_id,
+          instructorId: course.instructor_id,
+          duration: course.duration,
+          level: course.level,
+          credits: course.credits,
+          isPublished: course.is_published === 1,
+          imageUrl: course.image_url,
+          status: course.status as CourseStatus || 'Active',
+          enrolledStudents: course.enrollment_count,
+          moduleCount: course.module_count,
+          departmentName: course.department_name,
+          createdAt: course.created_at,
+          updatedAt: course.updated_at
+        })) as Course[]
+      }),
+      providesTags: ['Courses'],
+    }),
+
+    getTeachersWithDetailedCourses: builder.query<ApiResponse<TeacherWithCourses[]>, void>({
+      query: () => '/courses/teachers-with-courses',
+      transformResponse: (response: ApiResponse<any[]>) => ({
+        ...response,
+        data: response.data?.map(teacher => ({
+          id: teacher.id,
+          name: `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim(),
+          email: teacher.email,
+          phone: teacher.phone,
+          image: teacher.avatar,
+          departmentId: teacher.department,
+          specialization: teacher.specialization,
+          qualification: teacher.qualification,
+          yearsOfExperience: teacher.years_of_experience,
+          status: teacher.status,
+          course_count: teacher.course_count,
+          courses: (teacher.courses || []).map((course: any) => ({
+            id: course.id,
+            code: course.code,
+            title: course.title,
+            category: course.category,
+            level: course.level,
+            duration: course.duration,
+            isPublished: course.is_published === 1,
+            departmentName: course.department_name,
+            enrolledStudents: course.enrollment_count
+          })),
+          createdAt: teacher.created_at
+        })) as TeacherWithCourses[]
+      }),
+    }),
   }),
 });
 
@@ -285,4 +351,6 @@ export const {
   useGetCoursesByDepartmentQuery,
   useGetEnrolledStudentsQuery,
   useGetTeachersByDepartmentQuery,
+  useGetMyAssignedCoursesQuery,
+  useGetTeachersWithDetailedCoursesQuery,
 } = coursesApi;

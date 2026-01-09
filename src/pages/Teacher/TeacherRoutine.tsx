@@ -1,13 +1,17 @@
-import { useState } from "react";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  MapPin,
-  Users,
-  Calendar,
-  Coffee,
+    AlertCircle,
+    Calendar,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    Coffee,
+    Loader2,
+    MapPin,
+    Users,
 } from "lucide-react";
+import { useState } from "react";
+import { useGetTeacherTimetableQuery } from "../../app/api/timetable";
+import type { TimetableEntry } from "../../types/timetable";
 
 interface TeachingSession {
   id: number;
@@ -29,15 +33,6 @@ interface DaySchedule {
 
 export default function TeacherRoutine() {
   const [currentWeek, setCurrentWeek] = useState(0);
-  
-  // Current teacher info (in real app, this would come from auth context)
-  const currentTeacher = {
-    id: "teacher_001",
-    name: "Dr. Smith",
-    subjects: ["Mathematics", "Physics"]
-  };
-
-
 
   const getWeekDates = (weekOffset: number) => {
     const today = new Date();
@@ -66,6 +61,12 @@ export default function TeacherRoutine() {
 
   const weekDates = getWeekDates(currentWeek);
 
+  // Fetch teacher timetable from API
+  const { data: timetableResponse, isLoading, isError } = useGetTeacherTimetableQuery({
+    academicYear: "2024/2025",
+    semester: "First",
+  });
+
   const timeSlots = [
     "8:00 AM",
     "9:00 AM", 
@@ -79,55 +80,81 @@ export default function TeacherRoutine() {
     "5:00 PM"
   ];
 
-  // All schedule data (in real app, this would come from API)
-  const allScheduleData = {
-    Monday: [
-      { id: 1, subject: "Mathematics", class: "Grade 10-A", room: "Room 101", time: "9:00 AM", duration: "1h", color: "bg-blue-100 border-l-4 border-blue-500", type: "class" as const, teacherId: "teacher_001" },
-      { id: 2, subject: "Break", class: "", room: "", time: "10:00 AM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
-      { id: 3, subject: "Physics", class: "Grade 11-B", room: "Lab 201", time: "11:00 AM", duration: "2h", color: "bg-purple-100 border-l-4 border-purple-500", type: "class" as const, teacherId: "teacher_001" },
-      { id: 4, subject: "English", class: "Grade 10-B", room: "Room 105", time: "2:00 PM", duration: "1h", color: "bg-green-100 border-l-4 border-green-500", type: "class" as const, teacherId: "teacher_002" }
-    ],
-    Tuesday: [
-      { id: 5, subject: "Chemistry", class: "Grade 12-A", room: "Lab 301", time: "8:00 AM", duration: "2h", color: "bg-red-100 border-l-4 border-red-500", type: "class" as const, teacherId: "teacher_003" },
-      { id: 6, subject: "Lunch Break", class: "", room: "", time: "12:00 PM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
-      { id: 7, subject: "Computer Science", class: "Grade 11-A", room: "Lab 401", time: "3:00 PM", duration: "2h", color: "bg-indigo-100 border-l-4 border-indigo-500", type: "class" as const, teacherId: "teacher_004" }
-    ],
-    Wednesday: [
-      { id: 8, subject: "Mathematics", class: "Grade 10-A", room: "Room 101", time: "9:00 AM", duration: "1h", color: "bg-blue-100 border-l-4 border-blue-500", type: "class" as const, teacherId: "teacher_001" },
-      { id: 9, subject: "Break", class: "", room: "", time: "10:00 AM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
-      { id: 10, subject: "Biology", class: "Grade 12-B", room: "Lab 501", time: "11:00 AM", duration: "2h", color: "bg-teal-100 border-l-4 border-teal-500", type: "class" as const, teacherId: "teacher_005" },
-      { id: 11, subject: "Art", class: "Grade 10-B", room: "Studio 1", time: "2:00 PM", duration: "1h", color: "bg-pink-100 border-l-4 border-pink-500", type: "class" as const, teacherId: "teacher_006" }
-    ],
-    Thursday: [
-      { id: 12, subject: "Physics", class: "Grade 11-B", room: "Lab 201", time: "10:00 AM", duration: "2h", color: "bg-purple-100 border-l-4 border-purple-500", type: "class" as const, teacherId: "teacher_001" },
-      { id: 13, subject: "Lunch Break", class: "", room: "", time: "12:00 PM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
-      { id: 14, subject: "Geography", class: "Grade 11-A", room: "Room 301", time: "1:00 PM", duration: "1h", color: "bg-orange-100 border-l-4 border-orange-500", type: "class" as const, teacherId: "teacher_007" }
-    ],
-    Friday: [
-      { id: 15, subject: "Chemistry", class: "Grade 12-A", room: "Lab 301", time: "9:00 AM", duration: "2h", color: "bg-red-100 border-l-4 border-red-500", type: "class" as const, teacherId: "teacher_003" },
-      { id: 16, subject: "Break", class: "", room: "", time: "11:00 AM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-400", type: "break" as const, teacherId: "" },
-      { id: 17, subject: "English", class: "Grade 10-B", room: "Room 105", time: "12:00 PM", duration: "1h", color: "bg-green-100 border-l-4 border-green-500", type: "class" as const, teacherId: "teacher_002" }
-    ],
-    Saturday: [
-      { id: 18, subject: "Faculty Meeting", class: "", room: "Conference Room", time: "10:00 AM", duration: "2h", color: "bg-slate-100 border-l-4 border-slate-500", type: "class" as const, teacherId: "" }
-    ],
-    Sunday: []
+  // Helper function to format time from HH:mm to 12-hour format
+  const formatToAMPM = (timeStr: string) => {
+    if (!timeStr) return "";
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
   };
 
-  // Filter schedule to show only current teacher's classes and breaks
-  const baseSchedule: Record<string, TeachingSession[]> = {};
-  Object.keys(allScheduleData).forEach(day => {
-    baseSchedule[day] = allScheduleData[day as keyof typeof allScheduleData].filter(
-      session => session.type === "break" || session.teacherId === currentTeacher.id
-    );
-  });
+  // Helper function to calculate duration
+  const calculateDuration = (start: string, end: string) => {
+    if (!start || !end) return "1h";
+    const [sH, sM] = start.split(':').map(Number);
+    const [eH, eM] = end.split(':').map(Number);
+    const totalMinutes = (eH * 60 + eM) - (sH * 60 + sM);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    if (mins === 0) return `${hours}h`;
+    return `${hours}h ${mins}m`;
+  };
+
+  // Helper function to get consistent colors for subjects
+  const getSubjectColor = (subject: string) => {
+    const colors = [
+      "bg-blue-100 border-l-4 border-blue-500",
+      "bg-purple-100 border-l-4 border-purple-500",
+      "bg-green-100 border-l-4 border-green-500",
+      "bg-red-100 border-l-4 border-red-500",
+      "bg-yellow-100 border-l-4 border-yellow-500",
+      "bg-indigo-100 border-l-4 border-indigo-500",
+      "bg-teal-100 border-l-4 border-teal-500",
+      "bg-pink-100 border-l-4 border-pink-500",
+      "bg-orange-100 border-l-4 border-orange-500"
+    ];
+    let hash = 0;
+    for (let i = 0; i < subject.length; i++) {
+      hash = subject.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
 
   const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+  // Build schedule from API data
+  const buildSchedule = (entries: TimetableEntry[] = []) => {
+    const schedule: Record<string, TeachingSession[]> = {
+      Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: [], Sunday: []
+    };
+
+    entries.forEach(entry => {
+      const dayName = dayNames[entry.dayOfWeek - 1];
+      if (dayName && schedule[dayName]) {
+        schedule[dayName].push({
+          id: parseInt(entry.id),
+          subject: entry.courseName || "Unknown Course",
+          class: `${entry.level || "Level"} - ${entry.classCohortId || ""}`,
+          room: entry.room || "TBD",
+          time: formatToAMPM(entry.startTime),
+          duration: calculateDuration(entry.startTime, entry.endTime),
+          color: getSubjectColor(entry.courseName || "Unknown"),
+          type: "class",
+          teacherId: entry.instructorId
+        });
+      }
+    });
+
+    return schedule;
+  };
+
+  const baseSchedule = buildSchedule(timetableResponse?.data);
   
   const weeklySchedule: DaySchedule[] = weekDates.map((date, index) => ({
     day: dayNames[index],
     date: formatDate(date),
-    sessions: baseSchedule[dayNames[index] as keyof typeof baseSchedule] || []
+    sessions: baseSchedule[dayNames[index]] || []
   }));
 
   const getSessionForTimeSlot = (day: DaySchedule, timeSlot: string) => {
@@ -154,6 +181,41 @@ export default function TeacherRoutine() {
 
   const todayIndex = new Date().getDay() - 1;
   const todaySessions = todayIndex >= 0 && todayIndex < 7 ? weeklySchedule[todayIndex].sessions : [];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 text-primary-50 animate-spin" />
+        <p className="text-primary-50 font-medium animate-pulse text-lg">
+          Loading your teaching schedule...
+        </p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center space-y-6 border border-red-100">
+          <div className="inline-flex p-4 bg-red-50 rounded-full text-red-500">
+            <AlertCircle className="w-12 h-12" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-gray-900">Connection Issue</h2>
+            <p className="text-gray-600">
+              We couldn't fetch your teaching schedule. This might be due to a network problem or server maintenance.
+            </p>
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="w-full py-3 bg-primary-50 text-white rounded-xl font-semibold hover:bg-primary-100 transition-all shadow-lg hover:shadow-primary-50/25"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-x-hidden">

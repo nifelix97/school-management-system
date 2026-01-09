@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar,Users, BookOpen, AlertTriangle, Download, Search,  Plus, Edit, Check, X, BarChart3 } from 'lucide-react';
-import type { TimetableEntry, ExamEntry, Instructor, ConflictInfo } from '../../types/timetable';
-import TimetableCreateModal from '../../components/TimetableCreateModal';
-import ExamCreateModal from '../../components/ExamCreateModal';
+import { AlertTriangle, BarChart3, BookOpen, Calendar, Check, Download, Edit, Plus, Search, Trash2, Users, X } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-toastify';
+import { useGetClassesQuery } from '../../app/api/classes';
+import { useGetCoursesByDepartmentQuery, useGetTeachersByDepartmentQuery } from '../../app/api/courses';
+import { useGetDepartmentsQuery } from '../../app/api/departments';
+import {
+  useCreateTimetableMutation,
+  useDeleteTimetableMutation,
+  useGetDepartmentTimetableQuery,
+  useUpdateTimetableMutation
+} from '../../app/api/timetable';
 import ConflictResolutionModal from '../../components/ConflictResolutionModal';
-import WeeklyCalendarView from '../../components/WeeklyCalendarView';
+import ExamCreateModal from '../../components/ExamCreateModal';
 import NotificationSystem from '../../components/NotificationSystem';
 import ReportsAnalytics from '../../components/ReportsAnalytics';
+import TimetableCreateModal from '../../components/TimetableCreateModal';
+import WeeklyCalendarView from '../../components/WeeklyCalendarView';
+import type { ConflictInfo, CreateTimetableEntryDto, ExamEntry, TimetableEntry, UpdateTimetableEntryDto } from '../../types/timetable';
 
 const TimeTableExams: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'timetable' | 'exams' | 'reports'>('timetable');
@@ -51,38 +61,27 @@ const TimeTableExams: React.FC = () => {
     }
   ]);
 
-  // Mock data
-  const [timetableEntries, setTimetableEntries] = useState<TimetableEntry[]>([
-    {
-      id: '1',
-      courseId: 'CS101',
-      courseName: 'Introduction to Programming',
-      instructorId: 'T001',
-      instructorName: 'Dr. Smith',
-      day: 'Monday',
-      startTime: '09:00',
-      endTime: '10:30',
-      classroom: 'Room 101',
-      semester: 'Fall 2024',
-      level: '1st Year',
-      status: 'active'
-    },
-    {
-      id: '2',
-      courseId: 'CS102',
-      courseName: 'Data Structures',
-      instructorId: 'T002',
-      instructorName: 'Prof. Johnson',
-      day: 'Monday',
-      startTime: '09:30',
-      endTime: '11:00',
-      classroom: 'Room 102',
-      semester: 'Fall 2024',
-      level: '2nd Year',
-      status: 'conflict'
-    }
-  ]);
+  // API Hooks
+  const { data: timetableData, isLoading: isLoadingTimetable, isError: isErrorTimetable } = useGetDepartmentTimetableQuery({
+    academicYear: '2024/2025',
+    semester: (selectedSemester === 'all' ? 'First' : selectedSemester) as any
+  });
+  const { data: coursesData } = useGetCoursesByDepartmentQuery();
+  const { data: teachersData } = useGetTeachersByDepartmentQuery();
+  const { data: departmentsData } = useGetDepartmentsQuery();
+  const { data: classesData } = useGetClassesQuery();
 
+  const [createTimetable] = useCreateTimetableMutation();
+  const [updateTimetable] = useUpdateTimetableMutation();
+  const [deleteTimetable] = useDeleteTimetableMutation();
+
+  const timetableEntries = useMemo(() => timetableData?.data || [], [timetableData]);
+  const instructors = useMemo(() => teachersData?.data || [], [teachersData]);
+  const courses = useMemo(() => coursesData?.data || [], [coursesData]);
+  const departments = useMemo(() => departmentsData?.data || [], [departmentsData]);
+  const classes = useMemo(() => classesData?.data || [], [classesData]);
+
+  // Mock data for exams (as per user request placeholders)
   const [examEntries, setExamEntries] = useState<ExamEntry[]>([
     {
       id: '1',
@@ -95,32 +94,21 @@ const TimeTableExams: React.FC = () => {
       isOnline: false,
       invigilatorId: 'T001',
       invigilatorName: 'Dr. Smith',
-      semester: 'Fall 2024',
+      semester: 'First',
       level: '1st Year',
       status: 'scheduled'
     }
   ]);
 
-  const [instructors] = useState<Instructor[]>([
-    { id: 'T001', name: 'Dr. Smith', email: 'smith@university.edu', department: 'Computer Science', courses: ['CS101'] },
-    { id: 'T002', name: 'Prof. Johnson', email: 'johnson@university.edu', department: 'Computer Science', courses: ['CS102'] }
-  ]);
+  const [conflicts, setConflicts] = useState<ConflictInfo[]>([]);
 
-  const [conflicts, setConflicts] = useState<ConflictInfo[]>([
-    {
-      type: 'time_overlap',
-      message: 'Time overlap detected between CS101 and CS102 on Monday',
-      affectedEntries: ['1', '2']
-    }
-  ]);
-
-  const detectConflicts = () => {
+  const detectConflicts = (entries: TimetableEntry[]) => {
     const newConflicts: ConflictInfo[] = [];
     
     // Check for time overlaps
-    timetableEntries.forEach((entry1, index1) => {
-      timetableEntries.forEach((entry2, index2) => {
-        if (index1 !== index2 && entry1.day === entry2.day) {
+    entries.forEach((entry1, index1) => {
+      entries.forEach((entry2, index2) => {
+        if (index1 !== index2 && entry1.dayOfWeek === entry2.dayOfWeek) {
           const start1 = new Date(`2024-01-01 ${entry1.startTime}`);
           const end1 = new Date(`2024-01-01 ${entry1.endTime}`);
           const start2 = new Date(`2024-01-01 ${entry2.startTime}`);
@@ -129,7 +117,7 @@ const TimeTableExams: React.FC = () => {
           if ((start1 < end2 && end1 > start2)) {
             newConflicts.push({
               type: 'time_overlap',
-              message: `Time overlap between ${entry1.courseName} and ${entry2.courseName} on ${entry1.day}`,
+              message: `Time overlap between ${entry1.courseName || entry1.courseCode} and ${entry2.courseName || entry2.courseCode} on ${getDayName(entry1.dayOfWeek)}`,
               affectedEntries: [entry1.id, entry2.id]
             });
           }
@@ -140,33 +128,59 @@ const TimeTableExams: React.FC = () => {
     setConflicts(newConflicts);
   };
 
+  const getDayName = (day: number) => {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    return days[day - 1] || 'Unknown';
+  };
+
   useEffect(() => {
-    detectConflicts();
+    if (timetableEntries.length > 0) {
+      detectConflicts(timetableEntries);
+    }
   }, [timetableEntries]);
 
-  const filteredTimetableEntries = timetableEntries.filter(entry => {
-    const matchesSearch = entry.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         entry.instructorName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSemester = selectedSemester === 'all' || entry.semester === selectedSemester;
-    return matchesSearch && matchesSemester;
-  });
+  const filteredTimetableEntries = useMemo(() => {
+    return timetableEntries.filter(entry => {
+      const matchesSearch = (entry.courseName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (entry.courseCode || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (entry.courseId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (entry.instructorName || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSemester = selectedSemester === 'all' || entry.semester === selectedSemester;
+      return matchesSearch && matchesSemester;
+    });
+  }, [timetableEntries, searchTerm, selectedSemester]);
 
-  const filteredExamEntries = examEntries.filter(entry => {
-    const matchesSearch = entry.courseName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSemester = selectedSemester === 'all' || entry.semester === selectedSemester;
-    return matchesSearch && matchesSemester;
-  });
+  const filteredExamEntries = useMemo(() => {
+    return examEntries.filter(entry => {
+      const matchesSearch = (entry.courseName || entry.courseId || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSemester = selectedSemester === 'all' || entry.semester === selectedSemester;
+      return matchesSearch && matchesSemester;
+    });
+  }, [examEntries, searchTerm, selectedSemester]);
 
   const handleCreateTimetable = () => {
     setShowCreateModal(true);
   };
 
-  const handleSaveTimetableEntry = (entry: Omit<TimetableEntry, 'id'>) => {
-    const newEntry: TimetableEntry = {
-      ...entry,
-      id: Date.now().toString()
-    };
-    setTimetableEntries(prev => [...prev, newEntry]);
+  const handleSaveTimetableEntry = async (entry: CreateTimetableEntryDto) => {
+    try {
+      if (selectedEntry && 'id' in selectedEntry && activeTab === 'timetable') {
+        // Edit mode
+        await updateTimetable({ 
+          id: selectedEntry.id, 
+          data: entry as UpdateTimetableEntryDto 
+        }).unwrap();
+        toast.success('Timetable entry updated successfully');
+      } else {
+        // Create mode
+        await createTimetable(entry).unwrap();
+        toast.success('Timetable entry created successfully');
+      }
+      setShowCreateModal(false);
+      setSelectedEntry(null);
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Failed to save timetable entry');
+    }
   };
 
   const handleSaveExamEntry = (entry: Omit<ExamEntry, 'id'>) => {
@@ -177,22 +191,28 @@ const TimeTableExams: React.FC = () => {
     setExamEntries(prev => [...prev, newEntry]);
   };
 
-  const handleResolveConflict = (entryId: string, updates: Partial<TimetableEntry>) => {
-    setTimetableEntries(prev => prev.map(entry => 
-      entry.id === entryId ? { ...entry, ...updates, status: 'active' as const } : entry
-    ));
-    
-    // Add success notification
-    const newNotification = {
-      id: Date.now().toString(),
-      type: 'success' as const,
-      title: 'Conflict Resolved',
-      message: 'Schedule conflict has been successfully resolved.',
-      timestamp: new Date().toISOString(),
-      isRead: false,
-      actionRequired: false
-    };
-    setNotifications(prev => [newNotification, ...prev]);
+  const handleResolveConflict = async (entryId: string, updates: Partial<TimetableEntry>) => {
+    try {
+      await updateTimetable({ 
+        id: entryId, 
+        data: { ...updates, status: 'active' } as UpdateTimetableEntryDto 
+      }).unwrap();
+      
+      // Add success notification
+      const newNotification = {
+        id: Date.now().toString(),
+        type: 'success' as const,
+        title: 'Conflict Resolved',
+        message: 'Schedule conflict has been successfully resolved.',
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        actionRequired: false
+      };
+      setNotifications(prev => [newNotification, ...prev]);
+      toast.success('Conflict resolved successfully');
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Failed to resolve conflict');
+    }
   };
   
   const handleMarkNotificationAsRead = (id: string) => {
@@ -211,14 +231,24 @@ const TimeTableExams: React.FC = () => {
 
   const handleEditEntry = (entry: TimetableEntry | ExamEntry) => {
     setSelectedEntry(entry);
-    setShowEditModal(true);
+    if ('status' in entry && (activeTab === 'timetable')) {
+      setShowCreateModal(true); // Reuse create modal for editing timetable
+    } else {
+      setShowEditModal(true); // Use placeholder for exams for now
+    }
   };
 
-  const handleApproveEntry = (id: string) => {
+  const handleApproveEntry = async (id: string) => {
     if (activeTab === 'timetable') {
-      setTimetableEntries(prev => prev.map(entry => 
-        entry.id === id ? { ...entry, status: 'active' as const } : entry
-      ));
+      try {
+        await updateTimetable({ 
+          id, 
+          data: { status: 'active' } 
+        }).unwrap();
+        toast.success('Timetable entry approved');
+      } catch (error: any) {
+        toast.error(error?.data?.message || 'Failed to approve entry');
+      }
     } else {
       setExamEntries(prev => prev.map(entry => 
         entry.id === id ? { ...entry, status: 'approved' as const } : entry
@@ -226,11 +256,31 @@ const TimeTableExams: React.FC = () => {
     }
   };
 
-  const handleRejectEntry = (id: string) => {
-    if (activeTab === 'exams') {
+  const handleRejectEntry = async (id: string) => {
+    if (activeTab === 'timetable') {
+      if (window.confirm('Are you sure you want to reject (delete) this timetable entry?')) {
+        try {
+          await deleteTimetable(id).unwrap();
+          toast.success('Timetable entry rejected and deleted');
+        } catch (error: any) {
+          toast.error(error?.data?.message || 'Failed to reject entry');
+        }
+      }
+    } else {
       setExamEntries(prev => prev.map(entry => 
         entry.id === id ? { ...entry, status: 'rejected' as const } : entry
       ));
+    }
+  };
+
+  const handleDeleteEntry = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this timetable entry?')) {
+      try {
+        await deleteTimetable(id).unwrap();
+        toast.success('Timetable entry deleted successfully');
+      } catch (error: any) {
+        toast.error(error?.data?.message || 'Failed to delete entry');
+      }
     }
   };
 
@@ -376,9 +426,10 @@ const TimeTableExams: React.FC = () => {
                 onChange={(e) => setSelectedSemester(e.target.value)}
                 className="px-3 xs:px-4 py-2 border border-primary-50/30 text-primary-50 rounded-lg  text-sm w-full xs:w-auto"
               >
-                <option value="all">All Semesters</option>
-                <option value="Fall 2024">Fall 2024</option>
-                <option value="Spring 2024">Spring 2024</option>
+                <option value="all">Default (First)</option>
+                <option value="First">First Semester</option>
+                <option value="Second">Second Semester</option>
+                <option value="Summer">Summer Semester</option>
               </select>
 
               {activeTab === "timetable" && (
@@ -448,6 +499,21 @@ const TimeTableExams: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Loading & Error States */}
+        {isLoadingTimetable && (
+          <div className="flex items-center justify-center p-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-100"></div>
+          </div>
+        )}
+
+        {isErrorTimetable && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center mb-6">
+            <AlertTriangle className="mx-auto text-red-500 mb-2" size={32} />
+            <h3 className="text-red-800 font-semibold">Error Loading Timetable</h3>
+            <p className="text-red-600 text-sm">Failed to fetch the latest schedule. Please check your connection or try again.</p>
+          </div>
+        )}
 
         {/* Conflicts Alert */}
         {conflicts.length > 0 && (
@@ -529,7 +595,7 @@ const TimeTableExams: React.FC = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="text-sm font-medium text-gray-900">
-                                {entry.courseName}
+                                {entry.courseName || entry.courseCode}
                               </div>
                               <div className="text-sm text-gray-500">
                                 {entry.courseId}
@@ -541,17 +607,17 @@ const TimeTableExams: React.FC = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
-                              {entry.day}
+                              {getDayName(entry.dayOfWeek)}
                             </div>
                             <div className="text-sm text-gray-500">
                               {entry.startTime} - {entry.endTime}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {entry.classroom || entry.virtualLink || "TBD"}
+                            {entry.room} {entry.building ? `(${entry.building})` : ''}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {entry.level}
+                            {entry.level || entry.academicYear}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
@@ -582,16 +648,22 @@ const TimeTableExams: React.FC = () => {
                                   >
                                     <Check className="w-4 h-4" />
                                   </button>
-                                  <button
-                                    onClick={() => handleRejectEntry(entry.id)}
-                                    className="text-red-600 hover:text-red-900"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </td>
+                                    <button
+                                      onClick={() => handleRejectEntry(entry.id)}
+                                      className="text-red-600 hover:text-red-900"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </>
+                                )}
+                                <button
+                                  onClick={() => handleDeleteEntry(entry.id)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
                         </tr>
                       ))}
                     </tbody>
@@ -727,16 +799,23 @@ const TimeTableExams: React.FC = () => {
       {/* Create Modals */}
       <TimetableCreateModal
         isOpen={showCreateModal && activeTab === "timetable"}
-        onClose={() => setShowCreateModal(false)}
+        onClose={() => {
+          setShowCreateModal(false);
+          setSelectedEntry(null);
+        }}
         onSave={handleSaveTimetableEntry}
-        instructors={instructors}
+        teachers={instructors}
+        departments={departments}
+        classes={classes}
+        courses={courses.map(c => ({ id: c.id, title: c.title, code: c.code }))}
+        initialData={selectedEntry as TimetableEntry}
       />
 
       <ExamCreateModal
         isOpen={showCreateModal && activeTab === "exams"}
         onClose={() => setShowCreateModal(false)}
         onSave={handleSaveExamEntry}
-        instructors={instructors}
+        instructors={instructors.map(t => ({ id: t.id, name: t.name, email: t.email }))}
       />
 
       <ConflictResolutionModal

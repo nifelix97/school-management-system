@@ -1,6 +1,6 @@
+import { AlertTriangle, ArrowRight, Clock, MapPin, Users, X } from 'lucide-react';
 import React, { useState } from 'react';
-import { X, AlertTriangle, Clock, Users, MapPin, ArrowRight } from 'lucide-react';
-import type { TimetableEntry, ConflictInfo, Instructor } from '../types/timetable';
+import type { ConflictInfo, Instructor, TimetableEntry } from '../types/timetable';
 
 interface ConflictResolutionModalProps {
   isOpen: boolean;
@@ -22,16 +22,24 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
   const [selectedConflict, setSelectedConflict] = useState<ConflictInfo | null>(null);
   const [resolutionData, setResolutionData] = useState<{
     entryId: string;
-    newDay?: string;
+    newDayOfWeek?: number;
     newStartTime?: string;
     newEndTime?: string;
     newInstructorId?: string;
-    newClassroom?: string;
+    newRoom?: string;
+    newBuilding?: string;
   }>({
     entryId: ''
   });
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const days = [
+    { name: 'Monday', value: 1 },
+    { name: 'Tuesday', value: 2 },
+    { name: 'Wednesday', value: 3 },
+    { name: 'Thursday', value: 4 },
+    { name: 'Friday', value: 5 },
+    { name: 'Saturday', value: 6 }
+  ];
   const timeSlots = [
     '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', 
     '14:00', '15:00', '16:00', '17:00', '18:00'
@@ -45,7 +53,7 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
     if (!selectedConflict || !resolutionData.entryId) return;
 
     const updates: Partial<TimetableEntry> = {};
-    if (resolutionData.newDay) updates.day = resolutionData.newDay;
+    if (resolutionData.newDayOfWeek) updates.dayOfWeek = resolutionData.newDayOfWeek;
     if (resolutionData.newStartTime) updates.startTime = resolutionData.newStartTime;
     if (resolutionData.newEndTime) updates.endTime = resolutionData.newEndTime;
     if (resolutionData.newInstructorId) {
@@ -53,7 +61,8 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
       const instructor = instructors.find(i => i.id === resolutionData.newInstructorId);
       if (instructor) updates.instructorName = instructor.name;
     }
-    if (resolutionData.newClassroom) updates.classroom = resolutionData.newClassroom;
+    if (resolutionData.newRoom) updates.room = resolutionData.newRoom;
+    if (resolutionData.newBuilding) updates.building = resolutionData.newBuilding;
 
     onResolveConflict(resolutionData.entryId, updates);
     setSelectedConflict(null);
@@ -62,7 +71,7 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
 
   const getSuggestedTimeSlots = (entry: TimetableEntry) => {
     const suggestions = [];
-    const currentDay = entry.day;
+    const currentDayOfWeek = entry.dayOfWeek;
     
     // Suggest different times on the same day
     for (const time of timeSlots) {
@@ -71,13 +80,13 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
       
       const hasConflict = timetableEntries.some(other => 
         other.id !== entry.id && 
-        other.day === currentDay && 
+        other.dayOfWeek === currentDayOfWeek && 
         other.startTime === time
       );
       
       if (!hasConflict) {
         suggestions.push({
-          day: currentDay,
+          dayOfWeek: currentDayOfWeek,
           startTime: time,
           endTime: endTime.toTimeString().slice(0, 5)
         });
@@ -86,16 +95,17 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
     
     // Suggest different days
     for (const day of days) {
-      if (day !== currentDay) {
+      if (day.value !== currentDayOfWeek) {
         const hasConflict = timetableEntries.some(other => 
           other.id !== entry.id && 
-          other.day === day && 
+          other.dayOfWeek === day.value && 
           other.startTime === entry.startTime
         );
         
         if (!hasConflict) {
           suggestions.push({
-            day,
+            dayOfWeek: day.value,
+            dayName: day.name,
             startTime: entry.startTime,
             endTime: entry.endTime
           });
@@ -104,6 +114,10 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
     }
     
     return suggestions.slice(0, 3); // Return top 3 suggestions
+  };
+
+  const getDayName = (value: number) => {
+    return days.find(d => d.value === value)?.name || 'Unknown';
   };
 
   if (!isOpen) return null;
@@ -141,13 +155,16 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
                             <div key={entry.id} className="bg-white rounded p-3 border border-red-200">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="font-medium text-gray-900">{entry.courseName}</p>
+                                  <p className="font-medium text-gray-900">{entry.courseName || entry.courseCode}</p>
                                   <p className="text-sm text-gray-600">
-                                    {entry.instructorName} • {entry.day} {entry.startTime}-{entry.endTime}
+                                    {entry.instructorName} • {getDayName(entry.dayOfWeek)} {entry.startTime}-{entry.endTime}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {entry.room} {entry.building ? `(${entry.building})` : ''}
                                   </p>
                                 </div>
                                 <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                                  {entry.level}
+                                  {entry.type}
                                 </span>
                               </div>
                             </div>
@@ -194,7 +211,7 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
                         onClick={() => setResolutionData({ ...resolutionData, entryId: entry.id })}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <h5 className="font-medium text-gray-900">{entry.courseName}</h5>
+                          <h5 className="font-medium text-gray-900">{entry.courseName || entry.courseCode}</h5>
                           <input
                             type="radio"
                             checked={resolutionData.entryId === entry.id}
@@ -209,11 +226,11 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
                           </p>
                           <p className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
-                            {entry.day} {entry.startTime}-{entry.endTime}
+                            {getDayName(entry.dayOfWeek)} {entry.startTime}-{entry.endTime}
                           </p>
                           <p className="flex items-center gap-1">
                             <MapPin className="w-4 h-4" />
-                            {entry.classroom || 'Virtual'}
+                            {entry.room} {entry.building ? `(${entry.building})` : ''}
                           </p>
                         </div>
                       </div>
@@ -231,13 +248,13 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
                           New Day
                         </label>
                         <select
-                          value={resolutionData.newDay || ''}
-                          onChange={(e) => setResolutionData({ ...resolutionData, newDay: e.target.value })}
+                          value={resolutionData.newDayOfWeek || ''}
+                          onChange={(e) => setResolutionData({ ...resolutionData, newDayOfWeek: parseInt(e.target.value) })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="">Keep current day</option>
                           {days.map((day) => (
-                            <option key={day} value={day}>{day}</option>
+                            <option key={day.value} value={day.value}>{day.name}</option>
                           ))}
                         </select>
                       </div>
@@ -296,14 +313,27 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Alternative Classroom
+                          Alternative Building
                         </label>
                         <input
                           type="text"
-                          value={resolutionData.newClassroom || ''}
-                          onChange={(e) => setResolutionData({ ...resolutionData, newClassroom: e.target.value })}
+                          value={resolutionData.newBuilding || ''}
+                          onChange={(e) => setResolutionData({ ...resolutionData, newBuilding: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                          placeholder="e.g., Room 102, Lab B"
+                          placeholder="e.g., Block B"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Alternative Room
+                        </label>
+                        <input
+                          type="text"
+                          value={resolutionData.newRoom || ''}
+                          onChange={(e) => setResolutionData({ ...resolutionData, newRoom: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          placeholder="e.g., Room 102"
                         />
                       </div>
 
@@ -318,14 +348,14 @@ const ConflictResolutionModal: React.FC<ConflictResolutionModalProps> = ({
                               key={index}
                               onClick={() => setResolutionData({
                                 ...resolutionData,
-                                newDay: suggestion.day,
+                                newDayOfWeek: suggestion.dayOfWeek,
                                 newStartTime: suggestion.startTime,
                                 newEndTime: suggestion.endTime
                               })}
                               className="w-full text-left p-2 bg-white border border-blue-200 rounded hover:bg-blue-50 text-sm"
                             >
                               <div className="flex items-center justify-between">
-                                <span>{suggestion.day} {suggestion.startTime}-{suggestion.endTime}</span>
+                                <span>{getDayName(suggestion.dayOfWeek)} {suggestion.startTime}-{suggestion.endTime}</span>
                                 <ArrowRight className="w-4 h-4 text-blue-600" />
                               </div>
                             </button>

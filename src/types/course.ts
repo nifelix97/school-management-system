@@ -40,6 +40,11 @@ export interface Teacher {
   courseCount?: number;
 }
 
+export interface TeacherWithCourses extends Teacher {
+  courses: Course[];
+  course_count: number;
+}
+
 export interface Course {
   id: string;
   code: string;

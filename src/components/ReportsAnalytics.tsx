@@ -1,6 +1,6 @@
+import { BarChart3, BookOpen, Calendar, Clock, Download, Users } from 'lucide-react';
 import React, { useState } from 'react';
-import { BarChart3, Download, Calendar, Users, BookOpen, Clock } from 'lucide-react';
-import type { TimetableEntry, ExamEntry, Instructor } from '../types/timetable';
+import type { ExamEntry, Instructor, TimetableEntry } from '../types/timetable';
 
 interface ReportsAnalyticsProps {
   timetableEntries: TimetableEntry[];
@@ -14,6 +14,11 @@ const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({
   instructors
 }) => {
   const [selectedReport, setSelectedReport] = useState<'overview' | 'teachers' | 'utilization' | 'conflicts'>('overview');
+
+  const getDayName = (day: number) => {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    return days[day - 1] || 'Unknown';
+  };
 
   // Analytics calculations
   const getInstructorWorkload = () => {
@@ -40,8 +45,8 @@ const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({
     const roomUsage = new Map<string, number>();
     
     timetableEntries.forEach(entry => {
-      if (entry.classroom) {
-        roomUsage.set(entry.classroom, (roomUsage.get(entry.classroom) || 0) + 1);
+      if (entry.room) {
+        roomUsage.set(entry.room, (roomUsage.get(entry.room) || 0) + 1);
       }
     });
     
@@ -68,7 +73,7 @@ const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return days.map(day => ({
       day,
-      classes: timetableEntries.filter(entry => entry.day === day).length,
+      classes: timetableEntries.filter(entry => getDayName(entry.dayOfWeek) === day).length,
       exams: examEntries.filter(entry => {
         const examDay = new Date(entry.examDate).toLocaleDateString('en-US', { weekday: 'long' });
         return examDay === day;
@@ -86,7 +91,7 @@ const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({
     // Check for time overlaps
     timetableEntries.forEach((entry1, index1) => {
       timetableEntries.forEach((entry2, index2) => {
-        if (index1 !== index2 && entry1.day === entry2.day) {
+        if (index1 !== index2 && entry1.dayOfWeek === entry2.dayOfWeek) {
           const start1 = new Date(`2024-01-01 ${entry1.startTime}`);
           const end1 = new Date(`2024-01-01 ${entry1.endTime}`);
           const start2 = new Date(`2024-01-01 ${entry2.startTime}`);

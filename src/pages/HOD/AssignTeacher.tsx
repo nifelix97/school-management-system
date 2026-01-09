@@ -1,45 +1,65 @@
 import {
+  AlertCircle,
   Award,
   Clock,
   Eye,
+  RefreshCw,
   Search
 } from "lucide-react";
 import { useState } from "react";
-
-interface Teacher {
-  id: string;
-  name: string;
-  email: string;
-  specialization: string;
-  qualification: string;
-  status: "Active" | "Busy" | "Unavailable";
-  workload: number;
-  maxWorkload: number;
-  experience: number;
-  rating: number;
-}
+import { useGetTeachersWithDetailedCoursesQuery, type TeacherWithCourses } from "../../app/api/courses";
 
 export default function AssignTeacher() {
   const [teacherSearch, setTeacherSearch] = useState("");
   const [teacherFilter, setTeacherFilter] = useState("all");
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<TeacherWithCourses | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-
-
-  const teachers: Teacher[] = [
-    { id: "1", name: "Dr. Smith", email: "smith@university.edu", specialization: "Data Structures", qualification: "PhD Computer Science", status: "Active", workload: 2, maxWorkload: 4, experience: 8, rating: 4.5 },
-    { id: "2", name: "Dr. Johnson", email: "johnson@university.edu", specialization: "Machine Learning", qualification: "PhD AI", status: "Busy", workload: 4, maxWorkload: 4, experience: 12, rating: 4.8 },
-    { id: "3", name: "Dr. Brown", email: "brown@university.edu", specialization: "Programming", qualification: "PhD Software Engineering", status: "Active", workload: 1, maxWorkload: 4, experience: 5, rating: 4.2 }
-  ];
+  const { data: teachersData, isLoading, isError, refetch } = useGetTeachersWithDetailedCoursesQuery();
+  const teachers: TeacherWithCourses[] = teachersData?.data || [];
 
 
 
   const filteredTeachers = teachers.filter(teacher => {
-    const matchesSearch = teacher.name.toLowerCase().includes(teacherSearch.toLowerCase()) || teacher.specialization.toLowerCase().includes(teacherSearch.toLowerCase());
-    const matchesFilter = teacherFilter === "all" || teacher.status === teacherFilter;
+    const matchesSearch = teacher.name.toLowerCase().includes(teacherSearch.toLowerCase()) || 
+                         (teacher.specialization?.toLowerCase().includes(teacherSearch.toLowerCase()) || false);
+    const matchesFilter = teacherFilter === "all" || teacher.status?.toLowerCase() === teacherFilter.toLowerCase();
     return matchesSearch && matchesFilter;
   });
+
+  const getStatusColor = (status: string | undefined) => {
+    const s = status?.toLowerCase();
+    if (s === "active") return "text-green-600 bg-green-50";
+    if (s === "busy") return "text-yellow-600 bg-yellow-50";
+    return "text-red-600 bg-red-50";
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-50"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center bg-white p-8 rounded-xl shadow-sm max-w-md w-full">
+          <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Failed to load teachers</h2>
+          <p className="text-gray-600 mb-6">There was an error fetching the department teachers. Please try again.</p>
+          <button 
+            onClick={() => refetch()}
+            className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-primary-50 text-white rounded-lg hover:bg-opacity-90"
+          >
+            <RefreshCw size={18} />
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
 
 
@@ -91,25 +111,21 @@ export default function AssignTeacher() {
                       <h3 className="font-semibold text-primary-50 text-sm xs:text-base">
                         {teacher.name}
                       </h3>
-                      <p className="text-xs xs:text-sm text-primary-50/60">{teacher.specialization}</p>
+                      <p className="text-xs xs:text-sm text-primary-50/60">{teacher.specialization || "No specialization"}</p>
                     </div>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      teacher.status === "Active" ? "text-green-600 bg-green-50" :
-                      teacher.status === "Busy" ? "text-yellow-600 bg-yellow-50" :
-                      "text-red-600 bg-red-50"
-                    }`}>
-                      {teacher.status}
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(teacher.status)}`}>
+                      {teacher.status || "Inactive"}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
                     <div className="flex items-center gap-2 text-primary-50/70">
                       <Clock size={12} />
-                      <span>{teacher.workload}/{teacher.maxWorkload} courses</span>
+                      <span>{teacher.course_count || 0}/4 courses</span>
                     </div>
                     <div className="flex items-center gap-2 text-primary-50/70">
                       <Award size={12} />
-                      <span>{teacher.rating}/5.0 rating</span>
+                      <span>{teacher.rating || 0}/5.0 rating</span>
                     </div>
                   </div>
 
@@ -149,19 +165,15 @@ export default function AssignTeacher() {
                           <div className="text-sm text-primary-50/60">{teacher.email}</div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-primary-50">{teacher.specialization}</td>
+                      <td className="px-4 py-3 text-primary-50">{teacher.specialization || "N/A"}</td>
                       <td className="px-4 py-3 text-center">
-                        <div className="text-primary-50">{teacher.workload}/{teacher.maxWorkload}</div>
+                        <div className="text-primary-50">{teacher.course_count}/4</div>
                         <div className="text-xs text-primary-50/60">courses</div>
                       </td>
-                      <td className="px-4 py-3 text-center text-primary-50">{teacher.rating}/5.0</td>
+                      <td className="px-4 py-3 text-center text-primary-50">{teacher.rating || 0}/5.0</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          teacher.status === "Active" ? "text-green-600 bg-green-50" :
-                          teacher.status === "Busy" ? "text-yellow-600 bg-yellow-50" :
-                          "text-red-600 bg-red-50"
-                        }`}>
-                          {teacher.status}
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(teacher.status)}`}>
+                          {teacher.status || "Inactive"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -194,22 +206,22 @@ export default function AssignTeacher() {
               <div className="p-6 space-y-4">
                 <div>
                   <h3 className="font-semibold text-primary-50 mb-2">Qualifications</h3>
-                  <p className="text-sm text-primary-50/70">{selectedTeacher.qualification}</p>
+                  <p className="text-sm text-primary-50/70">{selectedTeacher.qualification || "No qualification listed"}</p>
                 </div>
 
                 <div>
                   <h3 className="font-semibold text-primary-50 mb-2">Specialization</h3>
-                  <p className="text-sm text-primary-50/70">{selectedTeacher.specialization}</p>
+                  <p className="text-sm text-primary-50/70">{selectedTeacher.specialization || "No specialization listed"}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <h3 className="font-semibold text-primary-50 mb-1">Experience</h3>
-                    <p className="text-sm text-primary-50/70">{selectedTeacher.experience} years</p>
+                    <p className="text-sm text-primary-50/70">{selectedTeacher.yearsOfExperience || 0} years</p>
                   </div>
                   <div>
                     <h3 className="font-semibold text-primary-50 mb-1">Rating</h3>
-                    <p className="text-sm text-primary-50/70">{selectedTeacher.rating}/5.0</p>
+                    <p className="text-sm text-primary-50/70">{selectedTeacher.rating || 0}/5.0</p>
                   </div>
                 </div>
 
@@ -219,14 +231,31 @@ export default function AssignTeacher() {
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
                       <div 
                         className="bg-primary-50 h-2 rounded-full" 
-                        style={{ width: `${(selectedTeacher.workload / selectedTeacher.maxWorkload) * 100}%` }}
+                        style={{ width: `${((selectedTeacher.course_count || 0) / 4) * 100}%` }}
                       />
                     </div>
                     <span className="text-sm text-primary-50/70">
-                      {selectedTeacher.workload}/{selectedTeacher.maxWorkload}
+                      {selectedTeacher.course_count || 0}/4
                     </span>
                   </div>
                 </div>
+
+                {selectedTeacher.courses && selectedTeacher.courses.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-primary-50 mb-2">Assigned Courses</h3>
+                    <div className="space-y-2">
+                      {selectedTeacher.courses.map(course => (
+                        <div key={course.id} className="p-2 bg-gray-50 rounded border border-gray-100 flex justify-between items-center text-xs">
+                          <div>
+                            <span className="font-medium text-primary-50">{course.code}</span>
+                            <span className="ml-2 text-primary-50/60">{course.title}</span>
+                          </div>
+                          <span className="text-primary-50/40">{course.level}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="p-6 border-t">

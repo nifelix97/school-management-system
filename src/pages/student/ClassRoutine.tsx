@@ -1,19 +1,25 @@
-import { useState } from "react";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  MapPin,
-  User,
-  Calendar,
+    Calendar,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    MapPin,
+    User,
+    Loader2,
+    AlertCircle,
 } from "lucide-react";
+import { useState } from "react";
+import { useGetStudentTimetableQuery } from "../../app/api/timetable";
+import type { TimetableEntry } from "../../types/timetable";
 
 interface ClassSession {
-  id: number;
+  id: string;
   subject: string;
   teacher: string;
   room: string;
-  time: string;
+  time: string; // format matched with timeSlots like "9:00 AM"
+  startTimeRaw: string; // for easier matching
+  endTimeRaw: string;
   duration: string;
   color: string;
 }
@@ -54,83 +60,154 @@ export default function ClassRoutine() {
 
   const weekDates = getWeekDates(currentWeek);
 
+  const { data: timetableResponse, isLoading, isError } = useGetStudentTimetableQuery({
+    academicYear: "2024/2025",
+    semester: "First",
+  });
+
   const timeSlots = [
-    "8:00 AM",
-    "9:00 AM", 
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 PM",
-    "1:00 PM",
-    "2:00 PM",
-    "3:00 PM",
-    "4:00 PM",
-    "5:00 PM"
+    "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+    "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"
   ];
 
-  const baseSchedule = {
-    Monday: [
-      { id: 1, subject: "Mathematics", teacher: "Dr. Smith", room: "Room 101", time: "9:00 AM", duration: "1h", color: "bg-blue-100 border-l-4 border-blue-500" },
-      { id: 2, subject: "Physics", teacher: "Prof. Johnson", room: "Lab 201", time: "11:00 AM", duration: "2h", color: "bg-purple-100 border-l-4 border-purple-500" },
-      { id: 3, subject: "English", teacher: "Ms. Davis", room: "Room 105", time: "2:00 PM", duration: "1h", color: "bg-green-100 border-l-4 border-green-500" }
-    ],
-    Tuesday: [
-      { id: 4, subject: "Chemistry", teacher: "Dr. Wilson", room: "Lab 301", time: "8:00 AM", duration: "2h", color: "bg-red-100 border-l-4 border-red-500" },
-      { id: 5, subject: "History", teacher: "Mr. Brown", room: "Room 203", time: "1:00 PM", duration: "1h", color: "bg-yellow-100 border-l-4 border-yellow-500" },
-      { id: 6, subject: "Computer Science", teacher: "Ms. Taylor", room: "Lab 401", time: "3:00 PM", duration: "2h", color: "bg-indigo-100 border-l-4 border-indigo-500" }
-    ],
-    Wednesday: [
-      { id: 7, subject: "Mathematics", teacher: "Dr. Smith", room: "Room 101", time: "9:00 AM", duration: "1h", color: "bg-blue-100 border-l-4 border-blue-500" },
-      { id: 8, subject: "Biology", teacher: "Dr. Garcia", room: "Lab 501", time: "11:00 AM", duration: "2h", color: "bg-teal-100 border-l-4 border-teal-500" },
-      { id: 9, subject: "Art", teacher: "Ms. Lee", room: "Studio 1", time: "2:00 PM", duration: "1h", color: "bg-pink-100 border-l-4 border-pink-500" }
-    ],
-    Thursday: [
-      { id: 10, subject: "Physics", teacher: "Prof. Johnson", room: "Lab 201", time: "10:00 AM", duration: "2h", color: "bg-purple-100 border-l-4 border-purple-500" },
-      { id: 11, subject: "Geography", teacher: "Mr. Anderson", room: "Room 301", time: "1:00 PM", duration: "1h", color: "bg-orange-100 border-l-4 border-orange-500" },
-      { id: 12, subject: "PE", teacher: "Coach Miller", room: "Gymnasium", time: "3:00 PM", duration: "1h", color: "bg-gray-100 border-l-4 border-gray-500" }
-    ],
-    Friday: [
-      { id: 13, subject: "Chemistry", teacher: "Dr. Wilson", room: "Lab 301", time: "9:00 AM", duration: "2h", color: "bg-red-100 border-l-4 border-red-500" },
-      { id: 14, subject: "English", teacher: "Ms. Davis", room: "Room 105", time: "12:00 PM", duration: "1h", color: "bg-green-100 border-l-4 border-green-500" },
-      { id: 15, subject: "Music", teacher: "Mr. Clark", room: "Music Room", time: "2:00 PM", duration: "1h", color: "bg-cyan-100 border-l-4 border-cyan-500" }
-    ],
-    Saturday: [
-      { id: 16, subject: "Study Hall", teacher: "Various", room: "Library", time: "10:00 AM", duration: "2h", color: "bg-slate-100 border-l-4 border-slate-500" }
-    ],
-    Sunday: []
+  const formatToAMPM = (timeStr: string) => {
+    if (!timeStr) return "";
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+  };
+
+  const calculateDuration = (start: string, end: string) => {
+    if (!start || !end) return "1h";
+    const [sH, sM] = start.split(':').map(Number);
+    const [eH, eM] = end.split(':').map(Number);
+    const totalMinutes = (eH * 60 + eM) - (sH * 60 + sM);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    if (mins === 0) return `${hours}h`;
+    return `${hours}h ${mins}m`;
+  };
+
+  const getSubjectColor = (subject: string) => {
+    const colors = [
+      "bg-blue-100 border-l-4 border-blue-500",
+      "bg-purple-100 border-l-4 border-purple-500",
+      "bg-green-100 border-l-4 border-green-500",
+      "bg-red-100 border-l-4 border-red-500",
+      "bg-yellow-100 border-l-4 border-yellow-500",
+      "bg-indigo-100 border-l-4 border-indigo-500",
+      "bg-teal-100 border-l-4 border-teal-500",
+      "bg-pink-100 border-l-4 border-pink-500"
+    ];
+    let hash = 0;
+    for (let i = 0; i < subject.length; i++) {
+      hash = subject.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
   };
 
   const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  
+
+  const buildSchedule = (entries: TimetableEntry[] = []) => {
+    const schedule: Record<string, ClassSession[]> = {
+      Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: [], Sunday: []
+    };
+
+    entries.forEach(entry => {
+      const dayName = dayNames[entry.dayOfWeek - 1];
+      if (dayName && schedule[dayName]) {
+        schedule[dayName].push({
+          id: entry.id,
+          subject: entry.courseName || "Unknown Course",
+          teacher: entry.instructorName || "Unknown Instructor",
+          room: entry.room || "TBD",
+          time: formatToAMPM(entry.startTime),
+          startTimeRaw: entry.startTime,
+          endTimeRaw: entry.endTime,
+          duration: calculateDuration(entry.startTime, entry.endTime),
+          color: getSubjectColor(entry.courseName || "Unknown")
+        });
+      }
+    });
+
+    return schedule;
+  };
+
+  const baseSchedule = buildSchedule(timetableResponse?.data);
   const weeklySchedule: DaySchedule[] = weekDates.map((date, index) => ({
     day: dayNames[index],
     date: formatDate(date),
-    classes: baseSchedule[dayNames[index] as keyof typeof baseSchedule] || []
+    classes: baseSchedule[dayNames[index]] || []
   }));
 
   const getClassForTimeSlot = (day: DaySchedule, timeSlot: string) => {
-    // Check if this time slot has a class starting at this time
-    const directMatch = day.classes.find(cls => cls.time === timeSlot);
-    if (directMatch) return directMatch;
-    
-    // Check if this time slot is part of a multi-hour class
-    const timeIndex = timeSlots.indexOf(timeSlot);
-    if (timeIndex === -1) return null;
-    
-    // Look for classes that started earlier and span into this time slot
+    const timeMatch = day.classes.find(cls => cls.time === timeSlot);
+    if (timeMatch) return timeMatch;
+
+    // Check if within duration
+    const [slotH, slotM] = timeSlot.split(/[: ]/).map((v, i) => {
+      if (i === 1) return parseInt(v); // minutes
+      if (i === 0) { // hours
+        let h = parseInt(v);
+        if (timeSlot.includes('PM') && h !== 12) h += 12;
+        if (timeSlot.includes('AM') && h === 12) h = 0;
+        return h;
+      }
+      return 0;
+    });
+    const slotTotalMinutes = slotH * 60 + slotM;
+
     for (const cls of day.classes) {
-      const classStartIndex = timeSlots.indexOf(cls.time);
-      if (classStartIndex === -1) continue;
-      
-      const duration = parseInt(cls.duration.replace('h', ''));
-      const classEndIndex = classStartIndex + duration;
-      
-      if (timeIndex >= classStartIndex && timeIndex < classEndIndex) {
+      const [sH, sM] = cls.startTimeRaw.split(':').map(Number);
+      const [eH, eM] = cls.endTimeRaw.split(':').map(Number);
+      const startTotal = sH * 60 + sM;
+      const endTotal = eH * 60 + eM;
+
+      if (slotTotalMinutes > startTotal && slotTotalMinutes < endTotal) {
         return cls;
       }
     }
-    
     return null;
   };
+
+  const todayDateStr = formatDate(new Date());
+  const todaySchedule = weeklySchedule.find(day => day.date === todayDateStr);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 text-primary-50 animate-spin" />
+        <p className="text-primary-50 font-medium animate-pulse text-lg">
+          Loading your class routine...
+        </p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center space-y-6 border border-red-100">
+          <div className="inline-flex p-4 bg-red-50 rounded-full text-red-500">
+            <AlertCircle className="w-12 h-12" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-gray-900">Connection Issue</h2>
+            <p className="text-gray-600">
+              We couldn't fetch your class routine. This might be due to a network problem or server maintenance.
+            </p>
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="w-full py-3 bg-primary-50 text-white rounded-xl font-semibold hover:bg-primary-100 transition-all shadow-lg hover:shadow-primary-50/25"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -267,35 +344,43 @@ export default function ClassRoutine() {
             Today's Classes
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {weeklySchedule[0].classes.map((classSession) => (
-              <div
-                key={classSession.id}
-                className={`${classSession.color} rounded-lg p-4`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-primary-50">
-                    {classSession.subject}
-                  </h4>
-                  <span className="text-sm text-primary-50">
-                    {classSession.time}
-                  </span>
+            {todaySchedule && todaySchedule.classes.length > 0 ? (
+              todaySchedule.classes.map((classSession) => (
+                <div
+                  key={classSession.id}
+                  className={`${classSession.color} rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-primary-50">
+                      {classSession.subject}
+                    </h4>
+                    <span className="text-sm font-medium text-primary-50">
+                      {classSession.time}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-sm text-primary-50">
+                    <div className="flex items-center gap-2">
+                      <User size={14} className="opacity-70" />
+                      <span>{classSession.teacher}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin size={14} className="opacity-70" />
+                      <span>{classSession.room}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock size={14} className="opacity-70" />
+                      <span>{classSession.duration}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1 text-sm text-primary-50">
-                  <div className="flex items-center gap-2">
-                    <User size={14} />
-                    <span>{classSession.teacher}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin size={14} />
-                    <span>{classSession.room}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock size={14} />
-                    <span>{classSession.duration}</span>
-                  </div>
-                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 font-medium">No classes scheduled for today.</p>
+                <p className="text-sm text-gray-400 mt-1">Enjoy your free time!</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

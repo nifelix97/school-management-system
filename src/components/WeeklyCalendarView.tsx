@@ -1,5 +1,5 @@
-import React from 'react';
 import { Clock, MapPin, User } from 'lucide-react';
+import React from 'react';
 import type { TimetableEntry } from '../types/timetable';
 
 interface WeeklyCalendarViewProps {
@@ -8,19 +8,26 @@ interface WeeklyCalendarViewProps {
 }
 
 const WeeklyCalendarView: React.FC<WeeklyCalendarViewProps> = ({ entries, onEntryClick }) => {
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const days = [
+    { name: 'Monday', value: 1 },
+    { name: 'Tuesday', value: 2 },
+    { name: 'Wednesday', value: 3 },
+    { name: 'Thursday', value: 4 },
+    { name: 'Friday', value: 5 },
+    { name: 'Saturday', value: 6 }
+  ];
   const timeSlots = [
     '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', 
     '14:00', '15:00', '16:00', '17:00', '18:00'
   ];
 
-  const getEntriesForDayAndTime = (day: string, time: string) => {
+  const getEntriesForDayAndTime = (dayValue: number, time: string) => {
     return entries.filter(entry => {
       const entryStart = new Date(`2024-01-01 ${entry.startTime}`);
       const entryEnd = new Date(`2024-01-01 ${entry.endTime}`);
       const slotTime = new Date(`2024-01-01 ${time}`);
       
-      return entry.day === day && slotTime >= entryStart && slotTime < entryEnd;
+      return entry.dayOfWeek === dayValue && slotTime >= entryStart && slotTime < entryEnd;
     });
   };
 
@@ -51,11 +58,11 @@ const WeeklyCalendarView: React.FC<WeeklyCalendarViewProps> = ({ entries, onEntr
               <span className="text-xs xs:text-sm font-medium text-primary-300">Time</span>
             </div>
             {days.map((day) => (
-              <div key={day} className="p-2 xs:p-3 bg-primary-300/10 border-r border-primary-300/20 last:border-r-0">
+              <div key={day.value} className="p-2 xs:p-3 bg-primary-300/10 border-r border-primary-300/20 last:border-r-0">
                 <span className="text-xs xs:text-sm font-medium text-primary-50">
-                  <span className="xs:hidden">{day.slice(0, 3)}</span>
-                  <span className="hidden xs:inline sm:hidden">{day.slice(0, 4)}</span>
-                  <span className="hidden sm:inline">{day}</span>
+                  <span className="xs:hidden">{day.name.slice(0, 3)}</span>
+                  <span className="hidden xs:inline sm:hidden">{day.name.slice(0, 4)}</span>
+                  <span className="hidden sm:inline">{day.name}</span>
                 </span>
               </div>
             ))}
@@ -69,10 +76,10 @@ const WeeklyCalendarView: React.FC<WeeklyCalendarViewProps> = ({ entries, onEntr
               </div>
               
               {days.map((day) => {
-                const dayEntries = getEntriesForDayAndTime(day, time);
+                const dayEntries = getEntriesForDayAndTime(day.value, time);
                 
                 return (
-                  <div key={`${day}-${time}`} className="p-1 xs:p-2 border-r border-gray-200 last:border-r-0 relative">
+                  <div key={`${day.value}-${time}`} className="p-1 xs:p-2 border-r border-gray-200 last:border-r-0 relative">
                     {dayEntries.map((entry) => (
                       <div
                         key={entry.id}
@@ -83,7 +90,7 @@ const WeeklyCalendarView: React.FC<WeeklyCalendarViewProps> = ({ entries, onEntr
                         `}
                       >
                         <div className="text-xs font-medium mb-1 truncate">
-                          {entry.courseName}
+                          {entry.courseName || entry.courseCode}
                         </div>
                         <div className="text-xs text-gray-600 space-y-1">
                           <div className="flex items-center gap-1">
@@ -95,17 +102,12 @@ const WeeklyCalendarView: React.FC<WeeklyCalendarViewProps> = ({ entries, onEntr
                             <User className="w-3 h-3" />
                             <span className="truncate">{entry.instructorName}</span>
                           </div>
-                          {entry.classroom && (
+                          {(entry.room || entry.building) && (
                             <div className="flex items-center gap-1 hidden xs:flex">
                               <MapPin className="w-3 h-3" />
-                              <span className="truncate">{entry.classroom}</span>
+                              <span className="truncate">{entry.room} {entry.building ? `(${entry.building})` : ''}</span>
                             </div>
                           )}
-                        </div>
-                        <div className="text-xs mt-1 hidden xs:block">
-                          <span className="bg-white bg-opacity-50 px-1 rounded">
-                            {entry.level}
-                          </span>
                         </div>
                       </div>
                     ))}
