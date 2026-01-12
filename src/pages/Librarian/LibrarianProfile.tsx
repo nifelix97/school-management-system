@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import { Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import {
+    IoAlertCircleOutline,
     IoBriefcaseOutline,
     IoCallOutline,
     IoCameraOutline,
@@ -11,61 +13,115 @@ import {
     IoSaveOutline,
     IoShieldCheckmarkOutline
 } from "react-icons/io5";
+import {
+    useGetProfileQuery,
+    useUpdateProfileMutation,
+    useUploadAvatarMutation
+} from "../../app/api/user";
 
 const LibrarianProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"personal" | "professional" | "settings">("personal");
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState<string>("https://ui-avatars.com/api/?name=Sarah+Johnson&background=0D8ABC&color=fff&size=256");
+  const [profileImage, setProfileImage] = useState<string>("https://ui-avatars.com/api/?name=Librarian&background=0D8ABC&color=fff&size=256");
 
-  // Mock data - in a real app, this would come from an API
-  const [profile, setProfile] = useState({
-    firstName: "Sarah",
-    lastName: "Johnson",
-    email: "sarah.johnson@university.edu",
-    phone: "+1 (555) 123-4567",
-    address: "123 University Ave, Campus City, ST 12345",
-    dateOfBirth: "1985-06-15",
-    role: "Senior Librarian",
+  // API hooks
+  const { data: profileResponse, isLoading: isProfileLoading, error: profileError } = useGetProfileQuery();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+  const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    dateOfBirth: "",
+    role: "Librarian",
     department: "Library Services",
-    employeeId: "LIB-2019-045",
-    joinDate: "2019-08-01",
-    qualifications: ["Master of Library Science", "Bachelor of Arts in English Literature"],
-    specialization: "Digital Resources & Information Systems",
-    bio: "Dedicated library professional with over 10 years of experience in academic library management. Passionate about promoting literacy and providing excellent information services to students and faculty.",
+    employeeId: "",
+    joinDate: "",
+    qualifications: [] as string[],
+    specialization: "",
+    bio: "",
   });
 
-  const handleSave = () => {
-    // In a real app, this would send data to an API
-    setIsEditing(false);
-    // Show success message (you can add toast notification here)
-    alert("Profile updated successfully!");
+  // Sync profile data to form
+  useEffect(() => {
+    if (profileResponse?.data) {
+      const p = profileResponse.data;
+      setFormData({
+        firstName: p.firstName || "",
+        lastName: p.lastName || "",
+        email: p.email || "",
+        phone: p.telephoneNumber || "",
+        address: p.office || "", // Mapping office to address for now as per plan
+        dateOfBirth: "", // Not directly in backend StudentProfile but kept for UI
+        role: p.role || "Librarian",
+        department: p.department || "Library Services",
+        employeeId: p.registrationNumber || "",
+        joinDate: "", // Not directly in backend StudentProfile
+        qualifications: typeof p.qualifications === 'string' ? [p.qualifications] : (p.qualifications || []),
+        specialization: p.specialization || "",
+        bio: p.bio || "",
+      });
+      if (p.profileImageUrl) {
+        setProfileImage(p.profileImageUrl);
+      }
+    }
+  }, [profileResponse]);
+
+  const handleSave = async () => {
+    try {
+      await updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        telephoneNumber: formData.phone,
+        bio: formData.bio,
+        specialization: formData.specialization,
+        office: formData.address,
+        qualifications: formData.qualifications.join(", "),
+      }).unwrap();
+      
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      alert("Failed to update profile. Please try again.");
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setProfile(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Check file type
       if (!file.type.startsWith('image/')) {
         alert('Please select an image file');
         return;
       }
-      
-      // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('Image size should be less than 5MB');
         return;
       }
 
-      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      try {
+        const uploadData = new FormData();
+        uploadData.append('avatar', file);
+        await uploadAvatar(uploadData).unwrap();
+        alert("Profile picture updated successfully!");
+      } catch (error) {
+        console.error("Failed to upload avatar:", error);
+        alert("Failed to upload avatar. Please try again.");
+      }
     }
   };
 
@@ -74,6 +130,27 @@ const LibrarianProfile: React.FC = () => {
     { id: "professional", label: "Professional", icon: <IoBriefcaseOutline /> },
     { id: "settings", label: "Settings", icon: <IoShieldCheckmarkOutline /> },
   ] as const;
+
+  if (isProfileLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-50" />
+        <span className="ml-2 text-primary-50">Loading profile...</span>
+      </div>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 flex flex-col items-center justify-center p-4">
+        <IoAlertCircleOutline className="h-12 w-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-semibold text-primary-50 mb-2">Error Loading Profile</h2>
+        <p className="text-primary-50 text-center">
+          We encountered an error while loading your profile. Please try again later.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 p-3 xs:p-4 sm:p-6 lg:p-8">
@@ -99,12 +176,17 @@ const LibrarianProfile: React.FC = () => {
             {/* Profile Image & Info */}
             <div className="px-6 pb-6 text-center relative">
               <div className="relative inline-block -mt-16 mb-4">
-                <div className="w-32 h-32 rounded-full border-4 border-white shadow-md bg-gray-200 overflow-hidden">
+                <div className="w-32 h-32 rounded-full border-4 border-white shadow-md bg-gray-200 overflow-hidden relative group">
                   <img 
                     src={profileImage} 
                     alt="Profile" 
                     className="w-full h-full object-cover"
                   />
+                  {(isUploading) && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    </div>
+                  )}
                 </div>
                 <input
                   type="file"
@@ -117,37 +199,38 @@ const LibrarianProfile: React.FC = () => {
                   onClick={() => document.getElementById('profile-image-upload')?.click()}
                   className="absolute bottom-2 right-2 p-2 bg-primary-50 text-white rounded-full shadow-lg hover:bg-primary-100 transition-colors"
                   type="button"
+                  disabled={isUploading}
                 >
                   <IoCameraOutline className="w-4 h-4" />
                 </button>
               </div>
 
               <h2 className="text-xl font-bold text-primary-50 mb-1">
-                {profile.firstName} {profile.lastName}
+                {formData.firstName} {formData.lastName}
               </h2>
-              <p className="text-primary-50/60 font-medium mb-4">{profile.role}</p>
+              <p className="text-primary-50/60 font-medium mb-4">{formData.role}</p>
 
               <div className="flex justify-center gap-3 mb-6">
                 <div className="px-3 py-1 rounded-full bg-primary-50/10 text-primary-50 text-xs font-semibold border border-primary-50/20">
                   Active
                 </div>
                 <div className="px-3 py-1 rounded-full bg-primary-100/10 text-primary-100 text-xs font-semibold border border-primary-100/20">
-                  {profile.employeeId}
+                  {formData.employeeId}
                 </div>
               </div>
 
               <div className="space-y-3 text-left border-t border-gray-100 pt-6">
                 <div className="flex items-center gap-3 text-sm text-primary-50/80">
                   <IoMailOutline className="w-5 h-5 text-primary-100" />
-                  <span className="truncate">{profile.email}</span>
+                  <span className="truncate">{formData.email}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-primary-50/80">
                   <IoCallOutline className="w-5 h-5 text-primary-100" />
-                  <span>{profile.phone}</span>
+                  <span>{formData.phone}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-primary-50/80">
                   <IoLocationOutline className="w-5 h-5 text-primary-100" />
-                  <span>{profile.address}</span>
+                  <span>{formData.address}</span>
                 </div>
               </div>
             </div>
@@ -183,13 +266,16 @@ const LibrarianProfile: React.FC = () => {
               {activeTab !== "settings" && (
                 <button
                   onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                  disabled={isUpdating}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 ${
                     isEditing
                       ? "bg-primary-50 text-white hover:bg-primary-100"
                       : "bg-gray-100 text-primary-50 hover:bg-gray-200"
                   }`}
                 >
-                  {isEditing ? (
+                  {isUpdating ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isEditing ? (
                     <>
                       <IoSaveOutline className="w-4 h-4" />
                       Save Changes
@@ -208,7 +294,7 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">First Name</label>
                     <input
                       type="text"
-                      value={profile.firstName}
+                      value={formData.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       disabled={!isEditing}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-500"
@@ -218,7 +304,7 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">Last Name</label>
                     <input
                       type="text"
-                      value={profile.lastName}
+                      value={formData.lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
                       disabled={!isEditing}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-500"
@@ -228,7 +314,7 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">Email Address</label>
                     <input
                       type="email"
-                      value={profile.email}
+                      value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       disabled={!isEditing}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-500"
@@ -238,17 +324,17 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">Phone Number</label>
                     <input
                       type="tel"
-                      value={profile.phone}
+                      value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       disabled={!isEditing}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-500"
                     />
                   </div>
                   <div className="sm:col-span-2 space-y-2">
-                    <label className="text-sm font-semibold text-primary-50/80">Address</label>
+                    <label className="text-sm font-semibold text-primary-50/80">Address (Office)</label>
                     <input
                       type="text"
-                      value={profile.address}
+                      value={formData.address}
                       onChange={(e) => handleInputChange('address', e.target.value)}
                       disabled={!isEditing}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-500"
@@ -258,7 +344,7 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">Date of Birth</label>
                     <input
                       type="date"
-                      value={profile.dateOfBirth}
+                      value={formData.dateOfBirth}
                       onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                       disabled={!isEditing}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-500"
@@ -267,7 +353,7 @@ const LibrarianProfile: React.FC = () => {
                   <div className="sm:col-span-2 space-y-2">
                     <label className="text-sm font-semibold text-primary-50/80">Bio</label>
                     <textarea
-                      value={profile.bio}
+                      value={formData.bio}
                       onChange={(e) => handleInputChange('bio', e.target.value)}
                       disabled={!isEditing}
                       rows={4}
@@ -285,7 +371,7 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">Employee ID</label>
                     <input
                       type="text"
-                      value={profile.employeeId}
+                      value={formData.employeeId}
                       disabled={true}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-500"
                     />
@@ -294,7 +380,7 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">Role / Designation</label>
                     <input
                       type="text"
-                      value={profile.role}
+                      value={formData.role}
                       disabled={true}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-500"
                     />
@@ -303,7 +389,7 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">Department</label>
                     <input
                       type="text"
-                      value={profile.department}
+                      value={formData.department}
                       disabled={true}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-500"
                     />
@@ -312,7 +398,7 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">Date Joined</label>
                     <input
                       type="date"
-                      value={profile.joinDate}
+                      value={formData.joinDate}
                       disabled={true}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-500"
                     />
@@ -321,7 +407,7 @@ const LibrarianProfile: React.FC = () => {
                     <label className="text-sm font-semibold text-primary-50/80">Specialization</label>
                     <input
                       type="text"
-                      value={profile.specialization}
+                      value={formData.specialization}
                       onChange={(e) => handleInputChange('specialization', e.target.value)}
                       disabled={!isEditing}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all disabled:bg-gray-50 disabled:text-gray-500"
@@ -330,11 +416,15 @@ const LibrarianProfile: React.FC = () => {
                   <div className="sm:col-span-2 space-y-2">
                     <label className="text-sm font-semibold text-primary-50/80">Qualifications</label>
                     <div className="flex flex-wrap gap-2 p-3 rounded-xl border border-gray-200 bg-gray-50/50 min-h-[60px]">
-                      {profile.qualifications.map((qual, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm text-primary-50 shadow-sm">
-                          {qual}
-                        </span>
-                      ))}
+                      {formData.qualifications.length > 0 ? (
+                        formData.qualifications.map((qual, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm text-primary-50 shadow-sm">
+                            {qual}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">No qualifications listed</span>
+                      )}
                     </div>
                   </div>
                 </div>

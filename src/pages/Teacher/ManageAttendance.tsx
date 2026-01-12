@@ -1,15 +1,23 @@
-import { useState } from "react";
 import {
-  ChevronLeft,
-  CheckCircle,
-  XCircle,
   AlertCircle,
+  Calendar,
+  CheckCircle,
+  ChevronLeft,
+  Download,
+  Filter,
+  Loader2,
   Save,
   Users,
-  Calendar,
-  Filter,
-  Download,
+  XCircle,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  useGetCourseAttendanceQuery,
+  useMarkBulkAttendanceMutation,
+  type AttendanceStatus
+} from "../../app/api/attendance";
+import { useGetEnrolledStudentsQuery, useGetMyAssignedCoursesQuery } from "../../app/api/courses";
+import { useGetTeacherTimetableQuery } from "../../app/api/timetable";
 
 interface Student {
   id: string;
@@ -20,63 +28,153 @@ interface Student {
 
 export default function ManageAttendance() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedSubject, setSelectedSubject] = useState("Mathematics");
-  const [selectedClass, setSelectedClass] = useState("Grade 10-A");
-  const [attendance, setAttendance] = useState<Record<string, "present" | "absent" | "absent-permission">>({});
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [selectedTimetableId, setSelectedTimetableId] = useState<string>("");
+  const [sessionTime, setSessionTime] = useState<string>("");
+  const [attendance, setAttendance] = useState<Record<string, AttendanceStatus>>({});
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
-  const subjects = ["Mathematics", "Physics", "Chemistry", "English", "Biology", "History"];
-  const classes = ["Grade 10-A", "Grade 10-B", "Grade 11-A", "Grade 11-B", "Grade 12-A"];
+  // Fetch teacher's assigned courses
+  const { data: coursesData, isLoading: coursesLoading } = useGetMyAssignedCoursesQuery();
+  
+  // Fetch teacher's timetable to get session times
+  const { data: timetableData } = useGetTeacherTimetableQuery({
+    academicYear: new Date().getFullYear().toString(),
+    semester: "First"
+  });
 
-  const students: Student[] = [
-    { id: "1", name: "John Smith", code: "STU001" },
-    { id: "2", name: "Emma Johnson", code: "STU002" },
-    { id: "3", name: "Michael Brown", code: "STU003" },
-    { id: "4", name: "Sophia Davis", code: "STU004" },
-    { id: "5", name: "William Wilson", code: "STU005" },
-    { id: "6", name: "Olivia Martinez", code: "STU006" },
-    { id: "7", name: "James Anderson", code: "STU007" },
-    { id: "8", name: "Isabella Taylor", code: "STU008" },
-    { id: "9", name: "Benjamin Thomas", code: "STU009" },
-    { id: "10", name: "Mia Garcia", code: "STU010" },
-  ];
+  // Fetch enrolled students for selected course
+  const { data: studentsData, isLoading: studentsLoading } = useGetEnrolledStudentsQuery(
+    selectedCourseId,
+    { skip: !selectedCourseId }
+  );
 
-  const handleStatusChange = (studentId: string, status: "present" | "absent" | "absent-permission") => {
+  // Fetch existing attendance for selected date and course
+  const { data: existingAttendanceData } = useGetCourseAttendanceQuery(
+    {
+      courseId: selectedCourseId,
+      filters: {
+        startDate: currentDate.toISOString().split('T')[0],
+        endDate: currentDate.toISOString().split('T')[0],
+      }
+    },
+    { skip: !selectedCourseId }
+  );
+
+  // Bulk attendance mutation
+  const [markBulkAttendance, { isLoading: isSaving }] = useMarkBulkAttendanceMutation();
+
+  const courses = coursesData?.data || [];
+  const students: Student[] = (studentsData?.data || []).map(student => ({
+    id: student.id,
+    name: `${student.first_name || ''} ${student.last_name || ''}`.trim(),
+    code: student.id,
+    avatar: student.avatar
+  }));
+
+  // Auto-select first course when courses load
+  useEffect(() => {
+    if (courses.length > 0 && !selectedCourseId) {
+      setSelectedCourseId(courses[0].id);
+    }
+  }, [courses, selectedCourseId]);
+
+  // Find matching timetable entry for selected course and date
+  useEffect(() => {
+    if (selectedCourseId && timetableData?.data) {
+      // Convert JavaScript day (0=Sunday to 6=Saturday) to ISO day (1=Monday to 7=Sunday)
+      const jsDay = currentDate.getDay(); // 0-6
+      const dayOfWeek = jsDay === 0 ? 7 : jsDay; // Convert to 1-7 (1=Monday, 7=Sunday)
+      
+      const matchingEntry = timetableData.data.find(
+        entry => entry.courseId === selectedCourseId && entry.dayOfWeek === dayOfWeek
+      );
+      
+      if (matchingEntry) {
+        setSelectedTimetableId(matchingEntry.id);
+        setSessionTime(`${matchingEntry.startTime}-${matchingEntry.endTime}`);
+      } else {
+        // Default session time if no timetable entry found
+        setSessionTime("08:00-10:00");
+      }
+    }
+  }, [selectedCourseId, currentDate, timetableData]);
+
+  // Load existing attendance records
+  useEffect(() => {
+    if (existingAttendanceData?.data) {
+      const attendanceMap: Record<string, AttendanceStatus> = {};
+      existingAttendanceData.data.forEach(record => {
+        attendanceMap[record.studentId] = record.status;
+      });
+      setAttendance(attendanceMap);
+    } else {
+      // Clear attendance when changing date/course
+      setAttendance({});
+    }
+  }, [existingAttendanceData]);
+
+  const handleStatusChange = (studentId: string, status: AttendanceStatus) => {
     setAttendance(prev => ({ ...prev, [studentId]: status }));
   };
 
-  const handleSaveAttendance = () => {
-    // Save attendance logic here
-    console.log("Saving attendance:", { date: currentDate, subject: selectedSubject, class: selectedClass, attendance });
-    setShowSaveConfirm(false);
-    alert("Attendance saved successfully!");
+  const handleSaveAttendance = async () => {
+    if (!selectedCourseId || students.length === 0) {
+      alert("Please select a course with students");
+      return;
+    }
+
+    try {
+      const attendanceRecords = students.map(student => ({
+        studentId: student.id,
+        status: attendance[student.id] || 'absent' as AttendanceStatus,
+        remarks: attendance[student.id] ? undefined : 'Not marked'
+      }));
+
+      await markBulkAttendance({
+        courseId: selectedCourseId,
+        timetableId: selectedTimetableId || selectedCourseId,
+        attendanceDate: currentDate.toISOString().split('T')[0],
+        sessionTime: sessionTime,
+        attendances: attendanceRecords
+      }).unwrap();
+
+      setShowSaveConfirm(false);
+      alert("Attendance saved successfully!");
+    } catch (error: any) {
+      console.error("Failed to save attendance:", error);
+      alert(`Failed to save attendance: ${error?.data?.message || 'Unknown error'}`);
+    }
   };
 
   const getStats = () => {
     const total = students.length;
     const present = Object.values(attendance).filter(s => s === "present").length;
     const absent = Object.values(attendance).filter(s => s === "absent").length;
-    const excused = Object.values(attendance).filter(s => s === "absent-permission").length;
-    const unmarked = total - present - absent - excused;
-    return { total, present, absent, excused, unmarked };
+    const excused = Object.values(attendance).filter(s => s === "excused").length;
+    const late = Object.values(attendance).filter(s => s === "late").length;
+    const unmarked = total - present - absent - excused - late;
+    return { total, present, absent, excused, late, unmarked };
   };
 
   const handleDownloadAttendance = () => {
+    const selectedCourse = courses.find(c => c.id === selectedCourseId);
     const csvData = [];
-    csvData.push(['Student Code', 'Student Name', 'Status', 'Date', 'Subject', 'Class']);
+    csvData.push(['Student Code', 'Student Name', 'Status', 'Date', 'Course', 'Session Time']);
     
     students.forEach(student => {
       const status = attendance[student.id] || 'Unmarked';
       const statusText = status === 'present' ? 'Present' : 
                         status === 'absent' ? 'Absent' : 
-                        status === 'absent-permission' ? 'Excused' : 'Unmarked';
+                        status === 'excused' ? 'Excused' :
+                        status === 'late' ? 'Late' : 'Unmarked';
       csvData.push([
         student.code,
         student.name,
         statusText,
         currentDate.toLocaleDateString(),
-        selectedSubject,
-        selectedClass
+        selectedCourse?.title || 'Unknown Course',
+        sessionTime
       ]);
     });
 
@@ -85,7 +183,7 @@ export default function ManageAttendance() {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `attendance_${selectedClass}_${selectedSubject}_${currentDate.toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `attendance_${selectedCourse?.code}_${currentDate.toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -93,6 +191,30 @@ export default function ManageAttendance() {
   };
 
   const stats = getStats();
+  const selectedCourse = courses.find(c => c.id === selectedCourseId);
+
+  if (coursesLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4" style={{color: 'var(--color-primary-50)'}} />
+          <p className="text-primary-50 font-medium">Loading courses...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (courses.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
+        <div className="text-center bg-white p-8 rounded-2xl shadow-lg">
+          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-orange-500" />
+          <h2 className="text-2xl font-bold text-primary-50 mb-2">No Courses Assigned</h2>
+          <p className="text-primary-50">You don't have any courses assigned yet.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
@@ -134,7 +256,7 @@ export default function ManageAttendance() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 xs:grid-cols-5 gap-2 xs:gap-3 sm:gap-4 mb-3 xs:mb-4 sm:mb-6">
+        <div className="grid grid-cols-2 xs:grid-cols-3 lg:grid-cols-6 gap-2 xs:gap-3 sm:gap-4 mb-3 xs:mb-4 sm:mb-6">
           <div className="bg-white rounded-lg xs:rounded-xl shadow-sm p-2 xs:p-3 sm:p-4 border-l-4" style={{borderColor: 'var(--color-primary-50)'}}>
             <div className="flex items-center gap-1.5 xs:gap-2">
               <Users style={{color: 'var(--color-primary-50)'}} size={16} />
@@ -165,6 +287,16 @@ export default function ManageAttendance() {
             </div>
           </div>
 
+          <div className="bg-white rounded-lg xs:rounded-xl shadow-sm p-2 xs:p-3 sm:p-4 border-l-4 border-yellow-500">
+            <div className="flex items-center gap-1.5 xs:gap-2">
+              <AlertCircle className="text-yellow-600" size={16} />
+              <div>
+                <p className="text-xs xs:text-sm text-primary-50">Late</p>
+                <p className="text-sm xs:text-base sm:text-lg font-bold text-primary-50">{stats.late}</p>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-lg xs:rounded-xl shadow-sm p-2 xs:p-3 sm:p-4 border-l-4 border-orange-500">
             <div className="flex items-center gap-1.5 xs:gap-2">
               <AlertCircle className="text-orange-600" size={16} />
@@ -188,7 +320,7 @@ export default function ManageAttendance() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg xs:rounded-xl shadow-sm p-3 xs:p-4 sm:p-6 mb-3 xs:mb-4 sm:mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 xs:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 xs:gap-4">
             <div>
               <label className="block text-xs xs:text-sm font-medium text-primary-50 mb-2">
                 <Calendar size={14} className="inline mr-1" />
@@ -204,45 +336,48 @@ export default function ManageAttendance() {
 
             <div>
               <label className="block text-xs xs:text-sm font-medium text-primary-50 mb-2">
-                Subject
+                Course
               </label>
               <select
-                value={selectedSubject}
-                onChange={(e) => setSelectedSubject(e.target.value)}
+                value={selectedCourseId}
+                onChange={(e) => setSelectedCourseId(e.target.value)}
                 className="w-full px-3 py-2 border border-primary-50 text-primary-50 rounded-lg text-xs xs:text-sm"
               >
-                {subjects.map(subject => (
-                  <option key={subject} value={subject}>{subject}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs xs:text-sm font-medium text-primary-50 mb-2">
-                Class
-              </label>
-              <select
-                value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
-                className="w-full px-3 py-2 border border-primary-50 text-primary-50 rounded-lg text-xs xs:text-sm"
-              >
-                {classes.map(cls => (
-                  <option key={cls} value={cls}>{cls}</option>
+                {courses.map(course => (
+                  <option key={course.id} value={course.id}>
+                    {course.code} - {course.title}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
+
+          {/* Session Time Display */}
+          {sessionTime && (
+            <div className="mt-3 p-2 bg-blue-50 rounded-lg">
+              <p className="text-xs text-blue-700">
+                <strong>Session Time:</strong> {sessionTime}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Student List */}
         <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg overflow-hidden">
           <div className="p-3 xs:p-4 sm:p-6 border-b border-gray-200">
-            <h2 className="text-base xs:text-lg sm:text-xl font-bold text-primary-50">
-              Student Attendance - {currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </h2>
-            <p className="text-xs xs:text-sm text-primary-50 mt-1">
-              {selectedSubject} • {selectedClass}
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base xs:text-lg sm:text-xl font-bold text-primary-50">
+                  Student Attendance - {currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </h2>
+                <p className="text-xs xs:text-sm text-primary-50 mt-1">
+                  {selectedCourse?.code} - {selectedCourse?.title}
+                </p>
+              </div>
+              {studentsLoading && (
+                <Loader2 className="w-5 h-5 animate-spin text-primary-50" />
+              )}
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -306,9 +441,26 @@ export default function ManageAttendance() {
                         </button>
 
                         <button
-                          onClick={() => handleStatusChange(student.id, "absent-permission")}
+                          onClick={() => handleStatusChange(student.id, "late")}
                           className={`p-2 xs:p-3 rounded-lg transition-all ${
-                            attendance[student.id] === "absent-permission"
+                            attendance[student.id] === "late"
+                              ? "bg-yellow-100 ring-2 ring-yellow-500"
+                              : "bg-gray-100 hover:bg-yellow-50"
+                          }`}
+                          title="Late"
+                        >
+                          <AlertCircle
+                            size={16}
+                            className={`xs:w-5 xs:h-5 ${
+                              attendance[student.id] === "late" ? "text-yellow-600" : "text-gray-400"
+                            }`}
+                          />
+                        </button>
+
+                        <button
+                          onClick={() => handleStatusChange(student.id, "excused")}
+                          className={`p-2 xs:p-3 rounded-lg transition-all ${
+                            attendance[student.id] === "excused"
                               ? "bg-orange-100 ring-2 ring-orange-500"
                               : "bg-gray-100 hover:bg-orange-50"
                           }`}
@@ -317,7 +469,7 @@ export default function ManageAttendance() {
                           <AlertCircle
                             size={16}
                             className={`xs:w-5 xs:h-5 ${
-                              attendance[student.id] === "absent-permission" ? "text-orange-600" : "text-gray-400"
+                              attendance[student.id] === "excused" ? "text-orange-600" : "text-gray-400"
                             }`}
                           />
                         </button>
@@ -336,7 +488,7 @@ export default function ManageAttendance() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => {
-                const newAttendance: Record<string, "present" | "absent" | "absent-permission"> = {};
+                const newAttendance: Record<string, AttendanceStatus> = {};
                 students.forEach(s => newAttendance[s.id] = "present");
                 setAttendance(newAttendance);
               }}
@@ -346,7 +498,7 @@ export default function ManageAttendance() {
             </button>
             <button
               onClick={() => {
-                const newAttendance: Record<string, "present" | "absent" | "absent-permission"> = {};
+                const newAttendance: Record<string, AttendanceStatus> = {};
                 students.forEach(s => newAttendance[s.id] = "absent");
                 setAttendance(newAttendance);
               }}
@@ -373,7 +525,7 @@ export default function ManageAttendance() {
                 Confirm Save Attendance
               </h2>
               <p className="text-xs xs:text-sm text-primary-50 mb-6">
-                Are you sure you want to save attendance for {selectedClass} - {selectedSubject} on{" "}
+                Are you sure you want to save attendance for {selectedCourse?.code} - {selectedCourse?.title} on{" "}
                 {currentDate.toLocaleDateString()}?
               </p>
               <div className="space-y-2 mb-6 p-3 bg-gray-50 rounded-lg">
@@ -384,6 +536,10 @@ export default function ManageAttendance() {
                 <div className="flex justify-between text-xs xs:text-sm">
                   <span className="text-primary-50">Absent:</span>
                   <span className="font-bold text-red-600">{stats.absent}</span>
+                </div>
+                <div className="flex justify-between text-xs xs:text-sm">
+                  <span className="text-primary-50">Late:</span>
+                  <span className="font-bold text-yellow-600">{stats.late}</span>
                 </div>
                 <div className="flex justify-between text-xs xs:text-sm">
                   <span className="text-primary-50">Excused:</span>
@@ -397,17 +553,28 @@ export default function ManageAttendance() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowSaveConfirm(false)}
-                  className="flex-1 px-4 py-2 border border-primary-50 text-primary-50 rounded-lg hover:bg-gray-50 transition-colors text-xs xs:text-sm font-medium"
+                  disabled={isSaving}
+                  className="flex-1 px-4 py-2 border border-primary-50 text-primary-50 rounded-lg hover:bg-gray-50 transition-colors text-xs xs:text-sm font-medium disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveAttendance}
-                  className="flex-1 px-4 py-2 text-white rounded-lg transition-colors text-xs xs:text-sm font-medium flex items-center justify-center gap-2"
+                  disabled={isSaving}
+                  className="flex-1 px-4 py-2 text-white rounded-lg transition-colors text-xs xs:text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50"
                   style={{backgroundColor: 'var(--color-primary-50)'}}
                 >
-                  <Save size={14} />
-                  Save
+                  {isSaving ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={14} />
+                      Save
+                    </>
+                  )}
                 </button>
               </div>
             </div>

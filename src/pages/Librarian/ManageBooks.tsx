@@ -1,39 +1,31 @@
-import React, { useState } from "react";
+import { Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import {
-    IoAddOutline,
-    IoAlertCircleOutline,
-    IoBookOutline,
-    IoCalendarOutline,
-    IoCheckmarkCircleOutline,
-    IoChevronBackOutline,
-    IoChevronForwardOutline,
-    IoCloseOutline,
-    IoCreateOutline,
-    IoLocationOutline,
-    IoPricetagOutline,
-    IoSaveOutline,
-    IoSearchOutline,
-    IoSwapHorizontalOutline,
-    IoTrashOutline,
+  IoAddOutline,
+  IoAlertCircleOutline,
+  IoBookOutline,
+  IoCalendarOutline,
+  IoCheckmarkCircleOutline,
+  IoChevronBackOutline,
+  IoChevronForwardOutline,
+  IoCloseOutline,
+  IoCreateOutline,
+  IoLocationOutline,
+  IoPricetagOutline,
+  IoSaveOutline,
+  IoSearchOutline,
+  IoSwapHorizontalOutline,
+  IoTrashOutline,
 } from "react-icons/io5";
+import {
+  useCreateBookMutation,
+  useGetBooksQuery,
+  useUpdateBookMutation,
+  type Book,
+  type CreateBookDto,
+  type UpdateBookDto,
+} from "../../app/api/library";
 import Input from "../../components/ui/Input";
-
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  isbn: string;
-  category: string;
-  publisher: string;
-  publishYear: number;
-  edition: string;
-  totalCopies: number;
-  availableCopies: number;
-  price: number;
-  location: string;
-  dateAdded: string;
-  status: "available" | "low-stock" | "out-of-stock";
-}
 
 const ManageBooks: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,6 +33,7 @@ const ManageBooks: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const itemsPerPage = 10;
 
   // Form state
@@ -49,140 +42,64 @@ const ManageBooks: React.FC = () => {
     author: "",
     isbn: "",
     category: "",
+    subcategory: "",
     publisher: "",
-    publishYear: "",
+    publicationYear: "",
     edition: "",
+    language: "",
+    pages: "",
+    description: "",
+    coverImage: "",
     totalCopies: "",
-    price: "",
     location: "",
   });
 
-  // Mock data
-  const [books, setBooks] = useState<Book[]>([
-    {
-      id: "1",
-      title: "Introduction to Algorithms",
-      author: "Thomas H. Cormen",
-      isbn: "978-0262033848",
-      category: "Computer Science",
-      publisher: "MIT Press",
-      publishYear: 2009,
-      edition: "3rd Edition",
-      totalCopies: 15,
-      availableCopies: 8,
-      price: 89.99,
-      location: "Section A, Shelf 12",
-      dateAdded: "2024-01-15",
-      status: "available",
-    },
-    {
-      id: "2",
-      title: "Clean Code",
-      author: "Robert C. Martin",
-      isbn: "978-0132350884",
-      category: "Software Engineering",
-      publisher: "Prentice Hall",
-      publishYear: 2008,
-      edition: "1st Edition",
-      totalCopies: 10,
-      availableCopies: 2,
-      price: 54.99,
-      location: "Section A, Shelf 15",
-      dateAdded: "2024-02-20",
-      status: "low-stock",
-    },
-    {
-      id: "3",
-      title: "Design Patterns",
-      author: "Erich Gamma",
-      isbn: "978-0201633612",
-      category: "Software Engineering",
-      publisher: "Addison-Wesley",
-      publishYear: 1994,
-      edition: "1st Edition",
-      totalCopies: 8,
-      availableCopies: 0,
-      price: 64.99,
-      location: "Section A, Shelf 14",
-      dateAdded: "2024-03-10",
-      status: "out-of-stock",
-    },
-    {
-      id: "4",
-      title: "The Lean Startup",
-      author: "Eric Ries",
-      isbn: "978-0307887894",
-      category: "Business",
-      publisher: "Crown Business",
-      publishYear: 2011,
-      edition: "1st Edition",
-      totalCopies: 12,
-      availableCopies: 7,
-      price: 29.99,
-      location: "Section B, Shelf 5",
-      dateAdded: "2024-04-05",
-      status: "available",
-    },
-    {
-      id: "5",
-      title: "Artificial Intelligence",
-      author: "Stuart Russell",
-      isbn: "978-0136042594",
-      category: "Computer Science",
-      publisher: "Pearson",
-      publishYear: 2020,
-      edition: "4th Edition",
-      totalCopies: 20,
-      availableCopies: 12,
-      price: 119.99,
-      location: "Section A, Shelf 10",
-      dateAdded: "2024-05-12",
-      status: "available",
-    },
-  ]);
-
-  const categories = ["all", "Computer Science", "Software Engineering", "Business", "Engineering", "Medicine", "Arts & Literature"];
-
-  // Filter books
-  const filteredBooks = books.filter((book) => {
-    const matchesSearch =
-      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.isbn.includes(searchQuery);
-    const matchesCategory = selectedCategory === "all" || book.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+  // API hooks
+  const { data: booksResponse, isLoading, error } = useGetBooksQuery({
+    search: searchQuery || undefined,
+    category: selectedCategory !== "all" ? selectedCategory : undefined,
   });
 
+  const [createBook, { isLoading: isCreating }] = useCreateBookMutation();
+  const [updateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
+
+  const books: Book[] = booksResponse?.data || [];
+
+  // Get unique categories from books
+  const categories = ["all", ...Array.from(new Set(books.map(book => book.category)))];
+
   // Pagination
-  const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
-  const paginatedBooks = filteredBooks.slice(
+  const totalPages = Math.ceil(books.length / itemsPerPage);
+  const paginatedBooks = books.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "available":
-        return "bg-green-50 text-green-600 border-green-200";
-      case "low-stock":
-        return "bg-amber-50 text-amber-600 border-amber-200";
-      case "out-of-stock":
-        return "bg-red-50 text-red-600 border-red-200";
-      default:
-        return "bg-gray-50 text-gray-600 border-gray-200";
+  // Reset to page 1 when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
+
+  const getStatusColor = (availableCopies: number, totalCopies: number) => {
+    if (availableCopies === 0) {
+      return "bg-red-50 text-red-600 border-red-200";
+    } else if (availableCopies < totalCopies * 0.3) {
+      return "bg-amber-50 text-amber-600 border-amber-200";
     }
+    return "bg-green-50 text-green-600 border-green-200";
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "available":
-        return <IoCheckmarkCircleOutline className="w-4 h-4" />;
-      case "low-stock":
-      case "out-of-stock":
-        return <IoAlertCircleOutline className="w-4 h-4" />;
-      default:
-        return null;
+  const getStatusIcon = (availableCopies: number, totalCopies: number) => {
+    if (availableCopies === 0 || availableCopies < totalCopies * 0.3) {
+      return <IoAlertCircleOutline className="w-4 h-4" />;
     }
+    return <IoCheckmarkCircleOutline className="w-4 h-4" />;
+  };
+
+  const getStatusText = (availableCopies: number, totalCopies: number) => {
+    if (availableCopies === 0) return "out of stock";
+    if (availableCopies < totalCopies * 0.3) return "low stock";
+    return "available";
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -190,24 +107,86 @@ const ManageBooks: React.FC = () => {
   };
 
   const handleEdit = (book: Book) => {
+    setSelectedBookId(book.id);
     setFormData({
       title: book.title,
       author: book.author,
       isbn: book.isbn,
       category: book.category,
-      publisher: book.publisher,
-      publishYear: book.publishYear.toString(),
-      edition: book.edition,
+      subcategory: book.subcategory || "",
+      publisher: book.publisher || "",
+      publicationYear: book.publicationYear?.toString() || "",
+      edition: book.edition || "",
+      language: book.language || "",
+      pages: book.pages?.toString() || "",
+      description: book.description || "",
+      coverImage: book.coverImage || "",
       totalCopies: book.totalCopies.toString(),
-      price: book.price.toString(),
-      location: book.location,
+      location: book.location || "",
     });
     setShowEditModal(true);
   };
 
-  const handleDelete = (bookId: string) => {
+  const handleDelete = async (_bookId: string) => {
     if (confirm("Are you sure you want to delete this book?")) {
-      setBooks(books.filter((b) => b.id !== bookId));
+      // TODO: Implement delete mutation when available in API
+      alert("Delete functionality will be implemented when API endpoint is available");
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      if (showEditModal && selectedBookId) {
+        // Update existing book
+        const updateData: UpdateBookDto = {
+          title: formData.title,
+          author: formData.author,
+          isbn: formData.isbn,
+          category: formData.category,
+          subcategory: formData.subcategory || undefined,
+          publisher: formData.publisher || undefined,
+          publicationYear: formData.publicationYear ? parseInt(formData.publicationYear) : undefined,
+          edition: formData.edition || undefined,
+          language: formData.language || undefined,
+          pages: formData.pages ? parseInt(formData.pages) : undefined,
+          description: formData.description || undefined,
+          coverImage: formData.coverImage || undefined,
+          totalCopies: parseInt(formData.totalCopies),
+          location: formData.location || undefined,
+        };
+
+        await updateBook({ id: selectedBookId, data: updateData }).unwrap();
+        alert("Book updated successfully!");
+      } else {
+        // Create new book
+        const createData: CreateBookDto = {
+          title: formData.title,
+          author: formData.author,
+          isbn: formData.isbn,
+          category: formData.category,
+          subcategory: formData.subcategory || undefined,
+          publisher: formData.publisher || undefined,
+          publicationYear: formData.publicationYear ? parseInt(formData.publicationYear) : undefined,
+          edition: formData.edition || undefined,
+          language: formData.language || undefined,
+          pages: formData.pages ? parseInt(formData.pages) : undefined,
+          description: formData.description || undefined,
+          coverImage: formData.coverImage || undefined,
+          totalCopies: parseInt(formData.totalCopies),
+          location: formData.location || undefined,
+        };
+
+        await createBook(createData).unwrap();
+        alert("Book added successfully!");
+      }
+
+      // Close modal and reset form
+      setShowAddModal(false);
+      setShowEditModal(false);
+      resetForm();
+    } catch (error) {
+      console.error("Failed to save book:", error);
+      alert("Failed to save book. Please try again.");
     }
   };
 
@@ -217,14 +196,42 @@ const ManageBooks: React.FC = () => {
       author: "",
       isbn: "",
       category: "",
+      subcategory: "",
       publisher: "",
-      publishYear: "",
+      publicationYear: "",
       edition: "",
+      language: "",
+      pages: "",
+      description: "",
+      coverImage: "",
       totalCopies: "",
-      price: "",
       location: "",
     });
+    setSelectedBookId(null);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-50" />
+        <span className="ml-2 text-primary-50">Loading books...</span>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 flex flex-col items-center justify-center p-4">
+        <IoAlertCircleOutline className="h-12 w-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-semibold text-primary-50 mb-2">Error Loading Books</h2>
+        <p className="text-primary-50 text-center">
+          We encountered an error while loading the books. Please try again later.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 p-3 xs:p-4 sm:p-6 lg:p-8">
@@ -338,66 +345,76 @@ const ManageBooks: React.FC = () => {
       {paginatedBooks.length === 0 ? (
         <div className="bg-white rounded-xl p-12 text-center shadow-lg border border-gray-100 mb-6">
           <IoBookOutline className="w-12 h-12 text-primary-50/30 mx-auto mb-3" />
-          <p className="text-primary-50/60">No books found</p>
+          <p className="text-primary-50/60">
+            {searchQuery || selectedCategory !== "all" 
+              ? "No books found matching your search" 
+              : "No books in the library yet"}
+          </p>
         </div>
       ) : (
         <>
           {/* Mobile Card View */}
           <div className="lg:hidden space-y-4 mb-6">
-            {paginatedBooks.map((book) => (
-              <div key={book.id} className="bg-white rounded-xl shadow-md border border-gray-100 p-4 animate-[fadeIn_0.3s_ease-out]">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-primary-50 mb-1">{book.title}</h3>
-                    <p className="text-sm text-primary-50/60">{book.author}</p>
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 ${getStatusColor(book.status)}`}>
-                    {getStatusIcon(book.status)}
-                    {book.status.replace("-", " ")}
-                  </span>
-                </div>
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-primary-50/60">ISBN:</span>
-                    <span className="font-medium text-primary-50">{book.isbn}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-primary-50/60">Category:</span>
-                    <span className="px-2.5 py-0.5 bg-primary-50/10 text-primary-50 rounded-full text-xs font-semibold">
-                      {book.category}
+            {paginatedBooks.map((book) => {
+              const statusText = getStatusText(book.availableCopies, book.totalCopies);
+              
+              return (
+                <div key={book.id} className="bg-white rounded-xl shadow-md border border-gray-100 p-4 animate-[fadeIn_0.3s_ease-out]">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-primary-50 mb-1">{book.title}</h3>
+                      <p className="text-sm text-primary-50/60">{book.author}</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 ${getStatusColor(book.availableCopies, book.totalCopies)}`}>
+                      {getStatusIcon(book.availableCopies, book.totalCopies)}
+                      {statusText}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-primary-50/60">Available:</span>
-                    <span className="font-semibold text-primary-50">
-                      {book.availableCopies}/{book.totalCopies}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-primary-50/60">Price:</span>
-                    <span className="font-semibold text-primary-50">${book.price.toFixed(2)}</span>
-                  </div>
-                </div>
 
-                <div className="flex gap-2 pt-3 border-t border-gray-100">
-                  <button
-                    onClick={() => handleEdit(book)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary-50 text-white rounded-lg hover:bg-primary-100 transition-colors text-sm font-semibold"
-                  >
-                    <IoCreateOutline className="w-4 h-4" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(book.id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-semibold"
-                  >
-                    <IoTrashOutline className="w-4 h-4" />
-                    Delete
-                  </button>
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-primary-50/60">ISBN:</span>
+                      <span className="font-medium text-primary-50">{book.isbn}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-primary-50/60">Category:</span>
+                      <span className="px-2.5 py-0.5 bg-primary-50/10 text-primary-50 rounded-full text-xs font-semibold">
+                        {book.category}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-primary-50/60">Available:</span>
+                      <span className="font-semibold text-primary-50">
+                        {book.availableCopies}/{book.totalCopies}
+                      </span>
+                    </div>
+                    {book.location && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-primary-50/60">Location:</span>
+                        <span className="font-medium text-primary-50">{book.location}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 pt-3 border-t border-gray-100">
+                    <button
+                      onClick={() => handleEdit(book)}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary-50 text-white rounded-lg hover:bg-primary-100 transition-colors text-sm font-semibold"
+                    >
+                      <IoCreateOutline className="w-4 h-4" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(book.id)}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-semibold"
+                    >
+                      <IoTrashOutline className="w-4 h-4" />
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Desktop Table View */}
@@ -418,7 +435,7 @@ const ManageBooks: React.FC = () => {
                     Copies
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
-                    Price
+                    Location
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
                     Status
@@ -429,58 +446,64 @@ const ManageBooks: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {paginatedBooks.map((book) => (
-                  <tr key={book.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-4">
-                      <div>
-                        <div className="font-semibold text-primary-50">{book.title}</div>
-                        <div className="text-sm text-primary-50/60">{book.author}</div>
-                        <div className="text-xs text-primary-50/50 mt-1">{book.publisher}</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-primary-50/70">{book.isbn}</td>
-                    <td className="px-4 py-4">
-                      <span className="px-2.5 py-1 bg-primary-50/10 text-primary-50 rounded-full text-xs font-semibold">
-                        {book.category}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="text-sm">
-                        <div className="font-semibold text-primary-50">
-                          {book.availableCopies}/{book.totalCopies}
+                {paginatedBooks.map((book) => {
+                  const statusText = getStatusText(book.availableCopies, book.totalCopies);
+                  
+                  return (
+                    <tr key={book.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-4">
+                        <div>
+                          <div className="font-semibold text-primary-50">{book.title}</div>
+                          <div className="text-sm text-primary-50/60">{book.author}</div>
+                          {book.publisher && (
+                            <div className="text-xs text-primary-50/50 mt-1">{book.publisher}</div>
+                          )}
                         </div>
-                        <div className="text-xs text-primary-50/60">available</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm font-semibold text-primary-50">
-                      ${book.price.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 w-fit ${getStatusColor(book.status)}`}>
-                        {getStatusIcon(book.status)}
-                        {book.status.replace("-", " ")}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(book)}
-                          className="p-2 bg-primary-50 text-white rounded-lg hover:bg-primary-100 transition-colors"
-                          title="Edit"
-                        >
-                          <IoCreateOutline className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(book.id)}
-                          className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
-                          title="Delete"
-                        >
-                          <IoTrashOutline className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-primary-50/70">{book.isbn}</td>
+                      <td className="px-4 py-4">
+                        <span className="px-2.5 py-1 bg-primary-50/10 text-primary-50 rounded-full text-xs font-semibold">
+                          {book.category}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="text-sm">
+                          <div className="font-semibold text-primary-50">
+                            {book.availableCopies}/{book.totalCopies}
+                          </div>
+                          <div className="text-xs text-primary-50/60">available</div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-primary-50/70">
+                        {book.location || "N/A"}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 w-fit ${getStatusColor(book.availableCopies, book.totalCopies)}`}>
+                          {getStatusIcon(book.availableCopies, book.totalCopies)}
+                          {statusText}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(book)}
+                            className="p-2 bg-primary-50 text-white rounded-lg hover:bg-primary-100 transition-colors"
+                            title="Edit"
+                          >
+                            <IoCreateOutline className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(book.id)}
+                            className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                            title="Delete"
+                          >
+                            <IoTrashOutline className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -493,7 +516,7 @@ const ManageBooks: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-sm text-primary-50/70">
               Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-              {Math.min(currentPage * itemsPerPage, filteredBooks.length)} of {filteredBooks.length} books
+              {Math.min(currentPage * itemsPerPage, books.length)} of {books.length} books
             </div>
             <div className="flex gap-2">
               <button
@@ -580,17 +603,21 @@ const ManageBooks: React.FC = () => {
                   <label className="block text-sm font-medium text-primary-50 mb-2">
                     Category <span className="text-red-500">*</span>
                   </label>
-                  <select
+                  <input
+                    type="text"
                     value={formData.category}
                     onChange={(e) => handleInputChange('category', e.target.value)}
+                    placeholder="e.g., Computer Science"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all bg-gray-50"
-                  >
-                    <option value="">Select category</option>
-                    {categories.filter(c => c !== "all").map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
+                <Input
+                  label="Subcategory"
+                  type="text"
+                  placeholder="Enter subcategory (optional)"
+                  value={formData.subcategory}
+                  onChange={(e) => handleInputChange('subcategory', e.target.value)}
+                />
                 <Input
                   label="Publisher"
                   type="text"
@@ -599,11 +626,11 @@ const ManageBooks: React.FC = () => {
                   onChange={(e) => handleInputChange('publisher', e.target.value)}
                 />
                 <Input
-                  label="Publish Year"
+                  label="Publication Year"
                   type="number"
                   placeholder="Enter year"
-                  value={formData.publishYear}
-                  onChange={(e) => handleInputChange('publishYear', e.target.value)}
+                  value={formData.publicationYear}
+                  onChange={(e) => handleInputChange('publicationYear', e.target.value)}
                   leftIcon={<IoCalendarOutline className="w-5 h-5" />}
                 />
                 <Input
@@ -614,20 +641,26 @@ const ManageBooks: React.FC = () => {
                   onChange={(e) => handleInputChange('edition', e.target.value)}
                 />
                 <Input
+                  label="Language"
+                  type="text"
+                  placeholder="e.g., English"
+                  value={formData.language}
+                  onChange={(e) => handleInputChange('language', e.target.value)}
+                />
+                <Input
+                  label="Pages"
+                  type="number"
+                  placeholder="Number of pages"
+                  value={formData.pages}
+                  onChange={(e) => handleInputChange('pages', e.target.value)}
+                />
+                <Input
                   label="Total Copies"
                   type="number"
                   placeholder="Enter number of copies"
                   value={formData.totalCopies}
                   onChange={(e) => handleInputChange('totalCopies', e.target.value)}
                   required
-                />
-                <Input
-                  label="Price"
-                  type="number"
-                  placeholder="Enter price"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange('price', e.target.value)}
-                  leftIcon={<span className="text-primary-50">$</span>}
                 />
                 <Input
                   label="Location"
@@ -637,6 +670,27 @@ const ManageBooks: React.FC = () => {
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   leftIcon={<IoLocationOutline className="w-5 h-5" />}
                 />
+                <div className="md:col-span-2">
+                  <Input
+                    label="Cover Image URL"
+                    type="text"
+                    placeholder="Enter cover image URL (optional)"
+                    value={formData.coverImage}
+                    onChange={(e) => handleInputChange('coverImage', e.target.value)}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-primary-50 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Enter book description (optional)"
+                    rows={4}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all bg-gray-50"
+                  />
+                </div>
               </div>
 
               <div className="mt-6 flex gap-3">
@@ -650,9 +704,22 @@ const ManageBooks: React.FC = () => {
                 >
                   Cancel
                 </button>
-                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-50 to-primary-100 text-white rounded-xl hover:shadow-lg transition-all font-semibold">
-                  <IoSaveOutline className="w-5 h-5" />
-                  {showEditModal ? "Update Book" : "Add Book"}
+                <button 
+                  onClick={handleSubmit}
+                  disabled={isCreating || isUpdating}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-50 to-primary-100 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {(isCreating || isUpdating) ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      {showEditModal ? "Updating..." : "Adding..."}
+                    </>
+                  ) : (
+                    <>
+                      <IoSaveOutline className="w-5 h-5" />
+                      {showEditModal ? "Update Book" : "Add Book"}
+                    </>
+                  )}
                 </button>
               </div>
             </div>

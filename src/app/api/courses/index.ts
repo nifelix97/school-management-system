@@ -272,7 +272,7 @@ export const coursesApi = apiSlice.injectEndpoints({
     }),
 
     getMyAssignedCourses: builder.query<ApiResponse<Course[]>, void>({
-      query: () => '/courses/my-assigned',
+      query: () => '/courses/my-courses',
       transformResponse: (response: ApiResponse<any[]>) => ({
         ...response,
         data: response.data?.map(course => ({

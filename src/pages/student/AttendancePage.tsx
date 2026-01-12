@@ -1,33 +1,34 @@
-import React, { useState } from "react";
 import {
+  AlertCircle,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
+  Clock,
   FileText,
-  TrendingUp,
   Plus,
   Send,
+  TrendingUp,
   X,
+  XCircle
 } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import type { AttendanceRecord as APIAttendanceRecord } from "../../app/api/attendance";
+import { useGetStudentAttendanceQuery } from "../../app/api/attendance";
+import { useGetEnrolledCoursesQuery } from "../../app/api/courses";
 
-// Import for navigation (you can replace with your routing solution)
-// import { useNavigate } from 'react-router-dom';
-
+// Local interface for UI display
 interface AttendanceRecord {
   date: Date;
-  status: "present" | "absent" | "absent-permission";
+  status: "present" | "absent" | "absent-permission" | "late";
   subject: string;
   time: string;
   reason?: string;
+  courseId: string;
 }
 
-
-
 export default function AttendancePage() {
-  const [currentMonth, setCurrentMonth] = useState(11); // December
-  const [currentYear, setCurrentYear] = useState(2024);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -46,37 +47,80 @@ export default function AttendancePage() {
     "July", "August", "September", "October", "November", "December"
   ];
 
-  const subjects = ["Mathematics", "Physics", "Chemistry", "English", "Biology", "History"];
+  // Get current user from localStorage
+  const userStr = localStorage.getItem('user');
+  const currentUser = userStr ? JSON.parse(userStr) : null;
+  const studentId = currentUser?.id?.toString() || "";
+
+  // Fetch enrolled courses
+  const { data: coursesResponse, isLoading: coursesLoading } = useGetEnrolledCoursesQuery(undefined, {
+    skip: !studentId
+  });
+  const enrolledCourses = coursesResponse?.data || [];
+
+  // Calculate date range for current month
+  const startDate = useMemo(() => {
+    return `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+  }, [currentMonth, currentYear]);
+
+  const endDate = useMemo(() => {
+    const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+    return `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  }, [currentMonth, currentYear]);
+
+  // Fetch attendance records for the current month
+  const { data: attendanceResponse, isLoading: attendanceLoading, error: attendanceError } = useGetStudentAttendanceQuery(
+    {
+      studentId,
+      filters: {
+        startDate,
+        endDate,
+        ...(selectedSubject !== "all" && { courseId: selectedSubject })
+      }
+    },
+    { skip: !studentId }
+  );
+
+  const apiAttendanceRecords = attendanceResponse?.data || [];
+
+  // Transform API records to UI format
+  const attendanceData: AttendanceRecord[] = useMemo(() => {
+    return apiAttendanceRecords.map((record: APIAttendanceRecord) => {
+      // Find the course for this record
+      const course = enrolledCourses.find(c => c.course?.id === record.courseId);
+      
+      // Map API status to UI status
+      let uiStatus: "present" | "absent" | "absent-permission" | "late";
+      if (record.status === "excused") {
+        uiStatus = "absent-permission";
+      } else if (record.status === "late") {
+        uiStatus = "late";
+      } else {
+        uiStatus = record.status as "present" | "absent";
+      }
+
+      return {
+        date: new Date(record.attendanceDate),
+        status: uiStatus,
+        subject: course?.course?.title || "Unknown Course",
+        time: record.sessionTime || "N/A",
+        reason: record.remarks,
+        courseId: record.courseId
+      };
+    });
+  }, [apiAttendanceRecords, enrolledCourses]);
 
 
-
-  // Sample attendance data
-  const attendanceData: AttendanceRecord[] = [
-    { date: new Date(2024, 11, 2), status: "present", subject: "Mathematics", time: "9:00 AM" },
-    { date: new Date(2024, 11, 2), status: "absent", subject: "Physics", time: "10:00 AM" },
-    { date: new Date(2024, 11, 3), status: "present", subject: "Chemistry", time: "9:00 AM" },
-    { date: new Date(2024, 11, 3), status: "absent-permission", subject: "English", time: "11:00 AM", reason: "Medical appointment" },
-    { date: new Date(2024, 11, 4), status: "present", subject: "Mathematics", time: "9:00 AM" },
-    { date: new Date(2024, 11, 4), status: "present", subject: "Biology", time: "2:00 PM" },
-    { date: new Date(2024, 11, 5), status: "absent", subject: "History", time: "1:00 PM" },
-    { date: new Date(2024, 11, 6), status: "present", subject: "Physics", time: "10:00 AM" },
-    { date: new Date(2024, 11, 9), status: "present", subject: "Mathematics", time: "9:00 AM" },
-    { date: new Date(2024, 11, 9), status: "absent-permission", subject: "Chemistry", time: "11:00 AM", reason: "Family emergency" },
-    { date: new Date(2024, 11, 10), status: "present", subject: "English", time: "11:00 AM" },
-    { date: new Date(2024, 11, 11), status: "absent", subject: "Biology", time: "2:00 PM" },
-    { date: new Date(2024, 11, 12), status: "present", subject: "History", time: "1:00 PM" },
-    { date: new Date(2024, 11, 13), status: "present", subject: "Physics", time: "10:00 AM" },
-  ];
 
   const getFilteredData = () => {
     if (selectedSubject === "all") return attendanceData;
-    return attendanceData.filter(record => record.subject === selectedSubject);
+    return attendanceData.filter(record => record.courseId === selectedSubject);
   };
 
   const calculateStats = () => {
     const filtered = getFilteredData();
     const total = filtered.length;
-    const present = filtered.filter(r => r.status === "present").length;
+    const present = filtered.filter(r => r.status === "present" || r.status === "late").length;
     const absent = filtered.filter(r => r.status === "absent").length;
     const absentWithPermission = filtered.filter(r => r.status === "absent-permission").length;
 
@@ -120,14 +164,16 @@ export default function AttendancePage() {
       const isToday = date.toDateString() === new Date().toDateString();
 
       const hasPresent = dayAttendance.some(r => r.status === "present");
+      const hasLate = dayAttendance.some(r => r.status === "late");
       const hasAbsent = dayAttendance.some(r => r.status === "absent");
       const hasAbsentPermission = dayAttendance.some(r => r.status === "absent-permission");
 
       let bgColor = "";
-      if (hasAbsent && hasPresent) bgColor = "bg-yellow-100 border-yellow-300";
+      if (hasAbsent && (hasPresent || hasLate)) bgColor = "bg-yellow-100 border-yellow-300";
       else if (hasAbsent) bgColor = "bg-red-100 border-red-300";
-      else if (hasAbsentPermission && hasPresent) bgColor = "bg-blue-100 border-blue-300";
+      else if (hasAbsentPermission && (hasPresent || hasLate)) bgColor = "bg-blue-100 border-blue-300";
       else if (hasAbsentPermission) bgColor = "bg-orange-100 border-orange-300";
+      else if (hasLate) bgColor = "bg-yellow-50 border-yellow-400";
       else if (hasPresent) bgColor = "bg-green-100 border-green-300";
 
       days.push(
@@ -179,6 +225,30 @@ export default function AttendancePage() {
 
   const stats = calculateStats();
 
+  // Loading state
+  if (coursesLoading || attendanceLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-50 mx-auto mb-4"></div>
+          <p className="text-primary-50">Loading attendance data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (attendanceError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
+        <div className="text-center text-red-600">
+          <p className="text-lg font-semibold mb-2">Error loading attendance</p>
+          <p className="text-sm">Please try again later</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen" style={{background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
       <div className="max-w-7xl mx-auto px-2 xs:px-3 sm:px-4 md:px-5 lg:px-6 py-2 xs:py-3 sm:py-4 md:py-6 lg:py-8">
@@ -202,10 +272,13 @@ export default function AttendancePage() {
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
               className="px-2 xs:px-3 py-1.5 xs:py-2 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm"
+              disabled={coursesLoading}
             >
-              <option value="all">All Subjects</option>
-              {subjects.map(subject => (
-                <option key={subject} value={subject}>{subject}</option>
+              <option value="all">All Courses</option>
+              {enrolledCourses.map(enrollment => (
+                <option key={enrollment.course?.id} value={enrollment.course?.id}>
+                  {enrollment.course?.title}
+                </option>
               ))}
             </select>
             <button
@@ -358,6 +431,7 @@ export default function AttendancePage() {
                   <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       {record.status === "present" && <CheckCircle className="text-green-600" size={20} />}
+                      {record.status === "late" && <Clock className="text-yellow-600" size={20} />}
                       {record.status === "absent" && <XCircle className="text-red-600" size={20} />}
                       {record.status === "absent-permission" && <AlertCircle className="text-orange-600" size={20} />}
                       <div>
@@ -368,10 +442,12 @@ export default function AttendancePage() {
                     <div className="text-right">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         record.status === "present" ? "bg-green-100 text-green-700" :
+                        record.status === "late" ? "bg-yellow-100 text-yellow-700" :
                         record.status === "absent" ? "bg-red-100 text-red-700" :
                         "bg-orange-100 text-orange-700"
                       }`}>
                         {record.status === "present" ? "Present" :
+                         record.status === "late" ? "Late" :
                          record.status === "absent" ? "Absent" : "Excused"}
                       </span>
                       {record.reason && (
@@ -391,10 +467,14 @@ export default function AttendancePage() {
             <FileText size={16} className="xs:w-5 xs:h-5" style={{color: 'var(--color-primary-50)'}} />
             Legend
           </h3>
-          <div className="grid grid-cols-1 xs:grid-cols-3 gap-2 xs:gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-2 xs:gap-3 sm:gap-4">
             <div className="flex items-center gap-2 xs:gap-3 p-2 xs:p-3 bg-green-50 rounded-lg border border-green-200">
               <CheckCircle className="text-green-600" size={16} />
               <span className="text-xs xs:text-sm font-medium text-primary-50">Present</span>
+            </div>
+            <div className="flex items-center gap-2 xs:gap-3 p-2 xs:p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <Clock className="text-yellow-600" size={16} />
+              <span className="text-xs xs:text-sm font-medium text-primary-50">Late</span>
             </div>
             <div className="flex items-center gap-2 xs:gap-3 p-2 xs:p-3 bg-red-50 rounded-lg border border-red-200">
               <XCircle className="text-red-600" size={16} />

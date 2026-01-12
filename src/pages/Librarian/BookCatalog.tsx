@@ -1,38 +1,33 @@
-import React, { useState } from "react";
+import { Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import {
-    IoAddOutline,
-    IoAlertCircleOutline,
-    IoBookOutline,
-    IoCheckmarkCircleOutline,
-    IoCloseOutline,
-    IoCreateOutline,
-    IoDownloadOutline,
-    IoEyeOutline,
-    IoFilterOutline,
-    IoGridOutline,
-    IoListOutline,
-    IoQrCodeOutline,
-    IoSaveOutline,
-    IoSearchOutline,
-    IoTrashOutline,
+  IoAddOutline,
+  IoAlertCircleOutline,
+  IoBookOutline,
+  IoCheckmarkCircleOutline,
+  IoCheckmarkOutline,
+  IoCloseOutline,
+  IoCreateOutline,
+  IoDownloadOutline,
+  IoEyeOutline,
+  IoFilterOutline,
+  IoGridOutline,
+  IoListOutline,
+  IoQrCodeOutline,
+  IoSaveOutline,
+  IoSearchOutline,
+  IoTrashOutline
 } from "react-icons/io5";
+import {
+  useCreateBookMutation,
+  useGetBooksQuery,
+  useGetLibraryStatsQuery,
+  useUpdateBookMutation,
+  type Book,
+  type CreateBookDto,
+  type UpdateBookDto
+} from "../../app/api/library";
 import Input from "../../components/ui/Input";
-
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  isbn: string;
-  category: string;
-  publisher: string;
-  publishYear: number;
-  edition: string;
-  totalCopies: number;
-  availableCopies: number;
-  status: "available" | "low-stock" | "out-of-stock";
-  location: string;
-  coverImage?: string;
-}
 
 const BookCatalog: React.FC = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -41,116 +36,62 @@ const BookCatalog: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
-  // Form state for adding books
-  const [newBook, setNewBook] = useState({
+  // API hooks
+  const { data: booksResponse, isLoading: isBooksLoading, error: booksError } = useGetBooksQuery();
+  const { data: statsResponse, isLoading: isStatsLoading } = useGetLibraryStatsQuery();
+  const [createBook, { isLoading: isCreating }] = useCreateBookMutation();
+  const [updateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
+
+  const books = booksResponse?.data || [];
+  const stats = statsResponse?.data;
+
+  // Form state for adding/editing books
+  const initialFormState = {
     title: "",
     author: "",
     isbn: "",
     category: "",
     publisher: "",
-    publishYear: "",
+    publicationYear: "",
     edition: "",
     totalCopies: "",
     location: "",
-  });
+    description: "",
+  };
 
-  // Mock data - in a real app, this would come from an API
-  const [books, setBooks] = useState<Book[]>([
-    {
-      id: "1",
-      title: "Introduction to Algorithms",
-      author: "Thomas H. Cormen, Charles E. Leiserson",
-      isbn: "978-0262033848",
-      category: "Computer Science",
-      publisher: "MIT Press",
-      publishYear: 2009,
-      edition: "3rd Edition",
-      totalCopies: 15,
-      availableCopies: 8,
-      status: "available",
-      location: "Section A, Shelf 12",
-    },
-    {
-      id: "2",
-      title: "Clean Code",
-      author: "Robert C. Martin",
-      isbn: "978-0132350884",
-      category: "Software Engineering",
-      publisher: "Prentice Hall",
-      publishYear: 2008,
-      edition: "1st Edition",
-      totalCopies: 10,
-      availableCopies: 2,
-      status: "low-stock",
-      location: "Section A, Shelf 15",
-    },
-    {
-      id: "3",
-      title: "Design Patterns",
-      author: "Erich Gamma, Richard Helm",
-      isbn: "978-0201633612",
-      category: "Software Engineering",
-      publisher: "Addison-Wesley",
-      publishYear: 1994,
-      edition: "1st Edition",
-      totalCopies: 8,
-      availableCopies: 0,
-      status: "out-of-stock",
-      location: "Section A, Shelf 14",
-    },
-    {
-      id: "4",
-      title: "The Lean Startup",
-      author: "Eric Ries",
-      isbn: "978-0307887894",
-      category: "Business",
-      publisher: "Crown Business",
-      publishYear: 2011,
-      edition: "1st Edition",
-      totalCopies: 12,
-      availableCopies: 7,
-      status: "available",
-      location: "Section B, Shelf 5",
-    },
-    {
-      id: "5",
-      title: "Artificial Intelligence: A Modern Approach",
-      author: "Stuart Russell, Peter Norvig",
-      isbn: "978-0136042594",
-      category: "Computer Science",
-      publisher: "Pearson",
-      publishYear: 2020,
-      edition: "4th Edition",
-      totalCopies: 20,
-      availableCopies: 12,
-      status: "available",
-      location: "Section A, Shelf 10",
-    },
-    {
-      id: "6",
-      title: "Database System Concepts",
-      author: "Abraham Silberschatz, Henry F. Korth",
-      isbn: "978-0078022159",
-      category: "Computer Science",
-      publisher: "McGraw-Hill",
-      publishYear: 2019,
-      edition: "7th Edition",
-      totalCopies: 18,
-      availableCopies: 3,
-      status: "low-stock",
-      location: "Section A, Shelf 11",
-    },
-  ]);
+  const [bookForm, setBookForm] = useState(initialFormState);
 
-  const categories = ["all", "Computer Science", "Software Engineering", "Business", "Engineering", "Medicine", "Arts & Literature"];
+  // Sync form when editing
+  useEffect(() => {
+    if (editingBook) {
+      setBookForm({
+        title: editingBook.title || "",
+        author: editingBook.author || "",
+        isbn: editingBook.isbn || "",
+        category: editingBook.category || "",
+        publisher: editingBook.publisher || "",
+        publicationYear: editingBook.publicationYear?.toString() || "",
+        edition: editingBook.edition || "",
+        totalCopies: editingBook.totalCopies?.toString() || "",
+        location: editingBook.location || "",
+        description: editingBook.description || "",
+      });
+      setShowAddModal(true);
+    } else {
+      setBookForm(initialFormState);
+    }
+  }, [editingBook]);
+
+  const categories = ["all", ...Array.from(new Set(books.map(b => b.category).filter(Boolean)))];
 
   const statuses = [
     { value: "all", label: "All Status" },
-    { value: "available", label: "Available" },
-    { value: "low-stock", label: "Low Stock" },
-    { value: "out-of-stock", label: "Out of Stock" },
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+    { value: "archived", label: "Archived" },
   ];
 
   // Filter books based on search and filters
@@ -166,11 +107,11 @@ const BookCatalog: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "available":
+      case "active":
         return "bg-green-50 text-green-600 border-green-200";
-      case "low-stock":
+      case "inactive":
         return "bg-amber-50 text-amber-600 border-amber-200";
-      case "out-of-stock":
+      case "archived":
         return "bg-red-50 text-red-600 border-red-200";
       default:
         return "bg-gray-50 text-gray-600 border-gray-200";
@@ -179,10 +120,10 @@ const BookCatalog: React.FC = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "available":
+      case "active":
         return <IoCheckmarkCircleOutline className="w-4 h-4" />;
-      case "low-stock":
-      case "out-of-stock":
+      case "inactive":
+      case "archived":
         return <IoAlertCircleOutline className="w-4 h-4" />;
       default:
         return null;
@@ -194,15 +135,80 @@ const BookCatalog: React.FC = () => {
     setShowDetailsModal(true);
   };
 
-  const handleDeleteBook = (bookId: string) => {
-    if (confirm("Are you sure you want to delete this book?")) {
-      setBooks(books.filter((b) => b.id !== bookId));
+  const handleEditBook = (book: Book) => {
+    setEditingBook(book);
+  };
+
+  const handleDeleteBook = async (bookId: string) => {
+    if (confirm("Are you sure you want to archive this book?")) {
+      try {
+        await updateBook({ id: bookId, data: { status: 'archived' } }).unwrap();
+        alert("Book archived successfully.");
+      } catch (err) {
+        console.error("Failed to archive book:", err);
+        alert("Failed to archive book. Please try again.");
+      }
     }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setNewBook(prev => ({ ...prev, [field]: value }));
+    setBookForm(prev => ({ ...prev, [field]: value }));
   };
+
+  const handleSaveBook = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const bookData: CreateBookDto = {
+      title: bookForm.title,
+      author: bookForm.author,
+      isbn: bookForm.isbn,
+      category: bookForm.category,
+      publisher: bookForm.publisher,
+      publicationYear: bookForm.publicationYear ? parseInt(bookForm.publicationYear) : undefined,
+      edition: bookForm.edition,
+      totalCopies: parseInt(bookForm.totalCopies) || 1,
+      location: bookForm.location,
+      description: bookForm.description,
+      status: 'active'
+    };
+
+    try {
+      if (editingBook) {
+        await updateBook({ id: editingBook.id, data: bookData as UpdateBookDto }).unwrap();
+        alert("Book updated successfully!");
+      } else {
+        await createBook(bookData).unwrap();
+        alert("Book added successfully!");
+      }
+      setShowAddModal(false);
+      setEditingBook(null);
+      setBookForm(initialFormState);
+    } catch (err) {
+      console.error("Failed to save book:", err);
+      alert("Failed to save book. Please check your inputs and try again.");
+    }
+  };
+
+  if (isBooksLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-50" />
+        <span className="ml-2 text-primary-50">Loading catalog...</span>
+      </div>
+    );
+  }
+
+  if (booksError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 flex flex-col items-center justify-center p-4">
+        <IoAlertCircleOutline className="h-12 w-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-semibold text-primary-50 mb-2">Error Loading Catalog</h2>
+        <p className="text-primary-50 text-center">
+          We encountered an error while loading the book catalog. Please try again later.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 p-3 xs:p-4 sm:p-6 lg:p-8">
@@ -218,7 +224,10 @@ const BookCatalog: React.FC = () => {
             </p>
           </div>
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => {
+                setEditingBook(null);
+                setShowAddModal(true);
+            }}
             className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-50 to-primary-100 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 font-semibold"
           >
             <IoAddOutline className="w-5 h-5" />
@@ -232,7 +241,9 @@ const BookCatalog: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Total Books</p>
-                <p className="text-2xl sm:text-3xl font-bold text-primary-50">{books.length}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-primary-50">
+                    {isStatsLoading ? "..." : stats?.totalBooks || books.length}
+                </p>
               </div>
               <div className="p-3 bg-gradient-to-br from-primary-50 to-primary-50/80 rounded-xl">
                 <IoBookOutline className="w-6 h-6 text-white" />
@@ -244,7 +255,7 @@ const BookCatalog: React.FC = () => {
               <div>
                 <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Available</p>
                 <p className="text-2xl sm:text-3xl font-bold text-green-600">
-                  {books.filter((b) => b.status === "available").length}
+                  {isStatsLoading ? "..." : stats?.activeBooks || books.filter(b => b.availableCopies > 0).length}
                 </p>
               </div>
               <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl">
@@ -255,26 +266,26 @@ const BookCatalog: React.FC = () => {
           <div className="bg-white rounded-xl p-4 sm:p-5 shadow-md border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Low Stock</p>
+                <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Borrowed</p>
                 <p className="text-2xl sm:text-3xl font-bold text-amber-600">
-                  {books.filter((b) => b.status === "low-stock").length}
+                  {isStatsLoading ? "..." : stats?.borrowedBooks || books.reduce((acc, b) => acc + (b.totalCopies - b.availableCopies), 0)}
                 </p>
               </div>
               <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl">
-                <IoAlertCircleOutline className="w-6 h-6 text-white" />
+                <IoCheckmarkOutline className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
           <div className="bg-white rounded-xl p-4 sm:p-5 shadow-md border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Out of Stock</p>
-                <p className="text-2xl sm:text-3xl font-bold text-red-600">
-                  {books.filter((b) => b.status === "out-of-stock").length}
+                <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Categories</p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                  {categories.length - 1}
                 </p>
               </div>
-              <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl">
-                <IoAlertCircleOutline className="w-6 h-6 text-white" />
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
+                <IoFilterOutline className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
@@ -374,10 +385,14 @@ const BookCatalog: React.FC = () => {
               {/* Book Cover */}
               <div className="h-48 bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-pattern opacity-10"></div>
-                <IoBookOutline className="w-20 h-20 text-white/80 relative z-10" />
+                {book.coverImage ? (
+                    <img src={book.coverImage} alt={book.title} className="w-full h-full object-cover relative z-10" />
+                ) : (
+                    <IoBookOutline className="w-20 h-20 text-white/80 relative z-10" />
+                )}
                 <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 ${getStatusColor(book.status)}`}>
                   {getStatusIcon(book.status)}
-                  {book.status.replace("-", " ")}
+                  {book.status}
                 </div>
               </div>
 
@@ -401,7 +416,7 @@ const BookCatalog: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-primary-50/60">Available:</span>
-                    <span className="font-bold text-primary-50">
+                    <span className={`font-bold ${book.availableCopies === 0 ? 'text-red-500' : 'text-primary-50'}`}>
                       {book.availableCopies}/{book.totalCopies}
                     </span>
                   </div>
@@ -416,7 +431,9 @@ const BookCatalog: React.FC = () => {
                     <IoEyeOutline className="w-4 h-4" />
                     View
                   </button>
-                  <button className="p-2 bg-gray-100 text-primary-50 rounded-lg hover:bg-gray-200 transition-colors">
+                  <button 
+                    onClick={() => handleEditBook(book)}
+                    className="p-2 bg-gray-100 text-primary-50 rounded-lg hover:bg-gray-200 transition-colors">
                     <IoCreateOutline className="w-4 h-4" />
                   </button>
                   <button
@@ -478,7 +495,7 @@ const BookCatalog: React.FC = () => {
                     <td className="px-4 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 w-fit ${getStatusColor(book.status)}`}>
                         {getStatusIcon(book.status)}
-                        {book.status.replace("-", " ")}
+                        {book.status}
                       </span>
                     </td>
                     <td className="px-4 py-4">
@@ -491,6 +508,7 @@ const BookCatalog: React.FC = () => {
                           <IoEyeOutline className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => handleEditBook(book)}
                           className="p-2 bg-gray-100 text-primary-50 rounded-lg hover:bg-gray-200 transition-colors"
                           title="Edit"
                         >
@@ -553,20 +571,27 @@ const BookCatalog: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-semibold text-primary-50/60 mb-1 block">Publisher</label>
-                    <p className="text-base text-primary-50">{selectedBook.publisher}</p>
+                    <p className="text-base text-primary-50">{selectedBook.publisher || "N/A"}</p>
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-primary-50/60 mb-1 block">Publish Year</label>
-                    <p className="text-base text-primary-50">{selectedBook.publishYear}</p>
+                    <p className="text-base text-primary-50">{selectedBook.publicationYear || "N/A"}</p>
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-primary-50/60 mb-1 block">Edition</label>
-                    <p className="text-base text-primary-50">{selectedBook.edition}</p>
+                    <p className="text-base text-primary-50">{selectedBook.edition || "N/A"}</p>
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-primary-50/60 mb-1 block">Location</label>
-                    <p className="text-base text-primary-50">{selectedBook.location}</p>
+                    <p className="text-base text-primary-50">{selectedBook.location || "N/A"}</p>
                   </div>
+                </div>
+
+                <div className="md:col-span-2">
+                    <label className="text-sm font-semibold text-primary-50/60 mb-1 block">Description</label>
+                    <p className="text-base text-primary-50 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                      {selectedBook.description || "No description available."}
+                    </p>
                 </div>
               </div>
 
@@ -604,27 +629,32 @@ const BookCatalog: React.FC = () => {
         </div>
       )}
 
-      {/* Add Book Modal */}
+      {/* Add/Edit Book Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-[fadeIn_0.3s_ease-out]">
           <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-[scaleIn_0.3s_ease-out]">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-primary-50">Add New Book</h2>
+              <h2 className="text-2xl font-bold text-primary-50">
+                {editingBook ? "Edit Book" : "Add New Book"}
+              </h2>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={() => {
+                    setShowAddModal(false);
+                    setEditingBook(null);
+                }}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <IoCloseOutline className="w-6 h-6 text-primary-50" />
               </button>
             </div>
             
-            <div className="p-6">
+            <form onSubmit={handleSaveBook} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
                   label="Book Title"
                   type="text"
                   placeholder="Enter book title"
-                  value={newBook.title}
+                  value={bookForm.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   required
                 />
@@ -632,7 +662,7 @@ const BookCatalog: React.FC = () => {
                   label="Author"
                   type="text"
                   placeholder="Enter author name"
-                  value={newBook.author}
+                  value={bookForm.author}
                   onChange={(e) => handleInputChange('author', e.target.value)}
                   required
                 />
@@ -640,7 +670,7 @@ const BookCatalog: React.FC = () => {
                   label="ISBN"
                   type="text"
                   placeholder="Enter ISBN"
-                  value={newBook.isbn}
+                  value={bookForm.isbn}
                   onChange={(e) => handleInputChange('isbn', e.target.value)}
                   required
                 />
@@ -649,42 +679,48 @@ const BookCatalog: React.FC = () => {
                     Category <span className="text-red-500">*</span>
                   </label>
                   <select 
-                    value={newBook.category}
+                    value={bookForm.category}
                     onChange={(e) => handleInputChange('category', e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all bg-gray-50"
+                    required
                   >
                     <option value="">Select category</option>
                     {categories.filter(c => c !== "all").map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
+                    {!categories.includes("Computer Science") && <option value="Computer Science">Computer Science</option>}
+                    {!categories.includes("Software Engineering") && <option value="Software Engineering">Software Engineering</option>}
+                    {!categories.includes("Mathematics") && <option value="Mathematics">Mathematics</option>}
+                    {!categories.includes("Physics") && <option value="Physics">Physics</option>}
+                    {!categories.includes("Literature") && <option value="Literature">Literature</option>}
                   </select>
                 </div>
                 <Input
                   label="Publisher"
                   type="text"
                   placeholder="Enter publisher"
-                  value={newBook.publisher}
+                  value={bookForm.publisher}
                   onChange={(e) => handleInputChange('publisher', e.target.value)}
                 />
                 <Input
-                  label="Publish Year"
+                  label="Publication Year"
                   type="number"
                   placeholder="Enter year"
-                  value={newBook.publishYear}
-                  onChange={(e) => handleInputChange('publishYear', e.target.value)}
+                  value={bookForm.publicationYear}
+                  onChange={(e) => handleInputChange('publicationYear', e.target.value)}
                 />
                 <Input
                   label="Edition"
                   type="text"
                   placeholder="e.g., 1st Edition"
-                  value={newBook.edition}
+                  value={bookForm.edition}
                   onChange={(e) => handleInputChange('edition', e.target.value)}
                 />
                 <Input
                   label="Total Copies"
                   type="number"
                   placeholder="Enter number of copies"
-                  value={newBook.totalCopies}
+                  value={bookForm.totalCopies}
                   onChange={(e) => handleInputChange('totalCopies', e.target.value)}
                   required
                 />
@@ -693,25 +729,47 @@ const BookCatalog: React.FC = () => {
                     label="Location"
                     type="text"
                     placeholder="e.g., Section A, Shelf 12"
-                    value={newBook.location}
+                    value={bookForm.location}
                     onChange={(e) => handleInputChange('location', e.target.value)}
                   />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                    <label className="block text-sm font-medium text-primary-50 mb-2">Description</label>
+                    <textarea
+                      value={bookForm.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      placeholder="Enter book description..."
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all bg-gray-50 resize-none"
+                    />
                 </div>
               </div>
 
               <div className="mt-6 flex gap-3">
                 <button
-                  onClick={() => setShowAddModal(false)}
+                  type="button"
+                  onClick={() => {
+                      setShowAddModal(false);
+                      setEditingBook(null);
+                  }}
                   className="flex-1 px-4 py-2.5 bg-gray-100 text-primary-50 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
                 >
                   Cancel
                 </button>
-                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-50 to-primary-100 text-white rounded-xl hover:shadow-lg transition-all font-semibold">
-                  <IoSaveOutline className="w-5 h-5" />
-                  Add Book
+                <button 
+                  type="submit"
+                  disabled={isCreating || isUpdating}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-50 to-primary-100 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
+                >
+                  {isCreating || isUpdating ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                      <IoSaveOutline className="w-5 h-5" />
+                  )}
+                  {editingBook ? "Update Book" : "Add Book"}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}

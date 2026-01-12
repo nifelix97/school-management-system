@@ -1,140 +1,94 @@
-import React, { useState } from "react";
+import { Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import {
-    IoAlertCircleOutline,
-    IoArrowBackOutline,
-    IoArrowForwardOutline,
-    IoBookOutline,
-    IoCheckmarkCircleOutline,
-    IoChevronBackOutline,
-    IoChevronForwardOutline,
-    IoPersonOutline,
-    IoRefreshOutline,
-    IoSearchOutline,
-    IoSwapHorizontalOutline,
-    IoTimeOutline
+  IoAlertCircleOutline,
+  IoArrowForwardOutline,
+  IoBookOutline,
+  IoCheckmarkCircleOutline,
+  IoChevronBackOutline,
+  IoChevronForwardOutline,
+  IoPersonOutline,
+  IoSearchOutline,
+  IoSwapHorizontalOutline,
+  IoTimeOutline
 } from "react-icons/io5";
+import {
+  useGetActiveBorrowingsQuery,
+  useGetBooksQuery,
+  useIssueBookMutation,
+  type Book,
+} from "../../app/api/library";
 import Input from "../../components/ui/Input";
 
-interface Transaction {
-  id: string;
-  studentId: string;
-  studentName: string;
-  bookTitle: string;
-  bookIsbn: string;
-  type: "checkout" | "return" | "renew";
-  checkoutDate: string;
-  dueDate: string;
-  returnDate?: string;
-  status: "active" | "returned" | "overdue";
-  fine?: number;
-}
-
 const Circulation: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"checkout" | "return" | "renew">("checkout");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchBookQuery, setSearchBookQuery] = useState("");
+  const [searchTransactionQuery, setSearchTransactionQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
   // Form states
   const [checkoutForm, setCheckoutForm] = useState({
-    studentId: "",
-    bookIsbn: "",
+    userId: "",
+    bookId: "",
+    dueDate: "",
   });
 
-  const [returnForm, setReturnForm] = useState({
-    transactionId: "",
-  });
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [showBookSearch, setShowBookSearch] = useState(false);
 
-  // Mock data
-  const transactions: Transaction[] = [
-    {
-      id: "TXN001",
-      studentId: "STU2024001",
-      studentName: "John Doe",
-      bookTitle: "Introduction to Algorithms",
-      bookIsbn: "978-0262033848",
-      type: "checkout",
-      checkoutDate: "2024-11-15",
-      dueDate: "2024-12-15",
-      status: "active",
-    },
-    {
-      id: "TXN002",
-      studentId: "STU2024002",
-      studentName: "Jane Smith",
-      bookTitle: "Clean Code",
-      bookIsbn: "978-0132350884",
-      type: "checkout",
-      checkoutDate: "2024-11-10",
-      dueDate: "2024-11-25",
-      status: "overdue",
-      fine: 5.00,
-    },
-    {
-      id: "TXN003",
-      studentId: "STU2024003",
-      studentName: "Mike Johnson",
-      bookTitle: "Design Patterns",
-      bookIsbn: "978-0201633612",
-      type: "return",
-      checkoutDate: "2024-10-20",
-      dueDate: "2024-11-20",
-      returnDate: "2024-11-18",
-      status: "returned",
-    },
-    {
-      id: "TXN004",
-      studentId: "STU2024004",
-      studentName: "Sarah Williams",
-      bookTitle: "The Lean Startup",
-      bookIsbn: "978-0307887894",
-      type: "checkout",
-      checkoutDate: "2024-11-20",
-      dueDate: "2024-12-20",
-      status: "active",
-    },
-    {
-      id: "TXN005",
-      studentId: "STU2024005",
-      studentName: "David Brown",
-      bookTitle: "Artificial Intelligence",
-      bookIsbn: "978-0136042594",
-      type: "renew",
-      checkoutDate: "2024-10-25",
-      dueDate: "2024-12-25",
-      status: "active",
-    },
-  ];
+  // API hooks
+  const { data: booksResponse, isLoading: booksLoading } = useGetBooksQuery({
+    search: searchBookQuery || undefined,
+  });
+  
+  const { data: borrowingsResponse, isLoading: borrowingsLoading, error: borrowingsError } = useGetActiveBorrowingsQuery();
+  const [issueBook, { isLoading: isIssuing }] = useIssueBookMutation();
+
+  const books: Book[] = booksResponse?.data || [];
+  const borrowings = borrowingsResponse?.data || [];
 
   const statuses = [
     { value: "all", label: "All Status" },
-    { value: "active", label: "Active" },
+    { value: "issued", label: "Active" },
     { value: "overdue", label: "Overdue" },
     { value: "returned", label: "Returned" },
   ];
 
-  // Filter transactions
-  const filteredTransactions = transactions.filter((txn) => {
+  // Filter borrowings
+  const filteredBorrowings = borrowings.filter((borrowing) => {
     const matchesSearch =
-      txn.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.bookTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.bookIsbn.includes(searchQuery);
-    const matchesStatus = selectedStatus === "all" || txn.status === selectedStatus;
+      borrowing.book?.title.toLowerCase().includes(searchTransactionQuery.toLowerCase()) ||
+      borrowing.user?.firstName.toLowerCase().includes(searchTransactionQuery.toLowerCase()) ||
+      borrowing.user?.lastName.toLowerCase().includes(searchTransactionQuery.toLowerCase()) ||
+      borrowing.book?.isbn.includes(searchTransactionQuery);
+    const matchesStatus = selectedStatus === "all" || borrowing.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
 
   // Pagination
-  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-  const paginatedTransactions = filteredTransactions.slice(
+  const totalPages = Math.ceil(filteredBorrowings.length / itemsPerPage);
+  const paginatedBorrowings = filteredBorrowings.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  // Reset to page 1 when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTransactionQuery, selectedStatus]);
+
+  // Calculate statistics
+  const stats = {
+    activeLoans: borrowings.filter(b => b.status === "issued").length,
+    overdue: borrowings.filter(b => b.status === "overdue").length,
+    returnedToday: borrowings.filter(b => b.status === "returned" && b.returnDate && isToday(b.returnDate)).length,
+    totalFines: borrowings.reduce((sum, b) => sum + (b.fineAmount || 0), 0),
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active":
+      case "issued":
         return "bg-blue-50 text-blue-600 border-blue-200";
       case "overdue":
         return "bg-red-50 text-red-600 border-red-200";
@@ -147,7 +101,7 @@ const Circulation: React.FC = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "active":
+      case "issued":
         return <IoTimeOutline className="w-4 h-4" />;
       case "overdue":
         return <IoAlertCircleOutline className="w-4 h-4" />;
@@ -158,22 +112,94 @@ const Circulation: React.FC = () => {
     }
   };
 
-  const handleCheckout = () => {
-    // Implementation for checkout
-    alert("Book checked out successfully!");
-    setCheckoutForm({ studentId: "", bookIsbn: "" });
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "issued":
+        return "Active";
+      case "overdue":
+        return "Overdue";
+      case "returned":
+        return "Returned";
+      default:
+        return status;
+    }
   };
 
-  const handleReturn = () => {
-    // Implementation for return
-    alert("Book returned successfully!");
-    setReturnForm({ transactionId: "" });
+  const isToday = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
   };
 
-  const handleRenew = (transactionId: string) => {
-    // Implementation for renew
-    alert(`Transaction ${transactionId} renewed successfully!`);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
+
+  const handleSelectBook = (book: Book) => {
+    setSelectedBook(book);
+    setCheckoutForm({ ...checkoutForm, bookId: book.id });
+    setShowBookSearch(false);
+    setSearchBookQuery("");
+  };
+
+  const handleCheckout = async () => {
+    if (!checkoutForm.userId || !checkoutForm.bookId) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      const issueData = {
+        userId: checkoutForm.userId,
+        bookId: checkoutForm.bookId,
+        dueDate: checkoutForm.dueDate || getDefaultDueDate(),
+      };
+
+      await issueBook(issueData).unwrap();
+      alert("Book issued successfully!");
+      
+      // Reset form
+      setCheckoutForm({ userId: "", bookId: "", dueDate: "" });
+      setSelectedBook(null);
+    } catch (error) {
+      console.error("Failed to issue book:", error);
+      alert("Failed to issue book. Please try again.");
+    }
+  };
+
+  // Get default due date (14 days from now)
+  const getDefaultDueDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 14);
+    return date.toISOString().split('T')[0];
+  };
+
+  // Loading state
+  if (borrowingsLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-50" />
+        <span className="ml-2 text-primary-50">Loading circulation data...</span>
+      </div>
+    );
+  }
+
+  // Error state
+  if (borrowingsError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 flex flex-col items-center justify-center p-4">
+        <IoAlertCircleOutline className="h-12 w-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-semibold text-primary-50 mb-2">Error Loading Data</h2>
+        <p className="text-primary-50 text-center">
+          We encountered an error while loading circulation data. Please try again later.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50 p-3 xs:p-4 sm:p-6 lg:p-8">
@@ -183,7 +209,7 @@ const Circulation: React.FC = () => {
           Circulation Management
         </h1>
         <p className="text-sm sm:text-base text-primary-50/70">
-          Manage book checkouts, returns, and renewals
+          Issue books and manage circulation
         </p>
       </div>
 
@@ -194,7 +220,7 @@ const Circulation: React.FC = () => {
             <div>
               <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Active Loans</p>
               <p className="text-2xl sm:text-3xl font-bold text-blue-600">
-                {transactions.filter((t) => t.status === "active").length}
+                {stats.activeLoans}
               </p>
             </div>
             <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
@@ -207,7 +233,7 @@ const Circulation: React.FC = () => {
             <div>
               <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Overdue</p>
               <p className="text-2xl sm:text-3xl font-bold text-red-600">
-                {transactions.filter((t) => t.status === "overdue").length}
+                {stats.overdue}
               </p>
             </div>
             <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl">
@@ -220,7 +246,7 @@ const Circulation: React.FC = () => {
             <div>
               <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Returned Today</p>
               <p className="text-2xl sm:text-3xl font-bold text-green-600">
-                {transactions.filter((t) => t.status === "returned").length}
+                {stats.returnedToday}
               </p>
             </div>
             <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl">
@@ -233,7 +259,7 @@ const Circulation: React.FC = () => {
             <div>
               <p className="text-xs sm:text-sm text-primary-50/60 font-medium mb-1">Total Fines</p>
               <p className="text-2xl sm:text-3xl font-bold text-amber-600">
-                ${transactions.reduce((sum, t) => sum + (t.fine || 0), 0).toFixed(2)}
+                ${stats.totalFines.toFixed(2)}
               </p>
             </div>
             <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl">
@@ -243,108 +269,87 @@ const Circulation: React.FC = () => {
         </div>
       </div>
 
-      {/* Action Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-1.5 flex gap-1 mb-6 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab("checkout")}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
-            activeTab === "checkout"
-              ? "bg-primary-50 text-white shadow-md"
-              : "text-primary-50/60 hover:bg-gray-50 hover:text-primary-50"
-          }`}
-        >
-          <IoArrowForwardOutline className="w-4 h-4" />
-          Check Out
-        </button>
-        <button
-          onClick={() => setActiveTab("return")}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
-            activeTab === "return"
-              ? "bg-primary-50 text-white shadow-md"
-              : "text-primary-50/60 hover:bg-gray-50 hover:text-primary-50"
-          }`}
-        >
-          <IoArrowBackOutline className="w-4 h-4" />
-          Return
-        </button>
-        <button
-          onClick={() => setActiveTab("renew")}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
-            activeTab === "renew"
-              ? "bg-primary-50 text-white shadow-md"
-              : "text-primary-50/60 hover:bg-gray-50 hover:text-primary-50"
-          }`}
-        >
-          <IoRefreshOutline className="w-4 h-4" />
-          Renew
-        </button>
-      </div>
-
-      {/* Action Forms */}
+      {/* Issue Book Form */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 sm:p-8 mb-6">
-        {activeTab === "checkout" && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold text-primary-50 mb-4">Check Out Book</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Student ID"
-                type="text"
-                placeholder="Enter student ID"
-                value={checkoutForm.studentId}
-                onChange={(e) => setCheckoutForm({ ...checkoutForm, studentId: e.target.value })}
-                leftIcon={<IoPersonOutline className="w-5 h-5" />}
-                required
-              />
-              <Input
-                label="Book ISBN"
-                type="text"
-                placeholder="Enter book ISBN"
-                value={checkoutForm.bookIsbn}
-                onChange={(e) => setCheckoutForm({ ...checkoutForm, bookIsbn: e.target.value })}
-                leftIcon={<IoBookOutline className="w-5 h-5" />}
-                required
+        <div className="flex items-center gap-2 mb-6">
+          <IoArrowForwardOutline className="w-6 h-6 text-primary-50" />
+          <h2 className="text-xl font-bold text-primary-50">Issue Book</h2>
+        </div>
+        
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="User ID"
+              type="text"
+              placeholder="Enter user ID (student/teacher)"
+              value={checkoutForm.userId}
+              onChange={(e) => setCheckoutForm({ ...checkoutForm, userId: e.target.value })}
+              leftIcon={<IoPersonOutline className="w-5 h-5" />}
+              required
+            />
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-primary-50 mb-2">
+                Book <span className="text-red-500">*</span>
+              </label>
+              {selectedBook ? (
+                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="flex-1">
+                    <p className="font-semibold text-primary-50">{selectedBook.title}</p>
+                    <p className="text-sm text-primary-50/60">{selectedBook.author} - {selectedBook.isbn}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedBook(null);
+                      setCheckoutForm({ ...checkoutForm, bookId: "" });
+                    }}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowBookSearch(true)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 hover:border-primary-50 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all bg-gray-50 text-left text-primary-50/60"
+                >
+                  Click to search for a book...
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-primary-50 mb-2">
+                Due Date
+              </label>
+              <input
+                type="date"
+                value={checkoutForm.dueDate || getDefaultDueDate()}
+                onChange={(e) => setCheckoutForm({ ...checkoutForm, dueDate: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-50 focus:ring-2 focus:ring-primary-50/20 outline-none transition-all bg-gray-50"
               />
             </div>
-            <button
-              onClick={handleCheckout}
-              className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-primary-50 to-primary-100 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
-            >
-              Check Out Book
-            </button>
           </div>
-        )}
 
-        {activeTab === "return" && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold text-primary-50 mb-4">Return Book</h2>
-            <div className="max-w-md">
-              <Input
-                label="Transaction ID or Book ISBN"
-                type="text"
-                placeholder="Enter transaction ID or ISBN"
-                value={returnForm.transactionId}
-                onChange={(e) => setReturnForm({ transactionId: e.target.value })}
-                leftIcon={<IoSearchOutline className="w-5 h-5" />}
-                required
-              />
-            </div>
-            <button
-              onClick={handleReturn}
-              className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
-            >
-              Process Return
-            </button>
-          </div>
-        )}
-
-        {activeTab === "renew" && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold text-primary-50 mb-4">Renew Book</h2>
-            <p className="text-primary-50/70">
-              Select a transaction from the list below to renew the loan period.
-            </p>
-          </div>
-        )}
+          <button
+            onClick={handleCheckout}
+            disabled={isIssuing || !checkoutForm.userId || !checkoutForm.bookId}
+            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-primary-50 to-primary-100 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isIssuing ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Issuing...
+              </>
+            ) : (
+              <>
+                <IoArrowForwardOutline className="w-5 h-5" />
+                Issue Book
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -353,9 +358,9 @@ const Circulation: React.FC = () => {
           <div className="flex-1">
             <Input
               type="text"
-              placeholder="Search by student, book, or ISBN..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search transactions by student, book, or ISBN..."
+              value={searchTransactionQuery}
+              onChange={(e) => setSearchTransactionQuery(e.target.value)}
               leftIcon={<IoSearchOutline className="w-5 h-5" />}
             />
           </div>
@@ -375,59 +380,55 @@ const Circulation: React.FC = () => {
         </div>
       </div>
 
-      {/* Transactions Display */}
-      {paginatedTransactions.length === 0 ? (
+      {/* Recent Transactions */}
+      <div className="mb-4">
+        <h3 className="text-lg font-bold text-primary-50">Recent Transactions</h3>
+      </div>
+
+      {paginatedBorrowings.length === 0 ? (
         <div className="bg-white rounded-xl p-12 text-center shadow-lg border border-gray-100 mb-6">
           <IoBookOutline className="w-12 h-12 text-primary-50/30 mx-auto mb-3" />
-          <p className="text-primary-50/60">No transactions found</p>
+          <p className="text-primary-50/60">
+            {searchTransactionQuery || selectedStatus !== "all"
+              ? "No transactions found matching your search"
+              : "No transactions yet"}
+          </p>
         </div>
       ) : (
         <>
           {/* Mobile Card View */}
           <div className="lg:hidden space-y-4 mb-6">
-            {paginatedTransactions.map((txn) => (
-              <div key={txn.id} className="bg-white rounded-xl shadow-md border border-gray-100 p-4 animate-[fadeIn_0.3s_ease-out]">
+            {paginatedBorrowings.map((borrowing) => (
+              <div key={borrowing.id} className="bg-white rounded-xl shadow-md border border-gray-100 p-4 animate-[fadeIn_0.3s_ease-out]">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <h3 className="font-bold text-primary-50 mb-1">{txn.bookTitle}</h3>
-                    <p className="text-sm text-primary-50/60">{txn.studentName}</p>
+                    <h3 className="font-bold text-primary-50 mb-1">{borrowing.book?.title || "Unknown Book"}</h3>
+                    <p className="text-sm text-primary-50/60">
+                      {borrowing.user?.firstName} {borrowing.user?.lastName}
+                    </p>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 ${getStatusColor(txn.status)}`}>
-                    {getStatusIcon(txn.status)}
-                    {txn.status}
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 ${getStatusColor(borrowing.status)}`}>
+                    {getStatusIcon(borrowing.status)}
+                    {getStatusLabel(borrowing.status)}
                   </span>
                 </div>
 
-                <div className="space-y-2 mb-4">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-primary-50/60">Student ID:</span>
-                    <span className="font-medium text-primary-50">{txn.studentId}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-primary-50/60">Checkout:</span>
-                    <span className="font-medium text-primary-50">{txn.checkoutDate}</span>
+                    <span className="text-primary-50/60">Issue Date:</span>
+                    <span className="font-medium text-primary-50">{formatDate(borrowing.issueDate)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-primary-50/60">Due Date:</span>
-                    <span className="font-medium text-primary-50">{txn.dueDate}</span>
+                    <span className="font-medium text-primary-50">{formatDate(borrowing.dueDate)}</span>
                   </div>
-                  {txn.fine && (
+                  {borrowing.fineAmount && borrowing.fineAmount > 0 && (
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-primary-50/60">Fine:</span>
-                      <span className="font-bold text-red-600">${txn.fine.toFixed(2)}</span>
+                      <span className="font-bold text-red-600">${borrowing.fineAmount.toFixed(2)}</span>
                     </div>
                   )}
                 </div>
-
-                {txn.status === "active" && (
-                  <button
-                    onClick={() => handleRenew(txn.id)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary-50 text-white rounded-lg hover:bg-primary-100 transition-colors text-sm font-semibold"
-                  >
-                    <IoRefreshOutline className="w-4 h-4" />
-                    Renew
-                  </button>
-                )}
               </div>
             ))}
           </div>
@@ -438,16 +439,13 @@ const Circulation: React.FC = () => {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
-                    Transaction ID
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
-                    Student
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
                     Book
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
-                    Checkout Date
+                    Borrower
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
+                    Issue Date
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
                     Due Date
@@ -458,51 +456,34 @@ const Circulation: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
                     Fine
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-primary-50/80 uppercase tracking-wider">
-                    Actions
-                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {paginatedTransactions.map((txn) => (
-                  <tr key={txn.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-4 text-sm font-semibold text-primary-50">{txn.id}</td>
+                {paginatedBorrowings.map((borrowing) => (
+                  <tr key={borrowing.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-4">
-                      <div>
-                        <div className="font-semibold text-primary-50">{txn.studentName}</div>
-                        <div className="text-sm text-primary-50/60">{txn.studentId}</div>
-                      </div>
+                      <div className="font-semibold text-primary-50">{borrowing.book?.title || "Unknown"}</div>
+                      <div className="text-sm text-primary-50/60">{borrowing.book?.isbn || "N/A"}</div>
                     </td>
                     <td className="px-4 py-4">
-                      <div>
-                        <div className="font-medium text-primary-50">{txn.bookTitle}</div>
-                        <div className="text-sm text-primary-50/60">{txn.bookIsbn}</div>
+                      <div className="font-medium text-primary-50">
+                        {borrowing.user?.firstName} {borrowing.user?.lastName}
                       </div>
+                      <div className="text-sm text-primary-50/60">{borrowing.user?.email}</div>
                     </td>
-                    <td className="px-4 py-4 text-sm text-primary-50/70">{txn.checkoutDate}</td>
-                    <td className="px-4 py-4 text-sm text-primary-50/70">{txn.dueDate}</td>
+                    <td className="px-4 py-4 text-sm text-primary-50/70">{formatDate(borrowing.issueDate)}</td>
+                    <td className="px-4 py-4 text-sm text-primary-50/70">{formatDate(borrowing.dueDate)}</td>
                     <td className="px-4 py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 w-fit ${getStatusColor(txn.status)}`}>
-                        {getStatusIcon(txn.status)}
-                        {txn.status}
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 w-fit ${getStatusColor(borrowing.status)}`}>
+                        {getStatusIcon(borrowing.status)}
+                        {getStatusLabel(borrowing.status)}
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      {txn.fine ? (
-                        <span className="text-sm font-bold text-red-600">${txn.fine.toFixed(2)}</span>
+                      {borrowing.fineAmount && borrowing.fineAmount > 0 ? (
+                        <span className="text-sm font-bold text-red-600">${borrowing.fineAmount.toFixed(2)}</span>
                       ) : (
                         <span className="text-sm text-primary-50/40">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4">
-                      {txn.status === "active" && (
-                        <button
-                          onClick={() => handleRenew(txn.id)}
-                          className="px-3 py-1.5 bg-primary-50 text-white rounded-lg hover:bg-primary-100 transition-colors text-sm font-semibold flex items-center gap-1"
-                        >
-                          <IoRefreshOutline className="w-4 h-4" />
-                          Renew
-                        </button>
                       )}
                     </td>
                   </tr>
@@ -519,7 +500,7 @@ const Circulation: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-sm text-primary-50/70">
               Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-              {Math.min(currentPage * itemsPerPage, filteredTransactions.length)} of {filteredTransactions.length} transactions
+              {Math.min(currentPage * itemsPerPage, filteredBorrowings.length)} of {filteredBorrowings.length} transactions
             </div>
             <div className="flex gap-2">
               <button
@@ -551,6 +532,58 @@ const Circulation: React.FC = () => {
               >
                 <IoChevronForwardOutline className="w-5 h-5" />
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Book Search Modal */}
+      {showBookSearch && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
+            <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-primary-50">Search Books</h2>
+              <button
+                onClick={() => setShowBookSearch(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6">
+              <Input
+                type="text"
+                placeholder="Search by title, author, or ISBN..."
+                value={searchBookQuery}
+                onChange={(e) => setSearchBookQuery(e.target.value)}
+                leftIcon={<IoSearchOutline className="w-5 h-5" />}
+              />
+
+              <div className="mt-4 max-h-96 overflow-y-auto space-y-2">
+                {booksLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary-50" />
+                  </div>
+                ) : books.length === 0 ? (
+                  <p className="text-center text-primary-50/60 py-8">No books found</p>
+                ) : (
+                  books
+                    .filter(book => book.availableCopies > 0)
+                    .map((book) => (
+                      <button
+                        key={book.id}
+                        onClick={() => handleSelectBook(book)}
+                        className="w-full p-3 rounded-lg border border-gray-200 hover:border-primary-50 hover:bg-gray-50 transition-all text-left"
+                      >
+                        <p className="font-semibold text-primary-50">{book.title}</p>
+                        <p className="text-sm text-primary-50/60">
+                          {book.author} - {book.isbn} ({book.availableCopies} available)
+                        </p>
+                      </button>
+                    ))
+                )}
+              </div>
             </div>
           </div>
         </div>
